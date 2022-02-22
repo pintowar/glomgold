@@ -33,7 +33,10 @@ dependencies {
     implementation("io.micronaut:micronaut-runtime")
     implementation("io.micronaut.cache:micronaut-cache-caffeine")
     implementation("io.micronaut.data:micronaut-data-r2dbc")
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
     implementation("io.micronaut.kotlin:micronaut-kotlin-runtime")
+    implementation("io.micronaut.liquibase:micronaut-liquibase")
+    implementation("io.micronaut.micrometer:micronaut-micrometer-core")
 //    implementation("io.micronaut.security:micronaut-security-session")
     implementation("io.micronaut.views:micronaut-views-thymeleaf")
     implementation("jakarta.annotation:jakarta.annotation-api")
@@ -86,6 +89,7 @@ gitProperties {
 
 application {
     mainClass.set("com.github.pintowar.ApplicationKt")
+    applicationDefaultJvmArgs = listOf("-Dmicronaut.environments=dev")
 }
 java {
     sourceCompatibility = JavaVersion.toVersion("17")
