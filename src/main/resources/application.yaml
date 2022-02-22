@@ -1,0 +1,20 @@
+micronaut:
+  application:
+    name: glomgold
+  security:
+    authentication: session
+
+jackson:
+  serialization:
+    writeDatesAsTimestamps: false
+
+endpoints:
+  all:
+    path: "/management"
+    enabled: true
+    sensitive: false
+
+netty:
+  default:
+    allocator:
+      max-order: 3

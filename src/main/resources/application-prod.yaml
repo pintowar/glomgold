@@ -1,0 +1,12 @@
+micronaut:
+  application:
+    name: glomgold-dev
+
+r2dbc:
+  datasources:
+    default:
+      schema-generate: NONE
+      dialect: POSTGRES
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      url: ${DB_URL}

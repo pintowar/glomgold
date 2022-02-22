@@ -1,0 +1,13 @@
+micronaut:
+  application:
+    name: glomgold-dev
+
+r2dbc:
+  datasources:
+    default:
+#      schema-generate: CREATE_DROP
+      schema-generate: NONE
+      dialect: POSTGRES
+      username: ${DB_USERNAME:postgres}
+      password: ${DB_PASSWORD:postgres}
+      url: ${DB_URL:`r2dbc:postgresql://localhost:5432/glomgold`}
