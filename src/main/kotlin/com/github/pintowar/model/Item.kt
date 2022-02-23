@@ -18,5 +18,5 @@ data class Item(
     var value: BigDecimal,
     @field:TypeDef(type = DataType.STRING) var currency: Currency,
     @field:TypeDef(type = DataType.TIMESTAMP) var period: YearMonth,
-    @field:Relation(Relation.Kind.MANY_TO_ONE) var user: User,
+    @field:Relation(Relation.Kind.MANY_TO_ONE) var user: User?,
 ) : Entity()

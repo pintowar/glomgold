@@ -1,13 +1,13 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.6.10"
-    id("org.jetbrains.kotlin.kapt") version "1.6.10"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.6.10"
-    id("com.github.johnrengelman.shadow") version "7.1.1"
-    id("io.micronaut.aot") version "3.2.1"
-    id("io.micronaut.application") version "3.2.1"
-    id("io.kotest") version "0.3.9"
-    id("com.gorylenko.gradle-git-properties") version "2.4.0"
-    id("org.liquibase.gradle") version "2.1.1"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.allopen)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.micronaut.aot)
+    alias(libs.plugins.micronaut.application)
+    alias(libs.plugins.kotest)
+    alias(libs.plugins.git.gradle)
+    alias(libs.plugins.liquibase.gradle)
 //    id("com.github.node-gradle.node")
     id("idea")
 }
@@ -15,8 +15,6 @@ plugins {
 version = "0.1"
 group = "com.github.pintowar"
 
-val kotlinVersion = project.properties.get("kotlinVersion")
-val kotlinCoVersion = project.properties.get("kotlinCoroutineVersion")
 repositories {
     mavenCentral()
 }
@@ -24,48 +22,21 @@ repositories {
 //apply(from = "gradle/liquibase.gradle.kts")
 
 dependencies {
-    kapt("io.micronaut:micronaut-http-validation")
-    kapt("io.micronaut.data:micronaut-data-processor")
-    kapt("io.micronaut.security:micronaut-security-annotations")
-    implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("io.micronaut:micronaut-management")
-    implementation("io.micronaut:micronaut-runtime")
-    implementation("io.micronaut.cache:micronaut-cache-caffeine")
-    implementation("io.micronaut.data:micronaut-data-r2dbc")
-    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
-    implementation("io.micronaut.kotlin:micronaut-kotlin-runtime")
-    implementation("io.micronaut.liquibase:micronaut-liquibase")
-    implementation("io.micronaut.micrometer:micronaut-micrometer-core")
-//    implementation("io.micronaut.security:micronaut-security-session")
-    implementation("io.micronaut.views:micronaut-views-thymeleaf")
-    implementation("jakarta.annotation:jakarta.annotation-api")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinCoVersion")
-    implementation("io.github.microutils:kotlin-logging-jvm:2.1.20")
-    runtimeOnly("ch.qos.logback:logback-classic")
-    runtimeOnly("io.r2dbc:r2dbc-postgresql")
-    runtimeOnly("org.postgresql:postgresql")
+    kapt(libs.bundles.micronaut.kapt)
 
-    testImplementation("org.testcontainers:r2dbc")
-    testImplementation("org.testcontainers:testcontainers")
-    testImplementation("org.testcontainers:postgresql")
+    implementation(libs.bundles.kotlin)
+    implementation(libs.bundles.kotlin.coroutines)
+    implementation(libs.bundles.micronaut)
+    implementation(libs.jbcrypt)
 
-    compileOnly("org.graalvm.nativeimage:svm")
+    runtimeOnly(libs.logback.classic)
+    runtimeOnly(libs.bundles.postgresql)
+    runtimeOnly(libs.jackson.module.kotlin)
 
-    implementation("org.mindrot:jbcrypt:0.4")
+    compileOnly(libs.graalvm.svm)
+    testImplementation(libs.bundles.testcontainers)
 
-    implementation("io.micronaut:micronaut-validation")
-
-    runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
-
-    liquibaseRuntime("org.liquibase:liquibase-core:4.5.0")
-    liquibaseRuntime("org.liquibase:liquibase-groovy-dsl:3.0.0")
-    liquibaseRuntime("info.picocli:picocli:4.6.1")
-    liquibaseRuntime("org.postgresql:postgresql:42.3.1")
-    liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:3.6")
+    liquibaseRuntime(libs.bundles.liquibase)
     liquibaseRuntime(sourceSets.main.get().output)
 }
 
