@@ -19,21 +19,5 @@ dependencies {
     implementation(libs.gradleplugin.kotest)
     implementation(libs.gradleplugin.git.properties)
     implementation(libs.gradleplugin.liquibase)
-}
-
-java {
-    sourceCompatibility = JavaVersion.toVersion("17")
-}
-
-tasks {
-    compileKotlin {
-        kotlinOptions {
-            jvmTarget = "17"
-        }
-    }
-    compileTestKotlin {
-        kotlinOptions {
-            jvmTarget = "17"
-        }
-    }
+    implementation(libs.gradleplugin.yaml)
 }

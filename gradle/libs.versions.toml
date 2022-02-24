@@ -15,6 +15,7 @@ gradleplugin-shadow = { module = "gradle.plugin.com.github.johnrengelman:shadow"
 gradleplugin-kotest = { module = "io.kotest:kotest-gradle-plugin", version.ref = "kotest-gradle" }
 gradleplugin-git-properties = { module = "com.gorylenko.gradle-git-properties:gradle-git-properties", version.ref = "git-gradle" }
 gradleplugin-liquibase = { module = "org.liquibase:liquibase-gradle-plugin", version.ref = "liquibase-gradle" }
+gradleplugin-yaml = { module = "org.yaml:snakeyaml", version = "1.30" }
 
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
