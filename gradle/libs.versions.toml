@@ -7,6 +7,15 @@ git-gradle = "2.4.0"
 liquibase-gradle = "2.1.1"
 
 [libraries]
+gradleplugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+gradleplugin-kotlin-allopen = { module = "org.jetbrains.kotlin:kotlin-allopen", version.ref = "kotlin" }
+#gradleplugin-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "kotlin" }
+gradleplugin-micronaut = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle" }
+gradleplugin-shadow = { module = "gradle.plugin.com.github.johnrengelman:shadow", version = "7.1.2" }
+gradleplugin-kotest = { module = "io.kotest:kotest-gradle-plugin", version.ref = "kotest-gradle" }
+gradleplugin-git-properties = { module = "com.gorylenko.gradle-git-properties:gradle-git-properties", version.ref = "git-gradle" }
+gradleplugin-liquibase = { module = "org.liquibase:liquibase-gradle-plugin", version.ref = "liquibase-gradle" }
+
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
@@ -32,7 +41,7 @@ micronaut-security-session = { module = "io.micronaut.security:micronaut-securit
 micronaut-views-thymeleaf = { module = "io.micronaut.views:micronaut-views-thymeleaf" }
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api" }
 
-jackson-module-kotlin = { module ="com.fasterxml.jackson.module:jackson-module-kotlin" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
 logback-classic = { module = "ch.qos.logback:logback-classic" }
 graalvm-svm = { module = "org.graalvm.nativeimage:svm" }
 jbcrypt = { module = "org.mindrot:jbcrypt", version = "0.4" }
@@ -55,21 +64,10 @@ micronaut = [
     "micronaut-http-client", "micronaut-jackson", "micronaut-management", "micronaut-runtime", "micronaut-validation",
     "micronaut-cache-caffeine", "micronaut-data-r2dbc", "micronaut-jdbc-hikari", "micronaut-kotlin-runtime",
     "micronaut-liquibase", "micronaut-micrometer-core", "micronaut-views-thymeleaf", "jakarta-annotation-api"
-#    "micronaut-security-session"
+    #    "micronaut-security-session"
 ]
 kotlin = ["kotlin-reflect", "kotlin-stdlib", "kotlin-logging"]
 kotlin-coroutines = ["kotlin-coroutines-core", "kotlin-coroutines-reactor"]
 postgresql = ["postgresql-jdbc", "postgresql-r2dbc"]
 testcontainers = ["testcontainers", "testcontainers-r2dbc", "testcontainers-postgresql"]
 liquibase = ["liquibase-core", "liquibase-groovy-dsl", "liquibase-picocli", "liquibase-hibernate", "postgresql-jdbc"]
-
-[plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
-shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.1" }
-micronaut-aot = { id = "io.micronaut.aot", version.ref = "micronaut-gradle" }
-micronaut-application = { id = "io.micronaut.application", version.ref = "micronaut-gradle" }
-kotest = { id = "io.kotest", version.ref = "kotest-gradle" }
-git-gradle = { id = "com.gorylenko.gradle-git-properties", version.ref = "git-gradle" }
-liquibase-gradle = { id = "org.liquibase.gradle", version.ref = "liquibase-gradle" }

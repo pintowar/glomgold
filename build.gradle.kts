@@ -1,15 +1,18 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.kotlin.allopen)
-    alias(libs.plugins.shadow)
-    alias(libs.plugins.micronaut.aot)
-    alias(libs.plugins.micronaut.application)
-    alias(libs.plugins.kotest)
-    alias(libs.plugins.git.gradle)
-    alias(libs.plugins.liquibase.gradle)
+    kotlin("jvm")
+    kotlin("kapt")
+    kotlin("plugin.allopen")
+    id("io.micronaut.application")
+    id("io.micronaut.aot")
+    id("com.github.johnrengelman.shadow")
+    id("io.kotest")
+    id("com.gorylenko.gradle-git-properties")
+    id("org.liquibase.gradle")
 //    id("com.github.node-gradle.node")
     id("idea")
+    id("glomgold.kotlin-liquibase")
 }
 
 version = "0.1"
@@ -36,21 +39,9 @@ dependencies {
     compileOnly(libs.graalvm.svm)
     testImplementation(libs.bundles.testcontainers)
 
+    // Should be declared in glomgold.kotlin-liquibase, but is not working
     liquibaseRuntime(libs.bundles.liquibase)
     liquibaseRuntime(sourceSets.main.get().output)
-}
-
-liquibase {
-    activities.register("main") {
-        this.arguments = mapOf(
-            "logLevel" to "info",
-            "changeLogFile" to "src/main/resources/db/liquibase-changelog.xml",
-            "url" to "jdbc:postgresql://localhost:5432/glomgold",
-            "username" to "postgres",
-            "password" to "postgres",
-        )
-    }
-    runList = "main"
 }
 
 gitProperties {
@@ -63,18 +54,15 @@ application {
     applicationDefaultJvmArgs = listOf("-Dmicronaut.environments=dev")
 }
 java {
-    sourceCompatibility = JavaVersion.toVersion("17")
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks {
-    compileKotlin {
+    withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "17"
-        }
-    }
-    compileTestKotlin {
-        kotlinOptions {
-            jvmTarget = "17"
+//            freeCompilerArgs = listOf("-Xjsr305=strict")
         }
     }
 }
