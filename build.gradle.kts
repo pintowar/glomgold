@@ -1,22 +1,23 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.6.10"
-    id("org.jetbrains.kotlin.kapt") version "1.6.10"
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.6.10"
-    id("com.github.johnrengelman.shadow") version "7.1.1"
-    id("io.micronaut.aot") version "3.2.1"
-    id("io.micronaut.application") version "3.2.1"
-    id("io.kotest") version "0.3.9"
-    id("com.gorylenko.gradle-git-properties") version "2.4.0"
-    id("org.liquibase.gradle") version "2.1.1"
+    kotlin("jvm")
+    kotlin("kapt")
+    kotlin("plugin.allopen")
+    id("io.micronaut.application")
+    id("io.micronaut.aot")
+    id("com.github.johnrengelman.shadow")
+    id("io.kotest")
+    id("com.gorylenko.gradle-git-properties")
+    id("org.liquibase.gradle")
 //    id("com.github.node-gradle.node")
     id("idea")
+    id("glomgold.kotlin-liquibase")
 }
 
 version = "0.1"
 group = "com.github.pintowar"
 
-val kotlinVersion = project.properties.get("kotlinVersion")
-val kotlinCoVersion = project.properties.get("kotlinCoroutineVersion")
 repositories {
     mavenCentral()
 }
@@ -24,59 +25,23 @@ repositories {
 //apply(from = "gradle/liquibase.gradle.kts")
 
 dependencies {
-    kapt("io.micronaut:micronaut-http-validation")
-    kapt("io.micronaut.data:micronaut-data-processor")
-    kapt("io.micronaut.security:micronaut-security-annotations")
-    implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("io.micronaut:micronaut-management")
-    implementation("io.micronaut:micronaut-runtime")
-    implementation("io.micronaut.cache:micronaut-cache-caffeine")
-    implementation("io.micronaut.data:micronaut-data-r2dbc")
-    implementation("io.micronaut.kotlin:micronaut-kotlin-runtime")
-//    implementation("io.micronaut.security:micronaut-security-session")
-    implementation("io.micronaut.views:micronaut-views-thymeleaf")
-    implementation("jakarta.annotation:jakarta.annotation-api")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinCoVersion")
-    implementation("io.github.microutils:kotlin-logging-jvm:2.1.20")
-    runtimeOnly("ch.qos.logback:logback-classic")
-    runtimeOnly("io.r2dbc:r2dbc-postgresql")
-    runtimeOnly("org.postgresql:postgresql")
+    kapt(libs.bundles.micronaut.kapt)
 
-    testImplementation("org.testcontainers:r2dbc")
-    testImplementation("org.testcontainers:testcontainers")
-    testImplementation("org.testcontainers:postgresql")
+    implementation(libs.bundles.kotlin)
+    implementation(libs.bundles.kotlin.coroutines)
+    implementation(libs.bundles.micronaut)
+    implementation(libs.jbcrypt)
 
-    compileOnly("org.graalvm.nativeimage:svm")
+    runtimeOnly(libs.logback.classic)
+    runtimeOnly(libs.bundles.postgresql)
+    runtimeOnly(libs.jackson.module.kotlin)
 
-    implementation("org.mindrot:jbcrypt:0.4")
+    compileOnly(libs.graalvm.svm)
+    testImplementation(libs.bundles.testcontainers)
 
-    implementation("io.micronaut:micronaut-validation")
-
-    runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
-
-    liquibaseRuntime("org.liquibase:liquibase-core:4.5.0")
-    liquibaseRuntime("org.liquibase:liquibase-groovy-dsl:3.0.0")
-    liquibaseRuntime("info.picocli:picocli:4.6.1")
-    liquibaseRuntime("org.postgresql:postgresql:42.3.1")
-    liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:3.6")
+    // Should be declared in glomgold.kotlin-liquibase, but is not working
+    liquibaseRuntime(libs.bundles.liquibase)
     liquibaseRuntime(sourceSets.main.get().output)
-}
-
-liquibase {
-    activities.register("main") {
-        this.arguments = mapOf(
-            "logLevel" to "info",
-            "changeLogFile" to "src/main/resources/db/liquibase-changelog.xml",
-            "url" to "jdbc:postgresql://localhost:5432/glomgold",
-            "username" to "postgres",
-            "password" to "postgres",
-        )
-    }
-    runList = "main"
 }
 
 gitProperties {
@@ -86,20 +51,18 @@ gitProperties {
 
 application {
     mainClass.set("com.github.pintowar.ApplicationKt")
+    applicationDefaultJvmArgs = listOf("-Dmicronaut.environments=dev")
 }
 java {
-    sourceCompatibility = JavaVersion.toVersion("17")
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks {
-    compileKotlin {
+    withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "17"
-        }
-    }
-    compileTestKotlin {
-        kotlinOptions {
-            jvmTarget = "17"
+//            freeCompilerArgs = listOf("-Xjsr305=strict")
         }
     }
 }
