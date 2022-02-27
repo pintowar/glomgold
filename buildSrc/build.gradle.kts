@@ -20,4 +20,6 @@ dependencies {
     implementation(libs.gradleplugin.git.properties)
     implementation(libs.gradleplugin.liquibase)
     implementation(libs.gradleplugin.yaml)
+
+    implementation(libs.gradleplugin.node)
 }
