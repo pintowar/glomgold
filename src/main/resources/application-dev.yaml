@@ -1,6 +1,12 @@
 micronaut:
   application:
     name: glomgold-dev
+  views:
+    thymeleaf:
+      cacheable: false
+
+liquibase:
+  enabled: true
 
 r2dbc:
   datasources:
@@ -13,6 +19,7 @@ r2dbc:
 
 datasources:
   liquibase:
+    enabled: true
     driverClassName: org.postgresql.Driver
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}

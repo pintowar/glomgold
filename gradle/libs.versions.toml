@@ -20,8 +20,9 @@ gradleplugin-yaml = { module = "org.yaml:snakeyaml", version = "1.30" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
-kotlin-logging = { module = "io.github.microutils:kotlin-logging-jvm", version = "2.1.20" }
+kotlin-coroutines-reactive = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactive", version.ref = "kotlin-coroutines" }
 kotlin-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor", version.ref = "kotlin-coroutines" }
+kotlin-logging = { module = "io.github.microutils:kotlin-logging-jvm", version = "2.1.20" }
 
 micronaut-http-validation = { module = "io.micronaut:micronaut-http-validation" }
 micronaut-data-processor = { module = "io.micronaut.data:micronaut-data-processor" }
@@ -31,6 +32,7 @@ micronaut-http-client = { module = "io.micronaut:micronaut-http-client" }
 micronaut-jackson = { module = "io.micronaut:micronaut-jackson-databind" }
 micronaut-management = { module = "io.micronaut:micronaut-management" }
 micronaut-runtime = { module = "io.micronaut:micronaut-runtime" }
+micronaut-session = { module = "io.micronaut:micronaut-session" }
 micronaut-validation = { module = "io.micronaut:micronaut-validation" }
 micronaut-cache-caffeine = { module = "io.micronaut.cache:micronaut-cache-caffeine" }
 micronaut-data-r2dbc = { module = "io.micronaut.data:micronaut-data-r2dbc" }
@@ -64,11 +66,11 @@ micronaut-kapt = ["micronaut-http-validation", "micronaut-data-processor", "micr
 micronaut = [
     "micronaut-http-client", "micronaut-jackson", "micronaut-management", "micronaut-runtime", "micronaut-validation",
     "micronaut-cache-caffeine", "micronaut-data-r2dbc", "micronaut-jdbc-hikari", "micronaut-kotlin-runtime",
-    "micronaut-liquibase", "micronaut-micrometer-core", "micronaut-views-thymeleaf", "jakarta-annotation-api"
-    #    "micronaut-security-session"
+    "micronaut-liquibase", "micronaut-micrometer-core", "micronaut-views-thymeleaf", "jakarta-annotation-api",
+    "micronaut-session", "micronaut-security-session"
 ]
 kotlin = ["kotlin-reflect", "kotlin-stdlib", "kotlin-logging"]
-kotlin-coroutines = ["kotlin-coroutines-core", "kotlin-coroutines-reactor"]
+kotlin-coroutines = ["kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor"]
 postgresql = ["postgresql-jdbc", "postgresql-r2dbc"]
 testcontainers = ["testcontainers", "testcontainers-r2dbc", "testcontainers-postgresql"]
 liquibase = ["liquibase-core", "liquibase-groovy-dsl", "liquibase-picocli", "liquibase-hibernate", "postgresql-jdbc"]

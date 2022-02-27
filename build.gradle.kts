@@ -51,7 +51,9 @@ gitProperties {
 
 application {
     mainClass.set("com.github.pintowar.ApplicationKt")
-    applicationDefaultJvmArgs = listOf("-Dmicronaut.environments=dev")
+    applicationDefaultJvmArgs = listOf(
+        "-Dmicronaut.environments=dev", "-Duser.timezone=UTC", "-Djava.security.egd=file:/dev/./urandom"
+    )
 }
 java {
     sourceCompatibility = JavaVersion.VERSION_17

@@ -3,6 +3,29 @@ micronaut:
     name: glomgold
   security:
     authentication: session
+    endpoints:
+      login:
+        enabled: true
+        path: /login
+      logout:
+        enabled: true
+        path: /logout
+        get-allowed: true
+    redirect:
+      unauthorized.url: /login
+      forbidden.url: /login
+      login-success: /panel
+      login-failure: /login-failed
+      logout: /login
+    intercept-url-map:
+      - pattern: /panel
+        access: isAuthenticated()
+      - pattern: /panel/**
+        access: isAuthenticated()
+      - pattern: /login
+        access: isAnonymous()
+      - pattern: /logout
+        access: isAnonymous()
 
 jackson:
   serialization:

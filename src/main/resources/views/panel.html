@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{layout/base :: layout(~{::title}, ~{::section})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:if="${errors}">Login Failed</title>
+    <title th:unless="${security}">Login</title>
+</head>
+<body>
+<section>
+    <div class="container pt-4">
+        <section class="mb-4">
+            <div class="row">
+                <div class="col-xl-6 col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <h5 class="mb-0 text-center"><strong>Period Navigation</strong></h5>
+                        </div>
+                        <div class="card-body">
+                            <div th:with="prev=(${period.minusMonths(1)}),next=(${period.plusMonths(1)})" class="mb-2">
+                                <a th:href="@{/panel(year=${prev.year},month=${prev.monthValue})}"
+                                   class="btn btn-link px-3">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                                <a th:href="@{/panel(year=${next.year},month=${next.monthValue})}"
+                                   class="btn btn-link px-3">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </div>
+                            <form th:action="@{/panel}" method="get" class="row gy-2 gx-3 align-items-center">
+                                <div class="col-auto">
+                                    <div class="form-outline">
+                                        <input type="text" id="year" name="year" th:value="${period.year}"
+                                               class="form-control"/>
+                                        <label class="form-label" for="year">Year</label>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-outline">
+                                        <input type="text" id="month" name="month" th:value="${period.monthValue}"
+                                               class="form-control"/>
+                                        <label class="form-label" for="month">Month</label>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary">Go</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6 col-md-12 mb-4">
+                    <div class="row mb-2">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between p-md-1">
+                                    <div class="d-flex flex-row">
+                                        <div class="align-self-center">
+                                            <h2 class="h1 mb-0 me-4"
+                                                th:text="${#numbers.formatCurrency(periodSummary)}">-</h2>
+                                        </div>
+                                        <div>
+                                            <h4>Total Cost</h4>
+                                            <p class="mb-0">Monthly Cost</p>
+                                        </div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-wallet text-success fa-3x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between p-md-1">
+                                    <div class="d-flex flex-row">
+                                        <div class="align-self-center">
+                                            <h2 class="h1 mb-0 me-4"
+                                                th:text="${#numbers.formatPercent(diffSummary, 1, 2)}">-</h2>
+                                        </div>
+                                        <div>
+                                            <h4>Bounce Rate</h4>
+                                            <p class="mb-0">Monthly Difference</p>
+                                        </div>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fas fa-chart-line text-success fa-3x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!--Section: Month Items-->
+        <section class="mb-4">
+            <div class="row">
+                <div class="col-xl-6 col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header text-center py-3">
+                            <h5 class="mb-0 text-center">
+                                <strong>Month Items</strong>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <form th:action="@{/panel/add-item}" method="post"
+                                      class="row mt-1 mb-2 gy-2 gx-3 align-items-center">
+                                    <input type="hidden" id="itemYear" name="year" th:value="${period.year}"/>
+                                    <input type="hidden" id="itemMonth" name="month" th:value="${period.monthValue}"/>
+                                    <div class="col-auto">
+                                        <div class="form-outline">
+                                            <input type="text" id="description" name="description"
+                                                   class="form-control"/>
+                                            <label class="form-label" for="description">Description</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="form-outline">
+                                            <input type="text" id="value" name="value" class="form-control"/>
+                                            <label class="form-label" for="value">Value</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-primary">Add Item</button>
+                                    </div>
+                                </form>
+                                <table class="table table-sm table-hover text-nowrap">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Value</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="item : ${items}">
+                                        <td th:text="${item.description}">Item Description</td>
+                                        <td>
+                                            <span th:text="${#numbers.formatCurrency(item.value)}"
+                                                  class="text-success">
+                                                $0.00
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <form th:action="@{'/panel/remove-item/{id}'(id=${item.id})}"
+                                                  th:method="post">
+                                                <button type="submit" class="btn btn-danger btn-sm px-3">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6 col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <h5 class="mb-0 text-center"><strong>Monthly Summary</strong></h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas class="my-4 w-100" id="myChart" height="380"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!--Section: Month Items-->
+
+
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+
+    <script th:inline="javascript">
+    var monthSummary = /*[[${monthSummary}]]*/ [];
+    var labels = monthSummary.map(function(i) { return i.description });
+    var values = monthSummary.map(function(i) { return i.value });
+
+    var ctx = document.getElementById("myChart");
+
+    var data = {
+      labels: labels,
+      datasets: [{
+        axis: 'y',
+        label: 'Transactions',
+        data: values,
+        fill: false,
+        borderWidth: 1
+      }]
+    };
+
+    var myChart = new Chart(ctx, {
+      type: 'bar',
+      data,
+      options: {
+        indexAxis: 'y',
+      }
+    });
+
+
+
+
+
+
+    </script>
+</section>
+
+</body>
+</html>

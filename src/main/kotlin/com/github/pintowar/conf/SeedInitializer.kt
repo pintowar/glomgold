@@ -16,12 +16,13 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import mu.KLogging
 import java.math.BigDecimal
+import java.time.Duration
 import java.time.YearMonth
 import java.util.*
 
 @Requires(property = "micronaut.environments", value = "dev")
 @Singleton
-class DataInitializer(
+class SeedInitializer(
     private val userRepo: UserRepository,
     private val itemRepo: ItemRepository
 ) : KLogging() {
@@ -38,16 +39,7 @@ class DataInitializer(
                 ).apply { setPassword("admin") }
                 val admin = userRepo.save(user)
 
-                val data = listOf(
-                    Item(
-                        description = "Water",
-                        value = BigDecimal(10),
-                        period = YearMonth.now(),
-                        currency = Currency.getInstance("BRL"),
-                        user = admin
-                    ),
-                )
-                data.forEach { logger.debug("saving: $it") }
+                val data = items(admin)
                 itemRepo.saveAll(data)
                     .onEach { logger.debug("saved item: $it") }
                     .onCompletion { logger.debug("completed.") }
@@ -56,6 +48,44 @@ class DataInitializer(
             }
             logger.info("data initialization is done...")
         }
-
     }
+
+    private fun items(user: User) = listOf(
+        Item(
+            description = "Water",
+            value = BigDecimal(10),
+            period = YearMonth.now(),
+            currency = Currency.getInstance("BRL"),
+            user = user
+        ),
+        Item(
+            description = "Groceries",
+            value = BigDecimal(200),
+            period = YearMonth.now(),
+            currency = Currency.getInstance("BRL"),
+            user = user
+        ),
+        Item(
+            description = "Clothing",
+            value = BigDecimal(500),
+            period = YearMonth.now(),
+            currency = Currency.getInstance("BRL"),
+            user = user
+        ),
+        Item(
+            description = "Groceries",
+            value = BigDecimal(150),
+            period = YearMonth.now().plusMonths(1),
+            currency = Currency.getInstance("BRL"),
+            user = user
+        ),
+        Item(
+            description = "Clothing",
+            value = BigDecimal(300),
+            period = YearMonth.now().plusMonths(1),
+            currency = Currency.getInstance("BRL"),
+            user = user
+        )
+    )
+
 }

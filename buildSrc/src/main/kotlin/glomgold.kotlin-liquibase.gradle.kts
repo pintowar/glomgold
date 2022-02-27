@@ -23,6 +23,8 @@ val defaultRunList = if (!project.hasProperty("runList")) "dev" else project.pro
 val diffChangelogFile =
     "src/main/resources/db/changelog/${SimpleDateFormat("yyyyMMddHHmmss").format(Date())}-changelog.xml"
 
+
+// https://medium.com/@benlucchesi/https-medium-com-benlucchesi-micronaut-gorm-liquibase-an-implementation-guide-f607d559ca16
 liquibase {
     activities.register("dev") {
         this.arguments = mapOf(

@@ -1,9 +1,9 @@
 micronaut:
   application:
     name: glomgold-dev
-
-thymeleaf:
-  cache: true
+  views:
+    thymeleaf:
+      cacheable: true
 
 r2dbc:
   datasources:

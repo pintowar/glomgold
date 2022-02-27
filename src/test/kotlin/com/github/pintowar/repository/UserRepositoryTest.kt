@@ -73,4 +73,18 @@ class UserRepositoryTest(
         }
     }
 
+    it("check password") {
+        val user = User(
+            username = "admin",
+            name = "Administrator",
+            email = "admin@glomgold.com"
+        ).apply { setPassword("admin") }
+        userRepo.save(user)
+
+        userRepo.findByUsername("admin")?.let { admin ->
+            admin.checkPassword("admin") shouldBe true
+            admin.checkPassword("other") shouldBe false
+        }
+    }
+
 })
