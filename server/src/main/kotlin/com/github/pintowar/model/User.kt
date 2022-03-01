@@ -25,7 +25,8 @@ data class User(
     companion object : KLogging()
 
     fun setPassword(passwd: String) {
-        this.passwordHash = generatePasswordHash(passwd)
+        if (passwd != this.passwordHash)
+            this.passwordHash = generatePasswordHash(passwd)
     }
 
     fun checkPassword(passwd: String): Boolean {

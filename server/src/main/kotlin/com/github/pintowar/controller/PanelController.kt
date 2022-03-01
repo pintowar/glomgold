@@ -49,7 +49,7 @@ class PanelController(
                 item.value,
                 Currency.getInstance("BRL"),
                 YearMonth.of(item.year, item.month),
-                userRepository.findByUsername(auth.name)
+                userRepository.findByUsername(auth.name)?.id!!
             )
         )
         return panelInfo(auth.name, YearMonth.of(item.year, item.month))

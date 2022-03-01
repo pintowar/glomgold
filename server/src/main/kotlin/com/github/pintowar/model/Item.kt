@@ -1,6 +1,9 @@
 package com.github.pintowar.model
 
-import io.micronaut.data.annotation.*
+import io.micronaut.data.annotation.Index
+import io.micronaut.data.annotation.Indexes
+import io.micronaut.data.annotation.MappedEntity
+import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
 import io.micronaut.data.model.naming.NamingStrategies.UnderScoreSeparatedLowerCase
 import java.math.BigDecimal
@@ -18,6 +21,5 @@ data class Item(
     var value: BigDecimal,
     @field:TypeDef(type = DataType.STRING) var currency: Currency,
     @field:TypeDef(type = DataType.TIMESTAMP) var period: YearMonth,
-    @field:Relation(Relation.Kind.MANY_TO_ONE)
-    @field:NotNull var user: User?
+    @field:NotNull var userId: Long
 ) : Entity()

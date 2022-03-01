@@ -64,7 +64,7 @@ class UserRepositoryTest(
                 value = BigDecimal(10),
                 period = YearMonth.now(),
                 currency = Currency.getInstance("BRL"),
-                user = user
+                userId = user.id!!
             )
 
             val savedItem = itemRepo.save(item)

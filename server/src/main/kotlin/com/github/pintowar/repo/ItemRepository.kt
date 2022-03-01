@@ -3,6 +3,7 @@ package com.github.pintowar.repo
 import com.github.pintowar.dto.ItemSummary
 import com.github.pintowar.model.Item
 import io.micronaut.data.annotation.Query
+import io.micronaut.data.model.Pageable
 import io.micronaut.data.model.query.builder.sql.Dialect
 import io.micronaut.data.r2dbc.annotation.R2dbcRepository
 import io.micronaut.data.repository.jpa.kotlin.CoroutineJpaSpecificationExecutor
@@ -13,6 +14,8 @@ import java.time.YearMonth
 
 @R2dbcRepository(dialect = Dialect.POSTGRES)
 interface ItemRepository : CoroutineCrudRepository<Item, Long>, CoroutineJpaSpecificationExecutor<Item> {
+
+    fun findAll(pageable: Pageable): Flow<Item>
 
     @Query(
         """
