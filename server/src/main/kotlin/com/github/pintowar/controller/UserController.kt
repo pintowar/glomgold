@@ -32,7 +32,7 @@ class UserController(private val userRepository: UserRepository) {
     suspend fun read(@PathVariable id: Long): HttpResponse<UserCommand> =
         HttpResponse.ok(userRepository.findById(id)?.let { UserCommand.toUserCommand(it) }) ?: HttpResponse.notFound()
 
-    @Put("/{id}")
+    @Patch("/{id}")
     suspend fun update(@PathVariable id: Long, @Body user: UserCommand): HttpResponse<UserCommand> =
         userRepository.findById(id)?.let { _ ->
             HttpResponse.ok(UserCommand.toUserCommand(userRepository.update(user.toUser())))

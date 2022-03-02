@@ -11,7 +11,6 @@ import io.micronaut.http.annotation.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 import javax.validation.constraints.NotBlank
@@ -38,7 +37,7 @@ class ItemController(private val itemRepository: ItemRepository) {
     suspend fun read(@PathVariable id: Long): HttpResponse<ItemCommand> =
         HttpResponse.ok(itemRepository.findById(id)?.let { ItemCommand.toCommand(it) }) ?: HttpResponse.notFound()
 
-    @Put("/{id}")
+    @Patch("/{id}")
     suspend fun update(@PathVariable id: Long, @Body item: ItemCommand): HttpResponse<ItemCommand> =
         itemRepository.findById(id)?.let { _ ->
             HttpResponse.ok(itemRepository.update(item.toItem()).let { ItemCommand.toCommand(it) })
