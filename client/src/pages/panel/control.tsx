@@ -17,9 +17,7 @@ export const ControlPanel: React.FC = () => {
 
     const [currentPeriod, setCurrentPeriod] = useState(moment(period, periodFormat));
 
-    const onChangePeriod = (date: any, _: string) => {
-        setCurrentPeriod(date)
-    }
+    const onChangePeriod = (date: any, _: string) => setCurrentPeriod(date);
 
     const columns = [
         {

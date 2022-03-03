@@ -1,6 +1,7 @@
-import { Refine } from "@pankod/refine-core";
+import { Refine, Authenticated } from "@pankod/refine-core";
 import {
     notificationProvider,
+    LoginPage,
     Layout,
     ErrorComponent,
 } from "@pankod/refine-antd";
@@ -11,8 +12,18 @@ import "@pankod/refine-antd/dist/styles.min.css";
 import { ItemList, ItemCreate, ItemEdit, ItemShow } from "pages/items";
 import { UserList, UserCreate, UserEdit, UserShow } from "pages/users";
 import { ControlPanel } from "pages/panel";
+import { DashboardPage } from "pages/dashboard";
+import { authProvider } from "authProvider";
 
 const API_URL = "/api";
+
+const AuthenticatedControlPanel = () => {
+    return (
+        <Authenticated>
+            <ControlPanel />
+        </Authenticated>
+    );
+};
 
 const App: React.FC = () => {
     return (
@@ -21,7 +32,7 @@ const App: React.FC = () => {
                 ...routerProvider,
                 routes: [
                     {
-                        element: <ControlPanel/>, path: '/panel',
+                        element: <AuthenticatedControlPanel/>, path: '/panel',
                     }
                 ]
             }}
@@ -35,7 +46,10 @@ const App: React.FC = () => {
                 }
             ]}
             notificationProvider={notificationProvider}
+            authProvider={authProvider}
+            LoginPage={LoginPage}
             Layout={Layout}
+            DashboardPage={DashboardPage}
             catchAll={<ErrorComponent />}
         />
     );
