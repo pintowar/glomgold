@@ -10,20 +10,28 @@ import "@pankod/refine-antd/dist/styles.min.css";
 
 import { ItemList, ItemCreate, ItemEdit, ItemShow } from "pages/items";
 import { UserList, UserCreate, UserEdit, UserShow } from "pages/users";
+import { ControlPanel } from "pages/panel";
 
 const API_URL = "/api";
 
 const App: React.FC = () => {
     return (
         <Refine
-            routerProvider={routerProvider}
+            routerProvider={{
+                ...routerProvider,
+                routes: [
+                    {
+                        element: <ControlPanel/>, path: '/panel',
+                    }
+                ]
+            }}
             dataProvider={dataProvider(API_URL)}
             resources={[
                 {
-                    name: "users", list: UserList, create: UserCreate, edit: UserEdit, show: UserShow, canDelete: true,
+                    name: "users", list: UserList, create: UserCreate, edit: UserEdit, show: UserShow, canDelete: true
                 },
                 {
-                    name: "items", list: ItemList, create: ItemCreate, edit: ItemEdit, show: ItemShow, canDelete: true,
+                    name: "items", list: ItemList, create: ItemCreate, edit: ItemEdit, show: ItemShow, canDelete: true
                 }
             ]}
             notificationProvider={notificationProvider}
