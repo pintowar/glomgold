@@ -1,0 +1,48 @@
+micronaut:
+  application:
+    name: glomgold
+  security:
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: '"${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}"'
+    intercept-url-map:
+      - pattern: /api/auth/**
+        access: isAuthenticated()
+      - pattern: /api/panel/**
+        access: isAuthenticated()
+      - pattern: /api/users/**
+        access:
+          - ROLE_ADMIN
+      - pattern: /api/items/**
+        access:
+          - ROLE_ADMIN
+      - pattern: /login
+        access: isAnonymous()
+      - pattern: /logout
+        access: isAnonymous()
+
+jackson:
+  serializationInclusion: NON_NULL
+  serialization:
+    writeDatesAsTimestamps: false
+
+endpoints:
+  all:
+    path: "/management"
+    enabled: true
+    sensitive: false
+
+netty:
+  default:
+    allocator:
+      max-order: 3
+
+liquibase:
+  enabled: true
+  datasources:
+    liquibase:
+      change-log: classpath:db/liquibase-changelog.xml

@@ -1,0 +1,30 @@
+micronaut:
+  application:
+    name: glomgold-dev
+  views:
+    thymeleaf:
+      cacheable: false
+
+liquibase:
+  enabled: true
+
+r2dbc:
+  datasources:
+    default:
+      schema-generate: NONE
+      dialect: POSTGRES
+      username: ${DB_USERNAME:postgres}
+      password: ${DB_PASSWORD:postgres}
+      url: "r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:glomgold}"
+
+datasources:
+  liquibase:
+    enabled: true
+    driverClassName: org.postgresql.Driver
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    url: "jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:glomgold}"
+
+logger:
+  levels:
+    io.micronaut.data.query: TRACE
