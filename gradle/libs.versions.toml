@@ -33,7 +33,6 @@ micronaut-http-client = { module = "io.micronaut:micronaut-http-client" }
 micronaut-jackson = { module = "io.micronaut:micronaut-jackson-databind" }
 micronaut-management = { module = "io.micronaut:micronaut-management" }
 micronaut-runtime = { module = "io.micronaut:micronaut-runtime" }
-micronaut-session = { module = "io.micronaut:micronaut-session" }
 micronaut-validation = { module = "io.micronaut:micronaut-validation" }
 micronaut-cache-caffeine = { module = "io.micronaut.cache:micronaut-cache-caffeine" }
 micronaut-data-r2dbc = { module = "io.micronaut.data:micronaut-data-r2dbc" }
@@ -41,7 +40,7 @@ micronaut-jdbc-hikari = { module = "io.micronaut.sql:micronaut-jdbc-hikari" }
 micronaut-kotlin-runtime = { module = "io.micronaut.kotlin:micronaut-kotlin-runtime" }
 micronaut-liquibase = { module = "io.micronaut.liquibase:micronaut-liquibase" }
 micronaut-micrometer-core = { module = "io.micronaut.micrometer:micronaut-micrometer-core" }
-micronaut-security-session = { module = "io.micronaut.security:micronaut-security-session" }
+micronaut-security-jwt = { module = "io.micronaut.security:micronaut-security-jwt" }
 micronaut-views-thymeleaf = { module = "io.micronaut.views:micronaut-views-thymeleaf" }
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api" }
 
@@ -68,7 +67,7 @@ micronaut = [
     "micronaut-http-client", "micronaut-jackson", "micronaut-management", "micronaut-runtime", "micronaut-validation",
     "micronaut-cache-caffeine", "micronaut-data-r2dbc", "micronaut-jdbc-hikari", "micronaut-kotlin-runtime",
     "micronaut-liquibase", "micronaut-micrometer-core", "micronaut-views-thymeleaf", "jakarta-annotation-api",
-    "micronaut-session", "micronaut-security-session"
+    "micronaut-security-jwt"
 ]
 kotlin = ["kotlin-reflect", "kotlin-stdlib", "kotlin-logging"]
 kotlin-coroutines = ["kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor"]

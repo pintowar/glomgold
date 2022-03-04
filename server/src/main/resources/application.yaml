@@ -2,26 +2,24 @@ micronaut:
   application:
     name: glomgold
   security:
-    authentication: session
-    endpoints:
-      login:
-        enabled: true
-        path: /login
-      logout:
-        enabled: true
-        path: /logout
-        get-allowed: true
-    redirect:
-      unauthorized.url: /login
-      forbidden.url: /login
-      login-success: /panel
-      login-failure: /login-failed
-      logout: /login
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: '"${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}"'
     intercept-url-map:
-      - pattern: /panel
+      - pattern: /api/auth/**
         access: isAuthenticated()
-      - pattern: /panel/**
+      - pattern: /api/panel/**
         access: isAuthenticated()
+      - pattern: /api/users/**
+        access:
+          - ROLE_ADMIN
+      - pattern: /api/items/**
+        access:
+          - ROLE_ADMIN
       - pattern: /login
         access: isAnonymous()
       - pattern: /logout

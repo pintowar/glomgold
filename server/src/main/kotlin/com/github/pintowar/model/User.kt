@@ -6,6 +6,7 @@ import io.micronaut.data.annotation.MappedEntity
 import io.micronaut.data.model.naming.NamingStrategies.UnderScoreSeparatedLowerCase
 import mu.KLogging
 import org.mindrot.jbcrypt.BCrypt
+import java.security.SecureRandom
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotBlank
 
@@ -22,7 +23,9 @@ data class User(
     var enabled: Boolean = true
 ) : Entity() {
 
-    companion object : KLogging()
+    companion object : KLogging() {
+        private val secureRandom = SecureRandom()
+    }
 
     fun setPassword(passwd: String) {
         if (passwd != this.passwordHash)
@@ -38,7 +41,7 @@ data class User(
 
     fun isAdmin() = "admin" == username
 
-    private fun generatePasswordHash(passwd: String) = BCrypt.hashpw(passwd, BCrypt.gensalt(16))
+    private fun generatePasswordHash(passwd: String) = BCrypt.hashpw(passwd, BCrypt.gensalt(10, secureRandom))
 
     private fun checkPasswordHash(passwordHash: String, password: String) = BCrypt.checkpw(password, passwordHash)
 }

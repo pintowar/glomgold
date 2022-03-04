@@ -13,9 +13,14 @@ import { ItemList, ItemCreate, ItemEdit, ItemShow } from "pages/items";
 import { UserList, UserCreate, UserEdit, UserShow } from "pages/users";
 import { ControlPanel } from "pages/panel";
 import { DashboardPage } from "pages/dashboard";
-import { authProvider } from "authProvider";
+import { generateAuthProvider } from "authProvider";
 
-const API_URL = "/api";
+import { API_URL } from "./constants";
+
+import axios from 'axios';
+
+const axiosInstance = axios.create()
+const authProvider = generateAuthProvider(axiosInstance)
 
 const AuthenticatedControlPanel = () => {
     return (
@@ -36,7 +41,7 @@ const App: React.FC = () => {
                     }
                 ]
             }}
-            dataProvider={dataProvider(API_URL)}
+            dataProvider={dataProvider(API_URL, axiosInstance)}
             resources={[
                 {
                     name: "users", list: UserList, create: UserCreate, edit: UserEdit, show: UserShow, canDelete: true

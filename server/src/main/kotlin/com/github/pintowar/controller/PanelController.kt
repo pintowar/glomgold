@@ -5,10 +5,8 @@ import com.github.pintowar.model.Item
 import com.github.pintowar.repo.ItemRepository
 import com.github.pintowar.repo.UserRepository
 import io.micronaut.http.HttpResponse
-import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.*
 import io.micronaut.security.authentication.Authentication
-import io.micronaut.views.View
 import kotlinx.coroutines.flow.toList
 import java.math.BigDecimal
 import java.math.MathContext
@@ -16,21 +14,18 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
-@Controller
+@Controller("/api/panel")
 class PanelController(
     private val itemRepository: ItemRepository, private val userRepository: UserRepository
 ) {
 
-    @View("panel")
-    @Get("/panel")
+    @Get("/")
     suspend fun panel(auth: Authentication, @QueryValue("year") year: Int?, @QueryValue("month") month: Int?) =
         LocalDate.now().let { now ->
             panelInfo(auth.name, YearMonth.of(year ?: now.year, month ?: now.monthValue))
         }
 
-    @View("panel")
-    @Post("/panel/remove-item/{id}")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Post("/remove-item/{id}")
     suspend fun removeItem(auth: Authentication, @PathVariable id: Long): HttpResponse<Map<String, Any>> {
         return itemRepository.findById(id)?.let { item ->
             itemRepository.delete(item)
@@ -38,10 +33,7 @@ class PanelController(
         } ?: HttpResponse.notFound()
     }
 
-
-    @View("panel")
-    @Post("/panel/add-item")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Post("/add-item")
     suspend fun addItem(auth: Authentication, @Body item: AddItem): Map<String, Any> {
         itemRepository.save(
             Item(

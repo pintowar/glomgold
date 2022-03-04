@@ -25,7 +25,8 @@ class AuthenticationProviderUserPassword(
         } ?: fail("No user found!")
     }.asPublisher()
 
-    private fun response(user: User) = AuthenticationResponse.success(user.username, mapOf("locale" to "pt-BR"))
+    private fun response(user: User) = AuthenticationResponse
+        .success(user.username, listOf(if (user.isAdmin()) "ROLE_ADMIN" else "ROLE_USER"))
 
     private fun fail(message: String): Unit = throw AuthenticationResponse.exception(message)
 }

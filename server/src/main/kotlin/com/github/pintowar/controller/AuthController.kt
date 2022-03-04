@@ -1,25 +1,16 @@
 package com.github.pintowar.controller
 
-import io.micronaut.http.HttpRequest
-import io.micronaut.http.HttpResponse
+import com.github.pintowar.repo.UserRepository
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
-import io.micronaut.views.View
-import java.util.*
+import io.micronaut.security.authentication.Authentication
 
-@Controller
-class AuthController {
+@Controller("/api/auth")
+class AuthController(private val userRepository: UserRepository) {
 
-    @View("login")
-    @Get("/login")
-    fun login(request: HttpRequest<Any>): HttpResponse<String> {
-        return HttpResponse.ok()
-    }
-
-    @Get("/login-failed")
-    @View("login")
-    fun loginFailed(): Map<String, Any> {
-        return Collections.singletonMap<String, Any>("errors", true)
-    }
+    @Get("/me")
+    suspend fun panel(auth: Authentication) = userRepository.findByUsername(auth.name)?.let { user ->
+        mapOf("username" to user.username, "name" to user.name, "email" to user.email)
+    } ?: emptyMap()
 
 }
