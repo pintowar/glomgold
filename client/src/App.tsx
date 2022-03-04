@@ -25,7 +25,7 @@ const authProvider = generateAuthProvider(axiosInstance)
 const AuthenticatedControlPanel = () => {
     return (
         <Authenticated>
-            <ControlPanel />
+            <ControlPanel axios={axiosInstance}/>
         </Authenticated>
     );
 };

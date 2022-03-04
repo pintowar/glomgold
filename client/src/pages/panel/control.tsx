@@ -1,23 +1,88 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from 'react-router-dom';
 
-import { Row, Col, Card, Space, Input, InputNumber, DatePicker, Button, Table, Statistic } from 'antd';
+import { Row, Col, Card, Space, Input, InputNumber, DatePicker, Button, Table, Statistic, Form } from 'antd';
 import { LeftOutlined, RightOutlined, RiseOutlined, WalletOutlined, DeleteOutlined } from '@ant-design/icons';
+import { AxiosInstance } from 'axios';
 import Chart from "react-apexcharts";
 import moment from 'moment';
 
 import { PanelLayout } from "./layout";
 
 import './control.css'
+import { IItem } from '../../interfaces'
+import { idText } from "typescript";
 
-export const ControlPanel: React.FC = () => {
+interface ControlPanelData {
+    items: IItem[]
+    stats: IItem[]
+    total: number
+    diff: number
+}
+
+interface ControlPanelProps {
+    axios: AxiosInstance
+}
+
+const barChartConfig = (data: ControlPanelData) => ({
+    options: {
+        chart: { id: "basic-bar" },
+        plotOptions: { bar: { horizontal: true } },
+        xaxis: { categories: data.stats.map(it => it.description) }
+    },
+    series: [
+        { name: "value", data: data.stats.map(it => it.value) }
+    ]
+})
+
+export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
     const periodFormat = 'YYYY-MM';
     const location = useLocation();
     const period = new URLSearchParams(location.search).get("period") || moment().format(periodFormat);
 
     const [currentPeriod, setCurrentPeriod] = useState(moment(period, periodFormat));
+    const [panelData, setPanelData] = useState<ControlPanelData>({
+        items: [],
+        stats: [],
+        total: 0,
+        diff: 0
+    });
+
+    const [form] = Form.useForm();
+
+    useEffect(() => {
+        populateData()
+    }, [currentPeriod]);
 
     const onChangePeriod = (date: any, _: string) => setCurrentPeriod(date);
+
+    const populateData = async () => {
+        const {status, data} = await axios.get(`/api/panel?year=${currentPeriod.year()}&month=${currentPeriod.month() + 1}`)
+        if (status === 200) {
+            setPanelData(data)
+        } else throw Error()
+    }
+
+    const onAddItem = async () => {
+        const year = currentPeriod.year()
+        const month = currentPeriod.month() + 1
+        const {description, value} = form.getFieldsValue()
+
+        const {status, data} = await axios.post("/api/panel/add-item", {year, month, description, value})
+        if (status === 200) {
+            form.resetFields()
+            setPanelData(data)
+        } else throw Error()
+    };
+
+    const onDeleteItem = async (record: any) => {
+        const {key} = record
+        const {status, data} = await axios.post(`/api/panel/remove-item/${key}`)
+        if (status === 200) {
+            form.resetFields()
+            setPanelData(data)
+        } else throw Error()
+    };
 
     const columns = [
         {
@@ -35,68 +100,24 @@ export const ControlPanel: React.FC = () => {
             key: 'operation',
             // fixed: 'right',
             // width: 100,
-            render: () => <Button type="text" danger><DeleteOutlined/></Button>,
-        },
-    ];
-    const data = [
-            {
-            key: '1',
-            description: 'Water',
-            value: 10,
-        },
-        {
-            key: '2',
-            description: 'Groceries',
-            value: 200,
-        },
-        {
-            key: '3',
-            description: 'Clothing',
-            value: 500,
-        },
-        {
-            key: '4',
-            description: 'Books',
-            value: 150,
+            render: (_: any, record: any) => <Button type="text" onClick={() => onDeleteItem(record)} danger><DeleteOutlined/></Button>,
         },
     ];
 
-    const config = {
-        options: {
-            chart: {
-                id: "basic-bar"
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: true
-                }
-            },
-            xaxis: {
-                categories: data.map(it => it.description)
-            }
-        },
-        series: [
-            {
-                name: "value",
-                data: data.map(it => it.value)
-            }
-        ]
-    };
+    const config = barChartConfig(panelData);
+    const tableData = panelData.items.map(({id, description, value}) => ({key: id, description, value}));
 
     return (
         <PanelLayout>
             <div className="card-row">
                 <Row gutter={[24, 24]}>
                     <Col span={12}>
-                        <Card title={`Period Navigation ${currentPeriod.format(periodFormat)}`} bordered={false}>
+                        <Card title={"Period Navigation"} bordered={false}>
                             <Space direction="vertical" size={12}>
                                 <Space direction="horizontal" size={2}>
                                     <Button type="text" onClick={() => setCurrentPeriod(currentPeriod.clone().add(-1, 'M'))}><LeftOutlined/></Button>
                                     <Button type="text" onClick={() => setCurrentPeriod(currentPeriod.clone().add(1, 'M'))}><RightOutlined/></Button>
-                                </Space>
-                                <Space direction="horizontal" size={6}>
                                     <DatePicker value={currentPeriod} format={periodFormat} onChange={onChangePeriod} picker="month" allowClear={false}/>
-                                    <Button type="primary">Go</Button>
                                 </Space>
                             </Space>
                         </Card>
@@ -106,7 +127,7 @@ export const ControlPanel: React.FC = () => {
                             <Space direction="horizontal" size={32}>
                                 <Statistic
                                     title="Monthly Cost"
-                                    value={860.00}
+                                    value={panelData.total}
                                     precision={2}
                                     valueStyle={{ color: '#3f8600' }}
                                     prefix={<WalletOutlined />}
@@ -114,7 +135,7 @@ export const ControlPanel: React.FC = () => {
                                 />
                                 <Statistic
                                     title="Monthly Difference"
-                                    value={42}
+                                    value={panelData.diff}
                                     precision={2}
                                     valueStyle={{ color: '#3f8600' }}
                                     prefix={<RiseOutlined />}
@@ -130,12 +151,18 @@ export const ControlPanel: React.FC = () => {
                     <Col span={12}>
                         <Card title="Month Items" bordered={false}>
                             <Space direction="vertical" size={12} wrap style={{width: '100%'}}>
-                                <Space direction="horizontal" size={6} wrap>
-                                    <Input placeholder="Description"/>
-                                    <InputNumber placeholder="Value" />
-                                </Space>
-                                <Button type="primary">Add Item</Button>
-                                <Table columns={columns} dataSource={data} size="small" />                                    
+                                <Form form={form} layout="inline">
+                                    {/* <Space direction="horizontal" size={6} wrap> */}
+                                        <Form.Item name="description" rules={[{ required: true }]}>
+                                            <Input placeholder="Description"/>
+                                        </Form.Item>
+                                        <Form.Item name="value" rules={[{ required: true }]}>
+                                            <InputNumber placeholder="Value" />
+                                        </Form.Item>
+                                    {/* </Space> */}
+                                </Form>
+                                <Button type="primary" onClick={onAddItem}>Add Item</Button>
+                                <Table columns={columns} dataSource={tableData} size="small" />                                    
                             </Space>
                         </Card>
                     </Col>

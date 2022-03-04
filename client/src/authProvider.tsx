@@ -43,27 +43,3 @@ export const generateAuthProvider = (axios: AxiosInstance): AuthProvider => ({
         }
     },
 });
-
-// export const authProvider: AuthProvider = {
-//     login: async ({ username, password, remember }) => {
-//         if (username === "admin" && password === "admin") {
-//             localStorage.setItem("username", username);
-//         } else {
-//             throw Error("Invalid Login")
-//         }
-//     },
-//     logout: async () => {
-//         localStorage.removeItem("username");
-//     },
-//     checkError: async () => {},
-//     checkAuth: async () => {
-//         if(!localStorage.getItem("username"))
-//             throw Error()
-//     },
-//     getPermissions: async () => ["admin"],
-//     getUserIdentity: async () => ({
-//                 id: 1,
-//                 name: "Administrator",
-//                 avatar: "https://unsplash.com/photos/IWLOvomUmWU/download?force=true&w=640",
-//             }),
-// };

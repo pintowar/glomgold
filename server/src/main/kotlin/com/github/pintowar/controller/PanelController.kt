@@ -27,9 +27,12 @@ class PanelController(
 
     @Post("/remove-item/{id}")
     suspend fun removeItem(auth: Authentication, @PathVariable id: Long): HttpResponse<Map<String, Any>> {
+        val userId = userRepository.findByUsername(auth.name)?.id!!
         return itemRepository.findById(id)?.let { item ->
-            itemRepository.delete(item)
-            HttpResponse.ok(panelInfo(auth.name, item.period))
+            if (userId == item.userId) {
+                itemRepository.delete(item)
+                HttpResponse.ok(panelInfo(auth.name, item.period))
+            } else HttpResponse.notFound()
         } ?: HttpResponse.notFound()
     }
 
@@ -56,10 +59,9 @@ class PanelController(
         )) - BigDecimal.ONE) else BigDecimal.ZERO
         return mapOf(
             "items" to itemRepository.listByPeriod(period, username).toList(),
-            "monthSummary" to itemRepository.monthSummary(period, username).toList(),
-            "periodSummary" to (periodSummary ?: BigDecimal.ZERO),
-            "diffSummary" to diffSummary,
-            "period" to period
+            "stats" to itemRepository.monthSummary(period, username).toList(),
+            "total" to (periodSummary ?: BigDecimal.ZERO),
+            "diff" to diffSummary
         )
     }
 }
