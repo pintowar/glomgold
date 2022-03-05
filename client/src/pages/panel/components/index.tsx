@@ -1,9 +1,12 @@
-import { Card, Space, DatePicker, Input, InputNumber, Button, Table, Statistic, Form, FormInstance } from 'antd';
-import { LeftOutlined, RightOutlined, DeleteOutlined, EditOutlined, WalletOutlined, RiseOutlined } from '@ant-design/icons';
+import { Card, Space, DatePicker, Input, InputNumber, Button, Table, Statistic, Form, FormInstance, } from 'antd';
+import Highlighter from 'react-highlight-words';
+import { LeftOutlined, RightOutlined, DeleteOutlined, EditOutlined, WalletOutlined, RiseOutlined, SearchOutlined } from '@ant-design/icons';
 import Chart from "react-apexcharts";
 
 import { IItem } from '../../../interfaces'
 import { PanelItem } from '../control'
+import { useState } from 'react';
+import { ColumnType } from 'antd/lib/table';
 
 interface MonthItemsCardProps {
     form: FormInstance
@@ -13,16 +16,111 @@ interface MonthItemsCardProps {
 }
 
 export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({form, tableData, onAddItem, onDeleteItem}) => {
-    const columns = [
+
+    let searchInput: Input | null = null
+    const [filterState, setFilterState] = useState({
+        searchText: '',
+        searchedColumn: ''
+    });
+
+    const handleSearch = (selectedKeys: React.Key[], confirm: (param?: any) => void, dataIndex: string) => {
+        confirm();
+        setFilterState({
+          searchText: `${selectedKeys[0]}`,
+          searchedColumn: dataIndex,
+        });
+    };
+
+    const handleReset = (clearFilters: (() => void) | undefined) => {
+        if(clearFilters) clearFilters();
+        setFilterState(state => ({...state, searchText: '' }));
+    };
+
+    const getColumnSearchProps = (dataIndex: string): ColumnType<PanelItem> => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <Input
+                    ref={node => {
+                        searchInput = node
+                    }}
+                    placeholder={`Search ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                    style={{ marginBottom: 8, display: 'block' }}
+                    />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        Search
+                    </Button>
+                    <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+                        Reset
+                    </Button>
+                    <Button
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                            confirm({ closeDropdown: false });
+                            setFilterState({
+                                searchText: `${selectedKeys[0]}`,
+                                searchedColumn: dataIndex,
+                            });
+                        }}
+                    >
+                        Filter
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+        onFilter: (value: string | number | boolean, record: PanelItem) => {
+            switch(dataIndex) {
+                case 'description':
+                    return record.description.toLowerCase().includes(`${value}`.toLowerCase())
+                case 'value':
+                    return `${record.value}`.toLowerCase().includes(`${value}`.toLowerCase())
+                default:
+                    return false
+            }
+        },
+        onFilterDropdownVisibleChange: visible => {
+              if (visible) {
+                setTimeout(() => searchInput?.select(), 100);
+              }
+        },
+        render: text =>
+          filterState.searchedColumn === dataIndex ? (
+            <Highlighter
+              highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+              searchWords={[filterState.searchText]}
+              autoEscape
+              textToHighlight={text ? text.toString() : ''}
+            />
+          ) : (
+            text
+          ),
+    })
+    
+     const columns = [
         {
             key: 'description',
             title: 'Description',
             dataIndex: 'description',
+            sorter: (a: PanelItem, b: PanelItem) => a.description.localeCompare(b.description),
+            ...getColumnSearchProps('description'),
         },
         {
             key: 'value',
             title: 'Value',
             dataIndex: 'value',
+            sorter: (a: PanelItem, b: PanelItem) => a.value - b.value,
+            ...getColumnSearchProps('value'),
         },
         {
             title: 'Action',
