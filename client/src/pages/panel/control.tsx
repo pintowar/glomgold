@@ -12,13 +12,6 @@ import { IItem } from '../../interfaces'
 
 import { PeriodSummaryCard, PeriodNavigationCard, MonthItemsCard, MonthStatsCard } from './components'
 
-export interface PanelItem {
-    key: number
-    description: string
-    value: number
-}
-
-
 interface ControlPanelData {
     items: IItem[]
     stats: IItem[]
@@ -44,8 +37,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
         diff: 0
     });
 
-    const [form] = Form.useForm();
-
     useEffect(() => {
         populateData()
     }, [currentPeriod]);
@@ -58,22 +49,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
         } else throw Error()
     }
 
-    const onAddItem = async () => {
-        const year = currentPeriod.year()
-        const month = currentPeriod.month() + 1
-        const {description, value} = form.getFieldsValue()
-
+    const onAddItem = async (year: number, month: number, description: string, value: number) => {
         const {status, data} = await axios.post("/api/panel/add-item", {year, month, description, value})
         if (status === 200) {
-            form.resetFields()
             setPanelData(data)
         } else throw Error()
     };
 
-    const onDeleteItem = async (item: PanelItem) => {
-        const {status, data} = await axios.post(`/api/panel/remove-item/${item.key}`)
+    const onDeleteItem = async (itemId: number) => {
+        const {status, data} = await axios.post(`/api/panel/remove-item/${itemId}`)
         if (status === 200) {
-            form.resetFields()
             setPanelData(data)
         } else throw Error()
     };
@@ -95,7 +80,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
             <div className="card-row">
                 <Row gutter={[24, 24]}>
                     <Col span={12}>
-                        <MonthItemsCard form={form} tableData={tableData} onAddItem={onAddItem} onDeleteItem={onDeleteItem}/>
+                        <MonthItemsCard tableData={tableData} currentPeriod={currentPeriod} onAddItem={onAddItem} onDeleteItem={onDeleteItem}/>
                     </Col>
                     <Col span={12}>
                         <MonthStatsCard tableData={panelData.stats} />

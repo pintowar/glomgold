@@ -4,24 +4,89 @@ import { LeftOutlined, RightOutlined, DeleteOutlined, EditOutlined, WalletOutlin
 import Chart from "react-apexcharts";
 
 import { IItem } from '../../../interfaces'
-import { PanelItem } from '../control'
 import { useState } from 'react';
 import { ColumnType } from 'antd/lib/table';
 
-interface MonthItemsCardProps {
-    form: FormInstance
-    onAddItem: () => Promise<void>
-    onDeleteItem: (item: PanelItem) => Promise<void>
-    tableData: PanelItem[]
+interface PanelItem {
+    key: number
+    description: string
+    value: number
 }
 
-export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({form, tableData, onAddItem, onDeleteItem}) => {
+interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+    editing: boolean;
+    dataIndex: string;
+    title: any;
+    inputType: 'number' | 'text';
+    record: PanelItem;
+    index: number;
+    children: React.ReactNode;
+}
+  
+const EditableCell: React.FC<EditableCellProps> = ({
+    editing,
+    dataIndex,
+    title,
+    inputType,
+    record,
+    index,
+    children,
+    ...restProps
+  }) => {
+    const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
+  
+    return (
+      <td {...restProps}>
+        {editing ? (
+          <Form.Item
+            name={dataIndex}
+            style={{ margin: 0 }}
+            rules={[
+              {
+                required: true,
+                message: `Please Input ${title}!`,
+              },
+            ]}
+          >
+            {inputNode}
+          </Form.Item>
+        ) : (
+          children
+        )}
+      </td>
+    );
+};
+
+interface MonthItemsCardProps {
+    onAddItem: (year: number, month: number, description: string, value: number) => Promise<void>
+    onDeleteItem: (itemId: number) => Promise<void>
+    tableData: PanelItem[]
+    currentPeriod: moment.Moment
+}
+
+export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({currentPeriod, tableData, onAddItem, onDeleteItem}) => {
+
+    const [form] = Form.useForm()
 
     let searchInput: Input | null = null
     const [filterState, setFilterState] = useState({
         searchText: '',
         searchedColumn: ''
     });
+
+    const addItem = () => {
+        const year = currentPeriod.year()
+        const month = currentPeriod.month() + 1
+        const {description, value} = form.getFieldsValue()
+
+        onAddItem(year, month, description, value)
+        form.resetFields()
+    };
+
+    const deleteItem = (item: PanelItem) => {
+        onDeleteItem(item.key)
+        form.resetFields()
+    }
 
     const handleSearch = (selectedKeys: React.Key[], confirm: (param?: any) => void, dataIndex: string) => {
         confirm();
@@ -130,7 +195,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({form, tableData, 
             render: (_: any, record: PanelItem) => (
                 <>
                     <Button type="text"><EditOutlined/></Button>
-                    <Button type="text" onClick={() => onDeleteItem(record)} danger><DeleteOutlined/></Button>
+                    <Button type="text" onClick={() => deleteItem(record)} danger><DeleteOutlined/></Button>
                 </>
             ),
         },
@@ -147,7 +212,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({form, tableData, 
                         <InputNumber placeholder="Value" />
                     </Form.Item>
                 </Form>
-                <Button type="primary" onClick={onAddItem}>Add Item</Button>
+                <Button type="primary" onClick={() => addItem()}>Add Item</Button>
                 <Table columns={columns} dataSource={tableData} size="small" />                                    
             </Space>
         </Card>
