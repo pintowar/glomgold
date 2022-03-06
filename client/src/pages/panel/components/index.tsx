@@ -1,6 +1,6 @@
 import { Card, Space, DatePicker, Input, InputNumber, Button, Table, Statistic, Form, FormInstance, } from 'antd';
 import Highlighter from 'react-highlight-words';
-import { LeftOutlined, RightOutlined, DeleteOutlined, EditOutlined, WalletOutlined, RiseOutlined, SearchOutlined } from '@ant-design/icons';
+import { LeftOutlined, RightOutlined, DeleteOutlined, EditOutlined, WalletOutlined, RiseOutlined, SearchOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import Chart from "react-apexcharts";
 
 import { IItem } from '../../../interfaces'
@@ -58,35 +58,37 @@ const EditableCell: React.FC<EditableCellProps> = ({
 };
 
 interface MonthItemsCardProps {
-    onAddItem: (year: number, month: number, description: string, value: number) => Promise<void>
+    onAddItem: (description: string, value: number) => Promise<void>
+    onEditItem: (id: number, description: string, value: number) => Promise<void>
     onDeleteItem: (itemId: number) => Promise<void>
     tableData: PanelItem[]
-    currentPeriod: moment.Moment
 }
 
-export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({currentPeriod, tableData, onAddItem, onDeleteItem}) => {
+export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddItem, onEditItem, onDeleteItem}) => {
 
-    const [form] = Form.useForm()
+    const [addForm] = Form.useForm()
+    const [editForm] = Form.useForm()
 
+    // start of editable cells
+    const [editingKey, setEditingKey] = useState('');
+
+    const isEditing = (record: PanelItem) => `${record.key}` === editingKey;
+
+    const edit = (record: Partial<PanelItem> & { key: React.Key }) => {
+        editForm.setFieldsValue({ description: '', value: '', ...record });
+        setEditingKey(`${record.key}`);
+    };
+
+    const cancel = () => setEditingKey('');
+
+    // end of editable cells
+
+    // start of filter components
     let searchInput: Input | null = null
     const [filterState, setFilterState] = useState({
         searchText: '',
         searchedColumn: ''
     });
-
-    const addItem = () => {
-        const year = currentPeriod.year()
-        const month = currentPeriod.month() + 1
-        const {description, value} = form.getFieldsValue()
-
-        onAddItem(year, month, description, value)
-        form.resetFields()
-    };
-
-    const deleteItem = (item: PanelItem) => {
-        onDeleteItem(item.key)
-        form.resetFields()
-    }
 
     const handleSearch = (selectedKeys: React.Key[], confirm: (param?: any) => void, dataIndex: string) => {
         confirm();
@@ -171,19 +173,58 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({currentPeriod, ta
             text
           ),
     })
+    // end of filter components
+
+    const addItem = () => {
+        const {description, value} = addForm.getFieldsValue()
+        onAddItem(description, value)
+        addForm.resetFields()
+    };
+
+    const editItem = async (key: number) => {
+        try {
+            const row = (await editForm.validateFields()) as PanelItem;
+            onEditItem(key, row.description, row.value)
+        } catch (errInfo) {
+            console.error('Validate Failed:', errInfo);
+        } finally {
+            setEditingKey('')
+        }
+    }
+
+    const deleteItem = (item: PanelItem) => {
+        onDeleteItem(item.key)
+        addForm.resetFields()
+    }
     
-     const columns = [
+    const columns = [
         {
             key: 'description',
             title: 'Description',
             dataIndex: 'description',
+            width: '60%',
             sorter: (a: PanelItem, b: PanelItem) => a.description.localeCompare(b.description),
+            onCell: (record: PanelItem) => ({
+                record,
+                inputType: 'text',
+                dataIndex: 'description',
+                title: 'Description',
+                editing: isEditing(record),
+              }),
             ...getColumnSearchProps('description'),
         },
         {
             key: 'value',
             title: 'Value',
             dataIndex: 'value',
+            width: '20%',
+            onCell: (record: PanelItem) => ({
+                record,
+                inputType: 'number',
+                dataIndex: 'value',
+                title: 'Value',
+                editing: isEditing(record),
+              }),
             sorter: (a: PanelItem, b: PanelItem) => a.value - b.value,
             ...getColumnSearchProps('value'),
         },
@@ -192,19 +233,28 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({currentPeriod, ta
             key: 'operation',
             // fixed: 'right',
             // width: 100,
-            render: (_: any, record: PanelItem) => (
-                <>
-                    <Button type="text"><EditOutlined/></Button>
-                    <Button type="text" onClick={() => deleteItem(record)} danger><DeleteOutlined/></Button>
-                </>
-            ),
+            render: (_: any, record: PanelItem) => {
+                const editable = isEditing(record);
+                return editable ? (
+                    <>
+                        <Button type="text" onClick={() => editItem(record.key)}><CheckOutlined /></Button>
+                        <Button type="text" onClick={cancel}><CloseOutlined /></Button>
+                    </>
+                )
+                : (
+                    <>
+                        <Button type="text" disabled={editingKey !== ''} onClick={() => edit(record)}><EditOutlined/></Button>
+                        <Button type="text" onClick={() => deleteItem(record)} danger><DeleteOutlined/></Button>
+                    </>
+                )
+            },
         },
     ];
 
     return (
         <Card title="Month Items" bordered={false}>
             <Space direction="vertical" size={12} wrap style={{width: '100%'}}>
-                <Form form={form} layout="inline">
+                <Form form={addForm} layout="inline">
                     <Form.Item name="description" rules={[{ required: true }]}>
                         <Input placeholder="Description"/>
                     </Form.Item>
@@ -213,7 +263,18 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({currentPeriod, ta
                     </Form.Item>
                 </Form>
                 <Button type="primary" onClick={() => addItem()}>Add Item</Button>
-                <Table columns={columns} dataSource={tableData} size="small" />                                    
+                <Form form={editForm} component={false}>
+                    <Table 
+                        components={{
+                            body: {
+                            cell: EditableCell,
+                            },
+                        }}
+                        columns={columns} 
+                        dataSource={tableData} 
+                        size="small" 
+                    />
+                </Form>
             </Space>
         </Card>
     )

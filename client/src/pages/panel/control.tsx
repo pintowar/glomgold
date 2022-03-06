@@ -49,15 +49,28 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
         } else throw Error()
     }
 
-    const onAddItem = async (year: number, month: number, description: string, value: number) => {
+    const onAddItem = async (description: string, value: number) => {
+        const year = currentPeriod.year()
+        const month = currentPeriod.month() + 1
+
         const {status, data} = await axios.post("/api/panel/add-item", {year, month, description, value})
         if (status === 200) {
             setPanelData(data)
         } else throw Error()
     };
 
+    const onEditItem = async (id: number, description: string, value: number) => {
+        const year = currentPeriod.year()
+        const month = currentPeriod.month() + 1
+
+        const {status, data} = await axios.patch(`/api/panel/edit-item/${id}`, {year, month, description, value})
+        if (status === 200) {
+            setPanelData(data)
+        } else throw Error()
+    };
+
     const onDeleteItem = async (itemId: number) => {
-        const {status, data} = await axios.post(`/api/panel/remove-item/${itemId}`)
+        const {status, data} = await axios.delete(`/api/panel/remove-item/${itemId}`)
         if (status === 200) {
             setPanelData(data)
         } else throw Error()
@@ -80,7 +93,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
             <div className="card-row">
                 <Row gutter={[24, 24]}>
                     <Col span={12}>
-                        <MonthItemsCard tableData={tableData} currentPeriod={currentPeriod} onAddItem={onAddItem} onDeleteItem={onDeleteItem}/>
+                        <MonthItemsCard tableData={tableData} onAddItem={onAddItem} onDeleteItem={onDeleteItem} onEditItem={onEditItem}/>
                     </Col>
                     <Col span={12}>
                         <MonthStatsCard tableData={panelData.stats} />

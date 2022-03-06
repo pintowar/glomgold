@@ -10,7 +10,7 @@ data class ItemSummary(
 )
 
 @Introspected
-data class AddItem(
+data class ItemBody(
     val year: Int,
     val month: Int,
     val description: String,
