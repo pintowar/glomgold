@@ -2,7 +2,9 @@ package com.github.pintowar.repo
 
 import com.github.pintowar.dto.ItemSummary
 import com.github.pintowar.model.Item
+import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.Query
+import io.micronaut.data.annotation.Version
 import io.micronaut.data.model.Pageable
 import io.micronaut.data.model.query.builder.sql.Dialect
 import io.micronaut.data.r2dbc.annotation.R2dbcRepository
@@ -17,35 +19,37 @@ interface ItemRepository : CoroutineCrudRepository<Item, Long>, CoroutineJpaSpec
 
     fun findAll(pageable: Pageable): Flow<Item>
 
+    suspend fun findByIdAndUserId(id: Long, userId: Long): Item?
+
     @Query(
         """
         SELECT i.*
         FROM items i
-        JOIN users u_ ON u_.id = i.user_id
-        WHERE i.period = :period AND u_.username = :username
+        WHERE i.period = :period AND i.user_id = :userId
+        ORDER BY i.created_at, i.description
         """
     )
-    fun listByPeriod(period: YearMonth, username: String): Flow<Item>
+    fun listByPeriod(period: YearMonth, userId: Long): Flow<Item>
 
     @Query(
         """
         SELECT i.description, sum(i.value) value
         FROM items i
-        JOIN users u_ ON u_.id = i.user_id
-        WHERE i.period = :period AND u_.username = :username
+        WHERE i.period = :period AND i.user_id = :userId
         GROUP BY i.description
         ORDER BY i.description
         """
     )
-    fun monthSummary(period: YearMonth, username: String): Flow<ItemSummary>
+    fun monthSummary(period: YearMonth, userId: Long): Flow<ItemSummary>
 
     @Query(
         """
         SELECT sum(i.value)
         FROM items i
-        JOIN users u_ ON u_.id = i.user_id
-        WHERE i.period = :period AND u_.username = :username
+        WHERE i.period = :period AND i.user_id = :userId
         """
     )
-    suspend fun periodSummary(period: YearMonth, username: String): BigDecimal?
+    suspend fun periodSummary(period: YearMonth, userId: Long): BigDecimal?
+
+    suspend fun update(@Id id: Long, @Version version: Int, description: String, value: BigDecimal): Long
 }

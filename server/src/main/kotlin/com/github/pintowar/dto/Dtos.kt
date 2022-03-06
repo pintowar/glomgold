@@ -1,5 +1,6 @@
 package com.github.pintowar.dto
 
+import com.github.pintowar.model.Item
 import io.micronaut.core.annotation.Introspected
 import java.math.BigDecimal
 
@@ -18,8 +19,9 @@ data class ItemBody(
 )
 
 @Introspected
-data class RemoveItem(
-    val id: Long,
-    val year: Int,
-    val month: Int,
+data class PanelInfo(
+    val items: List<Item>,
+    val stats: List<ItemSummary>,
+    val total: BigDecimal,
+    val diff: BigDecimal,
 )

@@ -26,7 +26,7 @@ class AuthenticationProviderUserPassword(
     }.asPublisher()
 
     private fun response(user: User) = AuthenticationResponse
-        .success(user.username, listOf(if (user.isAdmin()) "ROLE_ADMIN" else "ROLE_USER"))
+        .success(user.username, listOf(if (user.isAdmin()) "ROLE_ADMIN" else "ROLE_USER"), mapOf("userId" to user.id))
 
     private fun fail(message: String): Unit = throw AuthenticationResponse.exception(message)
 }
