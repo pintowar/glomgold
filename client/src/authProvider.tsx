@@ -22,7 +22,11 @@ export const generateAuthProvider = (axios: AxiosInstance): AuthProvider => ({
             Authorization: '',
         }
     },
-    checkError: async () => {},
+    checkError: async (error) => {
+        // if (error && error.statusCode === 401) {
+        //     throw Error();
+        // }
+    },
     checkAuth: async () => {
         const tokenKey = localStorage.getItem(TOKEN_KEY);
         if(tokenKey) {
@@ -35,7 +39,7 @@ export const generateAuthProvider = (axios: AxiosInstance): AuthProvider => ({
     },
     getPermissions: async () => ["admin"],
     getUserIdentity: async () => {
-        const { data, status } = await axios.get('/api/auth/me');
+        const { data, status } = await axios.get(`${API_URL}/auth/me`);
         if (status === 200) {
             return data;
         } else {

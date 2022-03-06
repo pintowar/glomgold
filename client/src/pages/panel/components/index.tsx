@@ -1,4 +1,4 @@
-import { Card, Space, DatePicker, Input, InputNumber, Button, Table, Statistic, Form, FormInstance, } from 'antd';
+import { Card, Space, DatePicker, Input, InputNumber, Button, Table, Statistic, Form, Typography, Popconfirm } from 'antd';
 import Highlighter from 'react-highlight-words';
 import { LeftOutlined, RightOutlined, DeleteOutlined, EditOutlined, WalletOutlined, RiseOutlined, SearchOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import Chart from "react-apexcharts";
@@ -6,6 +6,8 @@ import Chart from "react-apexcharts";
 import { IItem } from '../../../interfaces'
 import { useState } from 'react';
 import { ColumnType } from 'antd/lib/table';
+
+import './components.css'
 
 interface PanelItem {
     key: number
@@ -231,21 +233,24 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddI
         {
             title: 'Action',
             key: 'operation',
-            // fixed: 'right',
-            // width: 100,
             render: (_: any, record: PanelItem) => {
                 const editable = isEditing(record);
-                return editable ? (
-                    <>
-                        <Button type="text" onClick={() => editItem(record.key)}><CheckOutlined /></Button>
-                        <Button type="text" onClick={cancel}><CloseOutlined /></Button>
-                    </>
-                )
-                : (
-                    <>
-                        <Button type="text" disabled={editingKey !== ''} onClick={() => edit(record)}><EditOutlined/></Button>
-                        <Button type="text" onClick={() => deleteItem(record)} danger><DeleteOutlined/></Button>
-                    </>
+                return (
+                    <Space direction="horizontal" size={12}>
+                        {editable ? (
+                            <>
+                                <Typography.Link onClick={() => editItem(record.key)} className="panel-confirm"><CheckOutlined /></Typography.Link>
+                                <Typography.Link onClick={cancel} className="panel-cancel"><CloseOutlined /></Typography.Link>
+                            </>
+                        ) : (
+                            <>
+                                <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)} className="panel-edit"><EditOutlined/></Typography.Link>
+                                <Popconfirm title="Sure to delete?" onConfirm={() => deleteItem(record)}>
+                                    <Typography.Link className="panel-delete"><DeleteOutlined/></Typography.Link>
+                                </Popconfirm>
+                            </>
+                        )}
+                    </Space>
                 )
             },
         },
@@ -273,6 +278,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddI
                         columns={columns} 
                         dataSource={tableData} 
                         size="small" 
+                        pagination={{ position: [] }}
                     />
                 </Form>
             </Space>
@@ -321,12 +327,14 @@ export const PeriodNavigationCard: React.FC<PeriodNavigationCardProps> = ({value
 
     return (
         <Card title={"Period Navigation"} bordered={false}>
-            <Space direction="vertical" size={12}>
-                <Space direction="horizontal" size={2}>
-                    <Button type="text" onClick={() => onValueChange(period => period.clone().add(-1, 'M'))}><LeftOutlined/></Button>
-                    <Button type="text" onClick={() => onValueChange(period => period.clone().add(1, 'M'))}><RightOutlined/></Button>
-                    <DatePicker value={value} format={format} onChange={onChangePeriod} picker="month" allowClear={false}/>
-                </Space>
+            <Space direction="horizontal" size={12}>
+                <Typography.Link onClick={() => onValueChange(period => period.clone().add(-1, 'M'))} className="panel-nav">
+                    <LeftOutlined/>
+                </Typography.Link>
+                <Typography.Link onClick={() => onValueChange(period => period.clone().add(1, 'M'))} className="panel-nav">
+                    <RightOutlined/>
+                </Typography.Link>
+                <DatePicker value={value} format={format} onChange={onChangePeriod} picker="month" allowClear={false}/>
             </Space>
         </Card>
     );
@@ -351,7 +359,7 @@ export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({total, diff
                 />
                 <Statistic
                     title="Monthly Difference"
-                    value={difference}
+                    value={100 * difference}
                     precision={2}
                     valueStyle={{ color: '#3f8600' }}
                     prefix={<RiseOutlined />}
