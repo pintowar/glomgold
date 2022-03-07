@@ -76,6 +76,18 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
         } else throw Error()
     };
 
+    const onMonthItemCopy = async (items: any[]) => {
+        const year = currentPeriod.year()
+        const month = currentPeriod.month() + 1
+
+        const itemsWithPeriod = items.map(it => ({...it, year, month}))
+
+        const {status} = await axios.post(`/api/panel/copy-items`, itemsWithPeriod)
+        if (status !== 200) {
+            throw Error()
+        } 
+    };
+
     const tableData = panelData.items.map(({id, description, value}) => ({key: id, description, value}));
 
     return (
@@ -93,7 +105,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
             <div className="card-row">
                 <Row gutter={[24, 24]}>
                     <Col span={12}>
-                        <MonthItemsCard tableData={tableData} onAddItem={onAddItem} onDeleteItem={onDeleteItem} onEditItem={onEditItem}/>
+                        <MonthItemsCard tableData={tableData} onAddItem={onAddItem} onDeleteItem={onDeleteItem} onEditItem={onEditItem} onMonthItemCopy={onMonthItemCopy}/>
                     </Col>
                     <Col span={12}>
                         <MonthStatsCard tableData={panelData.stats} />

@@ -4,7 +4,7 @@ import { LeftOutlined, RightOutlined, DeleteOutlined, EditOutlined, WalletOutlin
 import Chart from "react-apexcharts";
 
 import { IItem } from '../../../interfaces'
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ColumnType } from 'antd/lib/table';
 
 import './components.css'
@@ -60,16 +60,37 @@ const EditableCell: React.FC<EditableCellProps> = ({
 };
 
 interface MonthItemsCardProps {
+    tableData: PanelItem[]
     onAddItem: (description: string, value: number) => Promise<void>
     onEditItem: (id: number, description: string, value: number) => Promise<void>
     onDeleteItem: (itemId: number) => Promise<void>
-    tableData: PanelItem[]
+    onMonthItemCopy: (items: PanelItem[]) => Promise<void>
 }
 
-export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddItem, onEditItem, onDeleteItem}) => {
+export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddItem, onEditItem, onDeleteItem, onMonthItemCopy}) => {
 
     const [addForm] = Form.useForm()
     const [editForm] = Form.useForm()
+
+    // start selected rows
+    const [selectedRows, setSelectedRows] = useState({
+        keys: [] as React.Key[],
+        rows: [] as PanelItem[]
+    })
+
+    const onSelectRowChange = (selectedRowKeys: React.Key[], selectedRows: PanelItem[]) => {
+        setSelectedRows({keys: selectedRowKeys, rows: selectedRows});
+    };
+
+    const rowSelection = {
+        selectedRowKeys: selectedRows.keys,
+        onChange: onSelectRowChange
+    };
+
+    useEffect(() => {
+        setSelectedRows({keys: [], rows: []})
+    }, [tableData])
+    // end selected rows
 
     // start of editable cells
     const [editingKey, setEditingKey] = useState('');
@@ -177,16 +198,16 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddI
     })
     // end of filter components
 
-    const addItem = () => {
+    const addItem = async () => {
         const {description, value} = addForm.getFieldsValue()
-        onAddItem(description, value)
+        await onAddItem(description, value)
         addForm.resetFields()
     };
 
     const editItem = async (key: number) => {
         try {
             const row = (await editForm.validateFields()) as PanelItem;
-            onEditItem(key, row.description, row.value)
+            await onEditItem(key, row.description, row.value)
         } catch (errInfo) {
             console.error('Validate Failed:', errInfo);
         } finally {
@@ -194,10 +215,14 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddI
         }
     }
 
-    const deleteItem = (item: PanelItem) => {
-        onDeleteItem(item.key)
+    const deleteItem = async (item: PanelItem) => {
+        await onDeleteItem(item.key)
         addForm.resetFields()
     }
+
+    const copyNextMonth = async () => {
+        await onMonthItemCopy(selectedRows.rows)
+    };
     
     const columns = [
         {
@@ -267,7 +292,10 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddI
                         <InputNumber placeholder="Value" />
                     </Form.Item>
                 </Form>
-                <Button type="primary" onClick={() => addItem()}>Add Item</Button>
+                <Space direction="horizontal" size={12} wrap style={{width: '100%'}}>
+                    <Button type="primary" onClick={() => addItem()}>Add Item</Button>
+                    <Button type="primary" disabled={selectedRows.keys.length == 0} onClick={() => copyNextMonth()}>Replicate Next Month</Button>
+                </Space>
                 <Form form={editForm} component={false}>
                     <Table 
                         components={{
@@ -275,6 +303,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddI
                             cell: EditableCell,
                             },
                         }}
+                        rowSelection={rowSelection}
                         columns={columns} 
                         dataSource={tableData} 
                         size="small" 

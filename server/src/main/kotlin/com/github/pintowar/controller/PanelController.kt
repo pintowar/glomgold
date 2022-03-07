@@ -7,7 +7,9 @@ import com.github.pintowar.repo.ItemRepository
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
 import io.micronaut.security.authentication.Authentication
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.toSet
 import java.math.BigDecimal
 import java.math.MathContext
 import java.time.LocalDate
@@ -25,15 +27,7 @@ class PanelController(private val itemRepository: ItemRepository) {
 
     @Post("/add-item")
     suspend fun addItem(auth: Authentication, @Body item: ItemBody): HttpResponse<PanelInfo> {
-        itemRepository.save(
-            Item(
-                item.description,
-                item.value,
-                Currency.getInstance("BRL"),
-                YearMonth.of(item.year, item.month),
-                authId(auth)
-            )
-        )
+        itemRepository.save(item.toItem(authId(auth)))
         return HttpResponse.ok(panelInfo(auth, YearMonth.of(item.year, item.month)))
     }
 
@@ -50,6 +44,19 @@ class PanelController(private val itemRepository: ItemRepository) {
             itemRepository.delete(item)
             HttpResponse.ok(panelInfo(auth, item.period))
         } ?: HttpResponse.notFound()
+
+    @Post("/copy-items")
+    suspend fun copyItems(auth: Authentication, @Body items: List<ItemBody>): HttpResponse<List<Item>> {
+        val itemsToCopy = items.map { it.toItem(authId(auth)) }.groupBy { it.period }
+            .flatMap { (period, periodItems) ->
+                val nextPeriod = period.plusMonths(1)
+                val nextItemsDesc = itemRepository.findByUserIdAndPeriod(authId(auth), nextPeriod)
+                    .map { it.description }.toSet()
+                periodItems.filter { it.description !in nextItemsDesc }.map { it.copy(period = nextPeriod) }
+            }
+        val savedItems = if (itemsToCopy.isNotEmpty()) itemRepository.saveAll(itemsToCopy).toList() else itemsToCopy
+        return HttpResponse.ok(savedItems)
+    }
 
     private fun authId(auth: Authentication): Long = auth.attributes["userId"] as Long
 

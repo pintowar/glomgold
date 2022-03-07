@@ -19,6 +19,8 @@ interface ItemRepository : CoroutineCrudRepository<Item, Long>, CoroutineJpaSpec
 
     fun findAll(pageable: Pageable): Flow<Item>
 
+    fun findByUserIdAndPeriod(userId: Long, period: YearMonth): Flow<Item>
+
     suspend fun findByIdAndUserId(id: Long, userId: Long): Item?
 
     @Query(

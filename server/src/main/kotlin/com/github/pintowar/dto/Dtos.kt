@@ -3,6 +3,8 @@ package com.github.pintowar.dto
 import com.github.pintowar.model.Item
 import io.micronaut.core.annotation.Introspected
 import java.math.BigDecimal
+import java.time.YearMonth
+import java.util.*
 
 @Introspected
 data class ItemSummary(
@@ -16,7 +18,15 @@ data class ItemBody(
     val month: Int,
     val description: String,
     val value: BigDecimal
-)
+) {
+    fun toItem(userId: Long) = Item(
+        description,
+        value,
+        Currency.getInstance("BRL"),
+        YearMonth.of(year, month),
+        userId
+    )
+}
 
 @Introspected
 data class PanelInfo(
