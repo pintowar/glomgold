@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { Row, Col, Form } from 'antd';
+import { Row, Col } from 'antd';
 import { AxiosInstance } from 'axios';
 import moment from 'moment';
 

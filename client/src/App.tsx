@@ -18,17 +18,10 @@ import { generateAuthProvider } from "authProvider";
 import { API_URL } from "./constants";
 
 import axios from 'axios';
+import { LocalStorage } from "LocalStorage";
 
 const axiosInstance = axios.create()
 const authProvider = generateAuthProvider(axiosInstance)
-
-const AuthenticatedControlPanel = () => {
-    return (
-        <Authenticated>
-            <ControlPanel axios={axiosInstance}/>
-        </Authenticated>
-    );
-};
 
 const App: React.FC = () => {
     return (
@@ -37,7 +30,9 @@ const App: React.FC = () => {
                 ...routerProvider,
                 routes: [
                     {
-                        element: <AuthenticatedControlPanel/>, path: '/panel',
+                        exact: true,
+                        element: <ControlPanel axios={axiosInstance}/>, 
+                        path: '/panel',
                     }
                 ]
             }}
@@ -52,6 +47,16 @@ const App: React.FC = () => {
             ]}
             notificationProvider={notificationProvider}
             authProvider={authProvider}
+            accessControlProvider={{
+                can: async ({ resource }) => {
+                    const roles = LocalStorage.getInstance().getUserRoles()
+
+                    const isAdmin = roles.includes('ROLE_ADMIN')
+                    const isAdminResource = ['dashboard', 'users', 'items'].includes(resource)
+                    const cond = !isAdmin && isAdminResource ? false : true
+                    return { can: cond }
+                }
+            }}
             LoginPage={LoginPage}
             Layout={Layout}
             DashboardPage={DashboardPage}
