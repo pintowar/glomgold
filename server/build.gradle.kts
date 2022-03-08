@@ -67,6 +67,23 @@ tasks {
 //            freeCompilerArgs = listOf("-Xjsr305=strict")
         }
     }
+
+    if (project.hasProperty("web-cli")) {
+        processResources {
+            val webCli = ":client"
+            dependsOn("$webCli:build")
+
+            doLast {
+                val origin = project(webCli).buildDir.absolutePath
+                val dest = "${project.buildDir.absolutePath}/resources/main/public"
+                copy {
+                    from(origin)
+                    into(dest)
+                }
+                logger.quiet("Cli Resources: move from $origin to $dest")
+            }
+        }
+    }
 }
 graalvmNative.toolchainDetection.set(false)
 micronaut {

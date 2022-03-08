@@ -7,14 +7,15 @@ allprojects {
     group = "com.github.pintowar"
 }
 
-/*tasks {
+tasks {
     register("assembleWebApp") {
-        dependsOn(":sudoscan-webserver:shadowJar")
+        val webServ = ":server"
+        dependsOn("${webServ}:shadowJar")
         group = "build"
         description = "Build web app"
         doLast {
             copy {
-                from(files("${project(":sudoscan-webserver").buildDir}/libs/")) {
+                from(files("${project(webServ).buildDir}/libs/")) {
                     include("*-all.jar")
                 }
                 into("$rootDir/build/")
@@ -23,4 +24,4 @@ allprojects {
             logger.quiet("JAR generated at $rootDir/build/. It combines the server and client projects.")
         }
     }
-}*/
+}

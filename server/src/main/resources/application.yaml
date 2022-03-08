@@ -1,6 +1,12 @@
 micronaut:
   application:
     name: glomgold
+  router:
+    static-resources:
+      default:
+        enabled: true
+        mapping: "/**"
+        paths: "classpath:public"
   security:
     authentication: bearer
     token:
@@ -23,6 +29,8 @@ micronaut:
       - pattern: /login
         access: isAnonymous()
       - pattern: /logout
+        access: isAnonymous()
+      - pattern: /**
         access: isAnonymous()
 
 jackson:
