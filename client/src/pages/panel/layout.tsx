@@ -30,7 +30,7 @@ export const PanelLayout: React.FC = ({children}) => {
                     <Menu.Item key="menu-logout" onClick={() => logout()} style={{justifyContent: "flex-end"}}>Logout</Menu.Item>
                 </Menu>
             </Header>
-            <Content className="site-layout" style={{ backgroundColor: '#508bfc', minHeight: '100vh', padding: '0 50px', marginTop: 64 }}>
+            <Content className="site-layout">
                 {children}
             </Content>
             <Footer style={{ textAlign: 'center' }}>Glomgold ©2022 Created by pintowar</Footer>

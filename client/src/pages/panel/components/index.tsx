@@ -338,7 +338,7 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({tableData}) => {
                 options={barChartConfig.options}
                 series={barChartConfig.series}
                 type="bar"
-                width="500"
+                width="100%"
             />
         </Card>
     );
