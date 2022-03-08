@@ -199,9 +199,13 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddI
     // end of filter components
 
     const addItem = async () => {
-        const {description, value} = addForm.getFieldsValue()
-        await onAddItem(description, value)
-        addForm.resetFields()
+        try {
+            const {description, value} = (await addForm.validateFields())
+            await onAddItem(description, value)
+            addForm.resetFields()
+        } catch (errInfo) {
+            console.error('Validate Failed:', errInfo);
+        }
     };
 
     const editItem = async (key: number) => {
