@@ -1,4 +1,4 @@
-import { Refine, Authenticated } from "@pankod/refine-core";
+import { Refine } from "@pankod/refine-core";
 import {
     notificationProvider,
     LoginPage,
@@ -11,7 +11,7 @@ import "@pankod/refine-antd/dist/styles.min.css";
 
 import { ItemList, ItemCreate, ItemEdit, ItemShow } from "pages/items";
 import { UserList, UserCreate, UserEdit, UserShow } from "pages/users";
-import { ControlPanel } from "pages/panel";
+import { ControlPanel, ReportPanel } from "pages/panel";
 import { DashboardPage } from "pages/dashboard";
 import { generateAuthProvider } from "authProvider";
 
@@ -31,8 +31,13 @@ const App: React.FC = () => {
                 routes: [
                     {
                         exact: true,
-                        element: <ControlPanel axios={axiosInstance}/>, 
+                        element: <ControlPanel axios={axiosInstance}/>,
                         path: '/panel',
+                    },
+                    {
+                        exact: true,
+                        element: <ReportPanel axios={axiosInstance}/>,
+                        path: '/report',
                     }
                 ]
             }}

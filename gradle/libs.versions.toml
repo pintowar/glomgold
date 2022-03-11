@@ -52,6 +52,8 @@ jbcrypt = { module = "org.mindrot:jbcrypt", version = "0.4" }
 postgresql-jdbc = { module = "org.postgresql:postgresql", version = "42.3.1" }
 postgresql-r2dbc = { module = "io.r2dbc:r2dbc-postgresql" }
 
+commons-math = { module = "org.apache.commons:commons-math3", version = "3.6.1" }
+
 testcontainers = { module = "org.testcontainers:testcontainers" }
 testcontainers-r2dbc = { module = "org.testcontainers:r2dbc" }
 testcontainers-postgresql = { module = "org.testcontainers:postgresql" }

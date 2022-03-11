@@ -26,8 +26,10 @@ export const PanelLayout: React.FC = ({children}) => {
                     <Menu.Item key="menu-panel">
                         <Link to={'/panel'}>Panel</Link>
                     </Menu.Item>
-                    <Menu.Item key="menu-report">Report</Menu.Item>
-                    <Menu.Item key="menu-logout" onClick={() => logout()} style={{justifyContent: "flex-end"}}>Logout</Menu.Item>
+                    <Menu.Item key="menu-report">
+                        <Link to={'/report'}>Report</Link>
+                    </Menu.Item>
+                    <Menu.Item key="menu-logout" onClick={() => logout()}>Logout</Menu.Item>
                 </Menu>
             </Header>
             <Content className="site-layout">

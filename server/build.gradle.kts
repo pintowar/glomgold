@@ -9,8 +9,6 @@ plugins {
     id("com.github.johnrengelman.shadow")
     id("io.kotest")
     id("com.gorylenko.gradle-git-properties")
-    id("org.liquibase.gradle")
-//    id("com.github.node-gradle.node")
     id("idea")
     id("glomgold.kotlin-liquibase")
 }
@@ -22,8 +20,6 @@ repositories {
     mavenCentral()
 }
 
-//apply(from = "gradle/liquibase.gradle.kts")
-
 dependencies {
     kapt(libs.bundles.micronaut.kapt)
 
@@ -31,6 +27,7 @@ dependencies {
     implementation(libs.bundles.kotlin.coroutines)
     implementation(libs.bundles.micronaut)
     implementation(libs.jbcrypt)
+    implementation(libs.commons.math)
 
     runtimeOnly(libs.logback.classic)
     runtimeOnly(libs.bundles.postgresql)
@@ -56,18 +53,20 @@ application {
     )
 }
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+        vendor.set(JvmVendorSpec.matching("GraalVM Community"))
+    }
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "17"
+//            freeCompilerArgs = listOf("-Xjsr305=strict")
+    }
 }
 
 tasks {
-    withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "17"
-//            freeCompilerArgs = listOf("-Xjsr305=strict")
-        }
-    }
-
     if (project.hasProperty("web-cli")) {
         processResources {
             val webCli = ":client"
@@ -85,7 +84,20 @@ tasks {
         }
     }
 }
-graalvmNative.toolchainDetection.set(false)
+
+graalvmNative {
+//    toolchainDetection.set(false)
+    binaries {
+        named("main") {
+            buildArgs("--verbose")
+            javaLauncher.set(javaToolchains.launcherFor {
+                languageVersion.set(JavaLanguageVersion.of(17))
+                vendor.set(JvmVendorSpec.matching("GraalVM Community"))
+            })
+        }
+    }
+}
+
 micronaut {
     runtime("netty")
     testRuntime("kotest")

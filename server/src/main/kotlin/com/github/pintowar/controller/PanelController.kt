@@ -1,5 +1,6 @@
 package com.github.pintowar.controller
 
+import com.github.pintowar.dto.AnnualReport
 import com.github.pintowar.dto.ItemBody
 import com.github.pintowar.dto.PanelInfo
 import com.github.pintowar.model.Item
@@ -14,7 +15,7 @@ import java.math.BigDecimal
 import java.math.MathContext
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.time.format.DateTimeFormatter
 
 @Controller("/api/panel")
 class PanelController(private val itemRepository: ItemRepository) {
@@ -24,6 +25,14 @@ class PanelController(private val itemRepository: ItemRepository) {
         LocalDate.now().let { now ->
             panelInfo(auth, YearMonth.of(year ?: now.year, month ?: now.monthValue))
         }
+
+    @Get("/report")
+    suspend fun report(auth: Authentication, @QueryValue("year") year: Int?): Map<String, Any> {
+        val currentYear = year ?: LocalDate.now().year
+        val formatter = DateTimeFormatter.ofPattern("MMM")
+        val summary = itemRepository.yearSummary(currentYear, authId(auth)).toList()
+        return AnnualReport(currentYear, summary).formatTable(formatter)
+    }
 
     @Post("/add-item")
     suspend fun addItem(auth: Authentication, @Body item: ItemBody): HttpResponse<PanelInfo> {

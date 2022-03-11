@@ -35,14 +35,25 @@ interface ItemRepository : CoroutineCrudRepository<Item, Long>, CoroutineJpaSpec
 
     @Query(
         """
-        SELECT i.description, sum(i.value) value
+        SELECT i.period, i.description, sum(i.value) value
         FROM items i
         WHERE i.period = :period AND i.user_id = :userId
-        GROUP BY i.description
+        GROUP BY i.period, i.description
         ORDER BY i.description
         """
     )
     fun monthSummary(period: YearMonth, userId: Long): Flow<ItemSummary>
+
+    @Query(
+        """
+        SELECT i.period, i.description, sum(i.value) value
+        FROM items i
+        WHERE extract(year from i.period) = :year AND i.user_id = :userId
+        GROUP BY i.period, i.description
+        ORDER BY i.period, i.description
+        """
+    )
+    fun yearSummary(year: Int, userId: Long): Flow<ItemSummary>
 
     @Query(
         """

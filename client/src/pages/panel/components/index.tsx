@@ -329,6 +329,8 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({tableData}) => {
         options: {
             chart: { id: "basic-bar" },
             plotOptions: { bar: { horizontal: true } },
+            dataLabels: { enabled: false },
+            colors: ['#77B6EA'],
             xaxis: { categories: tableData.map(it => it.description) }
         },
         series: [
