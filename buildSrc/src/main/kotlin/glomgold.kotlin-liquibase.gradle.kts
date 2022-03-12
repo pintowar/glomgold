@@ -19,7 +19,7 @@ repositories {
 //    liquibaseRuntime(sourceSets.main.get().output)
 //}
 
-val defaultRunList = if (!project.hasProperty("runList")) "dev" else project.property("runList")
+val defaultRunList = if (!project.hasProperty("runList")) "dev" else project.property("runList") as String
 val diffChangelogFile =
     "src/main/resources/db/changelog/${SimpleDateFormat("yyyyMMddHHmmss").format(Date())}-changelog.sql"
 
@@ -34,10 +34,8 @@ liquibase {
     activities.register("diffLog") {
         this.arguments = mapOf(
             "logLevel" to "debug",
-            "changeLogFile" to diffChangelogFile,
-            "referenceUrl" to "hibernate:spring:com.github.pintowar.model",
-            "classpath" to "$buildDir/classes/kotlin/main"
-        ) + dbCredentials(projectDir, "dev")
+            "changeLogFile" to diffChangelogFile
+        ) + dbCredentials(projectDir, "dev", true)
     }
     activities.register("prod") {
         this.arguments = mapOf(
