@@ -21,7 +21,7 @@ CREATE TABLE "public"."items" ("id" BIGINT NOT NULL, "version" INTEGER NOT NULL,
 -- rollback DROP TABLE "public"."items"
 
 -- changeset thiago:1647103668276-6
-CREATE UNIQUE INDEX "item_period_user" ON "public"."items"("period", "user_id");
+CREATE INDEX "item_period_user" ON "public"."items"("period", "user_id");
 -- rollback DROP INDEX "item_period_user"
 
 -- changeset thiago:1647103668276-7
