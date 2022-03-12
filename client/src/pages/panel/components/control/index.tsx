@@ -388,7 +388,7 @@ export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({total, diff
                     title="Monthly Cost"
                     value={total}
                     precision={2}
-                    valueStyle={{ color: '#3f8600' }}
+                    valueStyle={{ color: '#3F8600' }}
                     prefix={<WalletOutlined />}
                     suffix="$"
                 />
@@ -396,7 +396,7 @@ export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({total, diff
                     title="Monthly Difference"
                     value={100 * difference}
                     precision={2}
-                    valueStyle={{ color: '#3f8600' }}
+                    valueStyle={{ color: (difference >= 0) ? '#3F8600' : '#F36565' }}
                     prefix={<RiseOutlined />}
                     suffix="%"
                 />

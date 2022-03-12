@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { Row, Col } from 'antd';
+import { Row, Col, notification } from 'antd';
 import { AxiosInstance } from 'axios';
 import moment from 'moment';
 
@@ -85,7 +85,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
         const {status} = await axios.post(`/api/panel/copy-items`, itemsWithPeriod)
         if (status !== 200) {
             throw Error()
-        } 
+        } else {
+            notification['success']({
+                message: 'Successfuly Operation',
+                description: 'Items were successfuly replicated to the next month'
+            })
+        }
     };
 
     const tableData = panelData.items.map(({id, description, value}) => ({key: id, description, value}));
