@@ -55,35 +55,30 @@ class SeedInitializer(
             description = "Water",
             value = BigDecimal(10),
             period = YearMonth.now(),
-            currency = Currency.getInstance("BRL"),
             userId = user.id!!
         ),
         Item(
             description = "Groceries",
             value = BigDecimal(200),
             period = YearMonth.now(),
-            currency = Currency.getInstance("BRL"),
             userId = user.id!!
         ),
         Item(
             description = "Clothing",
             value = BigDecimal(500),
             period = YearMonth.now(),
-            currency = Currency.getInstance("BRL"),
             userId = user.id!!
         ),
         Item(
             description = "Groceries",
             value = BigDecimal(150),
             period = YearMonth.now().plusMonths(1),
-            currency = Currency.getInstance("BRL"),
             userId = user.id!!
         ),
         Item(
             description = "Clothing",
             value = BigDecimal(300),
             period = YearMonth.now().plusMonths(1),
-            currency = Currency.getInstance("BRL"),
             userId = user.id!!
         )
     )

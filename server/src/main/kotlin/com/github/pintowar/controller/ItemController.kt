@@ -53,7 +53,6 @@ data class ItemCommand(
     val version: Int? = null,
     @field:NotBlank val description: String,
     @field:NotBlank val value: BigDecimal,
-    @field:TypeDef(type = DataType.STRING) val currency: Currency,
     @field:NotBlank val year: Int,
     @field:NotBlank val month: Int,
     @field:NotNull val userId: Long
@@ -61,11 +60,11 @@ data class ItemCommand(
 
     companion object {
         fun toCommand(item: Item) = ItemCommand(
-            item.id, item.version, item.description, item.value, item.currency, item.period.year, item.period.monthValue, item.userId
+            item.id, item.version, item.description, item.value, item.period.year, item.period.monthValue, item.userId
         )
     }
 
-    fun toItem() = Item(description, value, currency, YearMonth.of(year, month), userId)
+    fun toItem() = Item(description, value, YearMonth.of(year, month), userId)
         .apply {
             id = this@ItemCommand.id
             version = this@ItemCommand.version

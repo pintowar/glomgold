@@ -21,8 +21,7 @@ repositories {
 
 val defaultRunList = if (!project.hasProperty("runList")) "dev" else project.property("runList")
 val diffChangelogFile =
-    "src/main/resources/db/changelog/${SimpleDateFormat("yyyyMMddHHmmss").format(Date())}-changelog.xml"
-
+    "src/main/resources/db/changelog/${SimpleDateFormat("yyyyMMddHHmmss").format(Date())}-changelog.sql"
 
 // https://medium.com/@benlucchesi/https-medium-com-benlucchesi-micronaut-gorm-liquibase-an-implementation-guide-f607d559ca16
 liquibase {

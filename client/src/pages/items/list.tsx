@@ -45,7 +45,6 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
                 <Table.Column dataIndex="id" title="ID" />
                 <Table.Column dataIndex="description" title="Description" />
                 <Table.Column dataIndex="value" title="Value" />
-                <Table.Column dataIndex="currency" title="Currency" />
                 <Table.Column dataIndex="year" title="Year" />
                 <Table.Column dataIndex="month" title="Month" />
                 <Table.Column

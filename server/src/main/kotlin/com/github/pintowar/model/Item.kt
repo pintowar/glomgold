@@ -13,13 +13,12 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
 @Indexes(
-    Index(name = "period_user", columns = ["period", "user"]),
+    Index(name = "item_period_user", columns = ["period", "user_id"]),
 )
 @MappedEntity(value = "items", namingStrategy = UnderScoreSeparatedLowerCase::class)
 data class Item(
     @field:NotBlank var description: String,
     var value: BigDecimal,
-    @field:TypeDef(type = DataType.STRING) var currency: Currency,
     @field:TypeDef(type = DataType.TIMESTAMP) var period: YearMonth,
     @field:NotNull var userId: Long
 ) : Entity()

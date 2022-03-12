@@ -11,8 +11,8 @@ import javax.validation.constraints.Email
 import javax.validation.constraints.NotBlank
 
 @Indexes(
-    Index(name = "username", columns = ["username"], unique = true),
-    Index(name = "email", columns = ["email"], unique = true)
+    Index(name = "user_username", columns = ["username"], unique = true),
+    Index(name = "user_email", columns = ["email"], unique = true)
 )
 @MappedEntity(value = "users", namingStrategy = UnderScoreSeparatedLowerCase::class)
 data class User(

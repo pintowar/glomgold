@@ -63,7 +63,6 @@ class UserRepositoryTest(
                 description = "Water",
                 value = BigDecimal(10),
                 period = YearMonth.now(),
-                currency = Currency.getInstance("BRL"),
                 userId = user.id!!
             )
 

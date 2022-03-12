@@ -31,9 +31,6 @@ export const ItemShow: React.FC<IResourceComponentsProps> = () => {
             <Title level={5}>Value</Title>
             <Text>{record?.value}</Text>
 
-            <Title level={5}>Currency</Title>
-            <Text>{record?.currency}</Text>
-
             <Title level={5}>Period</Title>
             <Text>{record?.year}-{record?.month}</Text>
 
