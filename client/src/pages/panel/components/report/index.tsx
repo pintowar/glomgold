@@ -64,17 +64,30 @@ export const ItemChart: React.FC<ChartReportProps> = ({cols, data}) => {
 
 interface AnnualTableProps {
     columns: string[]
-    rows: any[]
+    rowIndex: string[]
+    data: number[][]
     rowSummary: number[]
+    colSummary: number[]
     total: number
 }
 
-export const AnnualTable: React.FC<AnnualTableProps> = ({columns, rows, rowSummary, total}) => {
+export const AnnualTable: React.FC<AnnualTableProps> = ({columns, rowIndex, data, rowSummary, colSummary, total}) => {
+    
+    const tableCols = [{title: "", dataIndex: "desc", key: "desc"}]
+        .concat(columns.map((col: string) => ({title: col, dataIndex: col, key: col})))
+        .concat([{title: "Total", dataIndex: "total", key: "total"}]);
+
+    const source = rowIndex.map((desc, row) => {
+        const summary = ({key: row, desc: desc, total: colSummary[row]});
+        const dataCols = columns.reduce((acc, col, idx) => ({[col]: data[row][idx], ...acc}), {});
+
+        return {...dataCols, ...summary}
+    })
 
     return (
         <Table 
-            columns={columns.map((col: string) => ({title: col, dataIndex: col, key: col}))} 
-            dataSource={rows.map((row: any, idx: number) => ({key: `${idx}`, ...row}))} 
+            columns={tableCols} 
+            dataSource={source} 
             size="small" 
             pagination={{ position: [] }}
             bordered

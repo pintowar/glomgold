@@ -30,3 +30,13 @@ export interface IUser {
     name: string;
     enabled: boolean;
 }
+
+export interface IPanelAnnualReport {
+    columns: string[]
+    rowIndex: string[]
+    data: number[][]
+    rowSummary: number[]
+    rowTrend: number[]
+    colSummary: number[]
+    total: number
+}
