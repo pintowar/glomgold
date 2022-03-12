@@ -35,7 +35,8 @@ class SeedInitializer(
                 val user = User(
                     username = "admin",
                     name = "Administrator",
-                    email = "admin@glomgold.com"
+                    email = "admin@glomgold.com",
+                    admin = true
                 ).apply { setPassword("admin") }
                 val admin = userRepo.save(user)
 

@@ -25,8 +25,17 @@ export const UserShow: React.FC<IResourceComponentsProps> = () => {
             <Title level={5}>E-Mail</Title>
             <Text>{record?.email}</Text>
 
+            <Title level={5}>Locale</Title>
+            <Text>{record?.locale}</Text>
+
+            <Title level={5}>Timezone</Title>
+            <Text>{record?.timezone}</Text>
+
             <Title level={5}>Enabled</Title>
             <Text>{record?.enabled}</Text>
+
+            <Title level={5}>Admin</Title>
+            <Text>{record?.admin}</Text>
             
         </Show>
     );
