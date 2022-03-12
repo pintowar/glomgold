@@ -7,10 +7,10 @@ import moment from 'moment';
 
 import { PanelLayout } from "./layout";
 
-import './control.css'
+import './panel.css'
 import { IItem } from '../../interfaces'
 
-import { PeriodSummaryCard, PeriodNavigationCard, MonthItemsCard, MonthStatsCard } from './components'
+import { PeriodSummaryCard, PeriodNavigationCard, MonthItemsCard, MonthStatsCard } from './components/control'
 
 interface ControlPanelData {
     items: IItem[]

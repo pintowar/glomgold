@@ -3,11 +3,11 @@ import Highlighter from 'react-highlight-words';
 import { LeftOutlined, RightOutlined, DeleteOutlined, EditOutlined, WalletOutlined, RiseOutlined, SearchOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import Chart from "react-apexcharts";
 
-import { IItem } from '../../../interfaces'
+import { IItem } from '../../../../interfaces'
 import React, { useEffect, useState } from 'react';
 import { ColumnType } from 'antd/lib/table';
 
-import './components.css'
+import './control.css'
 
 interface PanelItem {
     key: number

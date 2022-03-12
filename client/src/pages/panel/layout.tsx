@@ -1,7 +1,7 @@
 import React from "react";
 import { Layout, Menu } from 'antd';
 
-import './layout.css'
+import './panel.css'
 import { useLogout } from "@pankod/refine-core";
 import routerProvider from "@pankod/refine-react-router-v6";
 import { LocalStorage } from "LocalStorage";

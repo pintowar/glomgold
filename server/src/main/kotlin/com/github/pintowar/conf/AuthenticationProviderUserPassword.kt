@@ -11,9 +11,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactive.asPublisher
 
 @Singleton
-class AuthenticationProviderUserPassword(
-    private val userRepo: UserRepository
-) : AuthenticationProvider {
+class AuthenticationProviderUserPassword(private val userRepo: UserRepository) : AuthenticationProvider {
 
     override fun authenticate(
         httpRequest: HttpRequest<*>?, authenticationRequest: AuthenticationRequest<*, *>

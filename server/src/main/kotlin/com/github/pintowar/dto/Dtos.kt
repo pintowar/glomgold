@@ -7,7 +7,6 @@ import io.micronaut.data.model.DataType
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics
 import org.apache.commons.math3.stat.regression.SimpleRegression
 import java.math.BigDecimal
-import java.math.MathContext
 import java.math.RoundingMode
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
