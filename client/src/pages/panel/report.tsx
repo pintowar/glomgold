@@ -41,7 +41,7 @@ export const ReportPanel: React.FC<ReportPanelProps> = ({axios}) => {
         const {status, data} = await axios.get(`/api/panel/report?year=${currentPeriod.year()}`)
         if (status === 200) {
             setDataTable({...data});
-            navigate(`/report?period=${currentPeriod.format(periodFormat)}`)
+            navigate(`/panel/report?period=${currentPeriod.format(periodFormat)}`)
         } else throw Error()
     }
 

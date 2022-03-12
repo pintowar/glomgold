@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { useLocation } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
 
 import './panel.css'
@@ -16,18 +17,23 @@ export const PanelLayout: React.FC = ({children}) => {
 
     const { mutate: logout } = useLogout();
 
+    const location = useLocation();
+    const [selectedMenu, setSelectedMenu] = useState(location.pathname.includes('report') ? 'menu-report' : 'menu-panel')
+
+    const handleClick = (info: any) => setSelectedMenu(info.key)
+
     return isLogged ? (
         <Layout>
             <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
                 <div className="logo">
                     Glomgold
                 </div>
-                <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['menu-panel']}>
+                <Menu onClick={handleClick} theme="dark" mode="horizontal" selectedKeys={[selectedMenu]}>
                     <Menu.Item key="menu-panel">
                         <Link to={'/panel'}>Panel</Link>
                     </Menu.Item>
                     <Menu.Item key="menu-report">
-                        <Link to={'/report'}>Report</Link>
+                        <Link to={'/panel/report'}>Report</Link>
                     </Menu.Item>
                     <Menu.Item key="menu-logout" onClick={() => logout()}>Logout</Menu.Item>
                 </Menu>

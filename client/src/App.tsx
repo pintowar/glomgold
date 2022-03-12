@@ -30,14 +30,12 @@ const App: React.FC = () => {
                 ...routerProvider,
                 routes: [
                     {
-                        exact: true,
                         element: <ControlPanel axios={axiosInstance}/>,
                         path: '/panel',
                     },
                     {
-                        exact: true,
                         element: <ReportPanel axios={axiosInstance}/>,
-                        path: '/report',
+                        path: '/panel/report',
                     }
                 ]
             }}
