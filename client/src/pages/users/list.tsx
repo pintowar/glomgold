@@ -36,6 +36,17 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
                         valueLabelFalse="No"
                     />
                 }/>
+                <Table.Column dataIndex="admin" title="Admin" render={(value) =>
+                    <BooleanField
+                        value={value}
+                        trueIcon={<CheckCircleOutlined />}
+                        falseIcon={<CloseCircleOutlined />}
+                        valueLabelTrue="Yes"
+                        valueLabelFalse="No"
+                    />
+                }/>
+                <Table.Column dataIndex="locale" title="Locale" />
+                <Table.Column dataIndex="timezone" title="Timezone" />
 
                 <Table.Column<IUser>
                     title="Actions"

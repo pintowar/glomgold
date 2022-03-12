@@ -35,7 +35,8 @@ class SeedInitializer(
                 val user = User(
                     username = "admin",
                     name = "Administrator",
-                    email = "admin@glomgold.com"
+                    email = "admin@glomgold.com",
+                    admin = true
                 ).apply { setPassword("admin") }
                 val admin = userRepo.save(user)
 
@@ -55,35 +56,30 @@ class SeedInitializer(
             description = "Water",
             value = BigDecimal(10),
             period = YearMonth.now(),
-            currency = Currency.getInstance("BRL"),
             userId = user.id!!
         ),
         Item(
             description = "Groceries",
             value = BigDecimal(200),
             period = YearMonth.now(),
-            currency = Currency.getInstance("BRL"),
             userId = user.id!!
         ),
         Item(
             description = "Clothing",
             value = BigDecimal(500),
             period = YearMonth.now(),
-            currency = Currency.getInstance("BRL"),
             userId = user.id!!
         ),
         Item(
             description = "Groceries",
             value = BigDecimal(150),
             period = YearMonth.now().plusMonths(1),
-            currency = Currency.getInstance("BRL"),
             userId = user.id!!
         ),
         Item(
             description = "Clothing",
             value = BigDecimal(300),
             period = YearMonth.now().plusMonths(1),
-            currency = Currency.getInstance("BRL"),
             userId = user.id!!
         )
     )

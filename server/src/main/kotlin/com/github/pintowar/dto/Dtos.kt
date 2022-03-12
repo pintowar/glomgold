@@ -6,7 +6,6 @@ import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.util.*
 
 @Introspected
 data class ItemSummary(
@@ -25,7 +24,6 @@ data class ItemBody(
     fun toItem(userId: Long) = Item(
         description,
         value,
-        Currency.getInstance("BRL"),
         YearMonth.of(year, month),
         userId
     )

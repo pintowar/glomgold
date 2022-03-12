@@ -28,7 +28,10 @@ export interface IUser {
     username: string;
     email: string;
     name: string;
+    locale: string;
+    timezone: string;
     enabled: boolean;
+    admin: boolean;
 }
 
 export interface IPanelAnnualReport {

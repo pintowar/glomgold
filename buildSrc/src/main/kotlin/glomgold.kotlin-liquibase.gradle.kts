@@ -19,10 +19,9 @@ repositories {
 //    liquibaseRuntime(sourceSets.main.get().output)
 //}
 
-val defaultRunList = if (!project.hasProperty("runList")) "dev" else project.property("runList")
+val defaultRunList = if (!project.hasProperty("runList")) "dev" else project.property("runList") as String
 val diffChangelogFile =
-    "src/main/resources/db/changelog/${SimpleDateFormat("yyyyMMddHHmmss").format(Date())}-changelog.xml"
-
+    "src/main/resources/db/changelog/${SimpleDateFormat("yyyyMMddHHmmss").format(Date())}-changelog.sql"
 
 // https://medium.com/@benlucchesi/https-medium-com-benlucchesi-micronaut-gorm-liquibase-an-implementation-guide-f607d559ca16
 liquibase {
@@ -35,10 +34,8 @@ liquibase {
     activities.register("diffLog") {
         this.arguments = mapOf(
             "logLevel" to "debug",
-            "changeLogFile" to diffChangelogFile,
-            "referenceUrl" to "hibernate:spring:com.github.pintowar.model",
-            "classpath" to "$buildDir/classes/kotlin/main"
-        ) + dbCredentials(projectDir, "dev")
+            "changeLogFile" to diffChangelogFile
+        ) + dbCredentials(projectDir, "dev", true)
     }
     activities.register("prod") {
         this.arguments = mapOf(

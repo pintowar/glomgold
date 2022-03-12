@@ -8,6 +8,8 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.ZoneId
+import java.util.*
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotBlank
 
@@ -50,17 +52,23 @@ data class UserCommand(
     @field:NotBlank var name: String,
     @field:Email var email: String,
     @field:NotBlank var password: String = "",
-    var enabled: Boolean = true
+    var enabled: Boolean = true,
+    var admin: Boolean = false,
+    var locale: Locale = Locale.getDefault(),
+    var timezone: ZoneId = ZoneId.systemDefault()
 ) {
 
     companion object {
-        fun toUserCommand(user: User) =
-            UserCommand(user.id, user.version, user.username, user.name, user.email, user.passwordHash, user.enabled)
+        fun toUserCommand(user: User) = UserCommand(
+            user.id, user.version, user.username, user.name, user.email,
+            user.passwordHash, user.enabled, user.admin, user.locale, user.timezone
+        )
     }
 
-    fun toUser() = User(username, name, email, enabled = enabled).apply {
-        id = this@UserCommand.id
-        version = this@UserCommand.version
-        setPassword(password)
-    }
+    fun toUser() = User(username, name, email, enabled = enabled, admin = admin, locale = locale, timezone = timezone)
+        .apply {
+            id = this@UserCommand.id
+            version = this@UserCommand.version
+            setPassword(password)
+        }
 }

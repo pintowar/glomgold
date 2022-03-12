@@ -65,17 +65,6 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Currency"
-                    name="currency"
-                    rules={[
-                        {
-                            required: true,
-                        },
-                    ]}
-                >
-                    <Input />
-                </Form.Item>
-                <Form.Item
                     label="Year"
                     name="year"
                     rules={[
