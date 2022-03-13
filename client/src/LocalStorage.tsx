@@ -24,7 +24,7 @@ export class LocalStorage {
 
     public setUser(data: any) : void {
         localStorage.setItem(TOKEN_KEY, data.access_token);
-        localStorage.setItem(USER_KEY, JSON.stringify(data));
+        localStorage.setItem(USER_KEY, atob(data.access_token.split('.')[1]));
     }
 
     public clearUser() : void {
@@ -38,6 +38,10 @@ export class LocalStorage {
 
     public getUser() : any {
         return JSON.parse(localStorage.getItem(USER_KEY) || '{}')
+    }
+
+    public isLoggedIn(): boolean {
+        return Object.keys(this.getUser()).length !== 0;
     }
 
     public getUserRoles() : string[] {

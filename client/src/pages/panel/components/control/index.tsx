@@ -61,13 +61,15 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
 interface MonthItemsCardProps {
     tableData: PanelItem[]
+    locale: string
+    currency: string
     onAddItem: (description: string, value: number) => Promise<void>
     onEditItem: (id: number, description: string, value: number) => Promise<void>
     onDeleteItem: (itemId: number) => Promise<void>
     onMonthItemCopy: (items: PanelItem[]) => Promise<void>
 }
 
-export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddItem, onEditItem, onDeleteItem, onMonthItemCopy}) => {
+export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, locale, currency, onAddItem, onEditItem, onDeleteItem, onMonthItemCopy}) => {
 
     const [addForm] = Form.useForm()
     const [editForm] = Form.useForm()
@@ -126,7 +128,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddI
         setFilterState(state => ({...state, searchText: '' }));
     };
 
-    const getColumnSearchProps = (dataIndex: string): ColumnType<PanelItem> => ({
+    const currencyFormat = (value: any) => value.toLocaleString(locale, {style: 'currency', currency: currency});
+
+    const getColumnSearchProps = (dataIndex: string, format: boolean = false): ColumnType<PanelItem> => ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
             <div style={{ padding: 8 }}>
                 <Input
@@ -190,10 +194,10 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddI
               highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
               searchWords={[filterState.searchText]}
               autoEscape
-              textToHighlight={text ? text.toString() : ''}
+              textToHighlight={text ? `${format ? currencyFormat(text) : text}` : ''}
             />
           ) : (
-            text
+            format ? currencyFormat(text) : text
           ),
     })
     // end of filter components
@@ -257,7 +261,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, onAddI
                 editing: isEditing(record),
               }),
             sorter: (a: PanelItem, b: PanelItem) => a.value - b.value,
-            ...getColumnSearchProps('value'),
+            ...getColumnSearchProps('value', true),
         },
         {
             title: 'Action',
@@ -378,24 +382,24 @@ export const PeriodNavigationCard: React.FC<PeriodNavigationCardProps> = ({value
 interface PeriodSummaryCardProps {
     total: number
     difference: number
+    locale: string
+    symbol: string
 }
 
-export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({total, difference}) => {
+export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({total, difference, locale, symbol}) => {
     return (
         <Card title="Period Summary" bordered={false}>
             <Space direction="horizontal" size={32}>
                 <Statistic
                     title="Monthly Cost"
-                    value={total}
-                    precision={2}
+                    value={total.toLocaleString(locale, {maximumFractionDigits: 2, minimumFractionDigits: 2})}
                     valueStyle={{ color: '#3F8600' }}
                     prefix={<WalletOutlined />}
-                    suffix="$"
+                    suffix={symbol}
                 />
                 <Statistic
                     title="Monthly Difference"
-                    value={100 * difference}
-                    precision={2}
+                    value={(100 * difference).toLocaleString(locale, {maximumFractionDigits: 2, minimumFractionDigits: 2})}
                     valueStyle={{ color: (difference >= 0) ? '#3F8600' : '#F36565' }}
                     prefix={<RiseOutlined />}
                     suffix="%"

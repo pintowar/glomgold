@@ -13,7 +13,7 @@ const { Header, Content, Footer } = Layout;
 
 export const PanelLayout: React.FC = ({children}) => {
     const storage = LocalStorage.getInstance()
-    const isLogged = Object.keys(storage.getUser()).length !== 0;
+    const isLogged = storage.isLoggedIn()
 
     const { mutate: logout } = useLogout();
 

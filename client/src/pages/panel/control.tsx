@@ -11,6 +11,7 @@ import './panel.css'
 import { IItem } from '../../interfaces'
 
 import { PeriodSummaryCard, PeriodNavigationCard, MonthItemsCard, MonthStatsCard } from './components/control'
+import { LocalStorage } from "LocalStorage";
 
 interface ControlPanelData {
     items: IItem[]
@@ -24,6 +25,8 @@ interface ControlPanelProps {
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
+    const {locale, currency, symbol} = LocalStorage.getInstance().getUser();
+
     const periodFormat = 'YYYY-MM';
     const location = useLocation();
     const navigate = useNavigate();
@@ -103,14 +106,15 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
                         <PeriodNavigationCard value={currentPeriod} onValueChange={setCurrentPeriod} format={periodFormat} />
                     </Col>
                     <Col span={12}>
-                        <PeriodSummaryCard total={panelData.total} difference={panelData.diff} />
+                        <PeriodSummaryCard total={panelData.total} difference={panelData.diff} locale={locale} symbol={symbol}/>
                     </Col>
                 </Row>
             </div>
             <div className="card-row">
                 <Row gutter={[24, 24]}>
                     <Col span={12}>
-                        <MonthItemsCard tableData={tableData} onAddItem={onAddItem} onDeleteItem={onDeleteItem} onEditItem={onEditItem} onMonthItemCopy={onMonthItemCopy}/>
+                        <MonthItemsCard tableData={tableData} locale={locale} currency={currency}
+                            onAddItem={onAddItem} onDeleteItem={onDeleteItem} onEditItem={onEditItem} onMonthItemCopy={onMonthItemCopy}/>
                     </Col>
                     <Col span={12}>
                         <MonthStatsCard tableData={panelData.stats} />

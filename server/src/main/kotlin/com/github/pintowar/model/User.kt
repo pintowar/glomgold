@@ -49,7 +49,14 @@ data class User(
 
     fun roles() = listOf(if (admin) "ROLE_ADMIN" else "ROLE_USER")
 
-    fun attributes() = mapOf("userId" to id)
+    fun attributes() = Currency.getInstance(locale).let { currency ->
+        mapOf(
+            "userId" to id,
+            "locale" to locale.toLanguageTag(),
+            "currency" to currency.currencyCode,
+            "symbol" to currency.symbol
+        )
+    }
 
     private fun generatePasswordHash(passwd: String) = BCrypt.hashpw(passwd, BCrypt.gensalt(10, secureRandom))
 
