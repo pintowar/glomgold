@@ -18,6 +18,8 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.security.authentication.UsernamePasswordCredentials
 import io.micronaut.security.token.jwt.render.BearerAccessRefreshToken
 import io.micronaut.test.extensions.kotest.annotation.MicronautTest
+import java.time.ZoneId
+import java.util.*
 
 @MicronautTest
 class JwtAuthenticationTest(
@@ -30,7 +32,9 @@ class JwtAuthenticationTest(
         val user = User(
             username = "admin",
             name = "Administrator",
-            email = "admin@glomgold.com"
+            email = "admin@glomgold.com",
+            locale = Locale.US,
+            timezone = ZoneId.of("UTC")
         ).apply { setPassword("admin") }
         userRepo.save(user)
     }
