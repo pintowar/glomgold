@@ -1,0 +1,42 @@
+name: Glomgold Develop CI
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:
+      - 'develop'
+      - 'feature/**'
+      - 'hotfix/**'
+      - 'bugfix/**'
+      - 'release/**'
+      - 'support/**'
+jobs:
+  gradle_dev_build:
+    name: Gradle Dev Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.m2/repository
+          key: ${{ runner.os }}-gradle-test-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle-test-
+
+      - name: Setup GraalVM CE
+        uses: DeLaGuardo/setup-graalvm@3.1
+        with:
+          graalvm-version: 22.0.0.2.java11
+      - name: Install Native Image
+        run: gu install native-image
+
+      - name: Running gradle task
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: wrapper
+          arguments: :server:clean :server:nativeTest
