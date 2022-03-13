@@ -1,9 +1,9 @@
 import { Refine } from "@pankod/refine-core";
 import {
     notificationProvider,
-    LoginPage,
     Layout,
     ErrorComponent,
+    Sider
 } from "@pankod/refine-antd";
 import dataProvider from "@pankod/refine-simple-rest";
 import routerProvider from "@pankod/refine-react-router-v6";
@@ -13,6 +13,8 @@ import { ItemList, ItemCreate, ItemEdit, ItemShow } from "pages/items";
 import { UserList, UserCreate, UserEdit, UserShow } from "pages/users";
 import { ControlPanel, ReportPanel } from "pages/panel";
 import { DashboardPage } from "pages/dashboard";
+import { LoginPage } from "pages/login";
+import { Title } from "title";
 import { generateAuthProvider } from "authProvider";
 
 import { API_URL } from "./constants";
@@ -60,6 +62,7 @@ const App: React.FC = () => {
                     return { can: cond }
                 }
             }}
+            Title={Title}
             LoginPage={LoginPage}
             Layout={Layout}
             DashboardPage={DashboardPage}
