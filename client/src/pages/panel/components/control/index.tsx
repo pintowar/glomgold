@@ -315,7 +315,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, locale
                         columns={columns} 
                         dataSource={tableData} 
                         size="small" 
-                        pagination={{ position: [] }}
+                        pagination={false}
                     />
                 </Form>
             </Space>

@@ -11,6 +11,8 @@ import {
     FilterDropdown,
     Select,
     getDefaultFilter,
+    useImport,
+    ImportButton
 } from "@pankod/refine-antd";
 
 import { useTable, useSelect } from "@pankod/refine-antd";
@@ -18,6 +20,7 @@ import { useTable, useSelect } from "@pankod/refine-antd";
 import { IItem, IUser } from "interfaces";
 
 export const ItemList: React.FC<IResourceComponentsProps> = () => {
+    const importProps = useImport<IItem>();
     const { tableProps, filters } = useTable<IItem>({
         syncWithLocation: true,
     });
@@ -40,7 +43,10 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
     });
 
     return (
-        <List>
+        <List pageHeaderProps={{
+            extra: <ImportButton {...importProps} />,
+            }}
+        >
             <Table {...tableProps} rowKey="id">
                 <Table.Column dataIndex="id" title="ID" />
                 <Table.Column dataIndex="description" title="Description" />

@@ -93,7 +93,7 @@ export const AnnualTable: React.FC<AnnualTableProps> = ({locale, currency, colum
             columns={tableCols} 
             dataSource={source} 
             size="small" 
-            pagination={{ position: [] }}
+            pagination={false}
             bordered
             summary={() => 
                 <Table.Summary fixed>
