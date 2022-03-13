@@ -63,6 +63,8 @@ export const ItemChart: React.FC<ChartReportProps> = ({cols, data}) => {
 }
 
 interface AnnualTableProps {
+    locale: string
+    currency: string
     columns: string[]
     rowIndex: string[]
     data: number[][]
@@ -71,11 +73,13 @@ interface AnnualTableProps {
     total: number
 }
 
-export const AnnualTable: React.FC<AnnualTableProps> = ({columns, rowIndex, data, rowSummary, colSummary, total}) => {
+export const AnnualTable: React.FC<AnnualTableProps> = ({locale, currency, columns, rowIndex, data, rowSummary, colSummary, total}) => {
     
-    const tableCols = [{title: "", dataIndex: "desc", key: "desc"}]
-        .concat(columns.map((col: string) => ({title: col, dataIndex: col, key: col})))
-        .concat([{title: "Total", dataIndex: "total", key: "total"}]);
+    const currencyFormat = (value?: number) => value ? value.toLocaleString(locale, {style: 'currency', currency: currency}) : '';
+
+    const tableCols = [{title: "", dataIndex: "desc", key: "desc", render: currencyFormat}]
+        .concat(columns.map((col: string) => ({title: col, dataIndex: col, key: col, render: currencyFormat})))
+        .concat([{title: "Total", dataIndex: "total", key: "total", render: currencyFormat}]);
 
     const source = rowIndex.map((desc, row) => {
         const summary = ({key: row, desc: desc, total: colSummary[row]});
@@ -98,10 +102,10 @@ export const AnnualTable: React.FC<AnnualTableProps> = ({columns, rowIndex, data
                             <strong>Total</strong>
                         </Table.Summary.Cell>
                         {rowSummary.map((it, idx) =>
-                            <Table.Summary.Cell key={idx + 1} index={idx}>{it}</Table.Summary.Cell>
+                            <Table.Summary.Cell key={idx + 1} index={idx}>{currencyFormat(it)}</Table.Summary.Cell>
                         )}
                         <Table.Summary.Cell key={rowSummary.length + 1} index={rowSummary.length + 1}>
-                            <strong>{total}</strong>
+                            <strong>{currencyFormat(total)}</strong>
                         </Table.Summary.Cell>
                     </Table.Summary.Row>
                 </Table.Summary>

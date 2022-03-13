@@ -9,12 +9,14 @@ import moment from 'moment';
 import { PanelLayout } from "./layout";
 import { ItemChart, PeriodChart, AnnualTable } from './components/report';
 import { IPanelAnnualReport } from "interfaces";
+import { LocalStorage } from "LocalStorage";
 
 interface ReportPanelProps {
     axios: AxiosInstance
 }
 
 export const ReportPanel: React.FC<ReportPanelProps> = ({axios}) => {
+    const {locale, currency} = LocalStorage.getInstance().getUser();
     const periodFormat = 'YYYY';
     const location = useLocation();
     const navigate = useNavigate();
@@ -63,7 +65,8 @@ export const ReportPanel: React.FC<ReportPanelProps> = ({axios}) => {
                             <Space direction="vertical" size={12} style={{width: '100%'}}>
                                 <Tabs>
                                     <Tabs.TabPane tab="Table" key={1}>
-                                        <AnnualTable columns={dataTable.columns} rowIndex={dataTable.rowIndex} data={dataTable.data}
+                                        <AnnualTable locale={locale} currency={currency}
+                                            columns={dataTable.columns} rowIndex={dataTable.rowIndex} data={dataTable.data}
                                             rowSummary={dataTable.rowSummary} colSummary={dataTable.colSummary} total={dataTable.total}/>
                                     </Tabs.TabPane>
                                     <Tabs.TabPane tab="Chart" key={2}>
