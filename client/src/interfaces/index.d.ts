@@ -41,5 +41,6 @@ export interface IPanelAnnualReport {
     rowSummary: number[]
     rowTrend: number[]
     colSummary: number[]
+    colAverage: number[]
     total: number
 }

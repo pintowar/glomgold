@@ -39,7 +39,7 @@ export const PeriodChart: React.FC<ChartReportProps> = ({cols, data, trend}) => 
 export const ItemChart: React.FC<ChartReportProps> = ({cols, data}) => {
     const barChartConfig = {
         options: {
-            title: { text: "Annual Item Cost" },
+            title: { text: "Average Item Cost" },
             chart: { id: "bar" },
             plotOptions: { bar: { borderRadius: 4 } },
             dataLabels: { enabled: false },

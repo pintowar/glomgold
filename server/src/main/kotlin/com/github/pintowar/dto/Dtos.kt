@@ -45,5 +45,6 @@ data class PanelAnnualReport(
     val rowSummary: List<BigDecimal?>,
     val rowTrend: List<BigDecimal>,
     val colSummary: List<BigDecimal?>,
+    val colAverage: List<BigDecimal?>,
     val total: BigDecimal,
 )

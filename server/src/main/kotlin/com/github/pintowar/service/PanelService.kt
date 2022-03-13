@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.toList
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics
 import org.apache.commons.math3.stat.regression.SimpleRegression
 import java.math.BigDecimal
-import java.math.MathContext
 import java.math.RoundingMode
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -32,6 +31,8 @@ class PanelService(private val itemRepository: ItemRepository) {
             rowIndex.indices.map { row -> data[row][col] }.reduce(::nullableSum)
         }
         val colSummary = data.map { it.reduce(::nullableSum) }
+        val colAverage = colSummary.zip(data.map { row -> row.count { it != null } })
+            .map { (sum, count) -> sum?.divide(BigDecimal(count), RoundingMode.HALF_UP) }
 
         return PanelAnnualReport(
             columns.map { it.format(formatter) },
@@ -40,6 +41,7 @@ class PanelService(private val itemRepository: ItemRepository) {
             rowSummary,
             calcTrend(rowSummary),
             colSummary,
+            colAverage,
             colSummary.reduce(::nullableSum) ?: BigDecimal.ZERO
         )
     }
@@ -48,7 +50,7 @@ class PanelService(private val itemRepository: ItemRepository) {
         val periodSummary = itemRepository.periodSummary(period, userId)
         val lastPeriodSummary = itemRepository.periodSummary(period.minusMonths(1), userId)
         val diffSummary = if (periodSummary != null && lastPeriodSummary != null)
-            ((periodSummary.divide(lastPeriodSummary, MathContext.DECIMAL32)) - BigDecimal.ONE)
+            ((periodSummary.divide(lastPeriodSummary, RoundingMode.HALF_UP)) - BigDecimal.ONE)
         else BigDecimal.ZERO
 
         return PanelInfo(

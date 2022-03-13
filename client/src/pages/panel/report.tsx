@@ -30,6 +30,7 @@ export const ReportPanel: React.FC<ReportPanelProps> = ({axios}) => {
         rowSummary: [],
         rowTrend: [],
         colSummary: [],
+        colAverage: [],
         total: 0
     });
 
@@ -72,7 +73,7 @@ export const ReportPanel: React.FC<ReportPanelProps> = ({axios}) => {
                                     <Tabs.TabPane tab="Chart" key={2}>
                                         <Space direction="vertical" size={12} style={{width: '100%'}}>
                                             <PeriodChart cols={dataTable.columns} data={dataTable.rowSummary} trend={dataTable.rowTrend}/>
-                                            <ItemChart cols={dataTable.rowIndex} data={dataTable.colSummary}/>
+                                            <ItemChart cols={dataTable.rowIndex} data={dataTable.colAverage}/>
                                         </Space>
                                     </Tabs.TabPane>
                                 </Tabs>
