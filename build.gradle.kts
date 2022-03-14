@@ -1,6 +1,6 @@
 plugins {
     base
-//    id("net.researchgate.release")
+    id("net.researchgate.release")
 }
 
 allprojects {
@@ -23,5 +23,13 @@ tasks {
 
             logger.quiet("JAR generated at $rootDir/build/. It combines the server and client projects.")
         }
+    }
+}
+
+release {
+    tagTemplate = "v\$version"
+
+    git {
+        requireBranch = "master"
     }
 }

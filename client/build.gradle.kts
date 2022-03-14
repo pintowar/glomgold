@@ -4,6 +4,8 @@ plugins {
     id("com.github.node-gradle.node")
 }
 
+description = "Glomgold Web Client"
+
 project.buildDir = file("build")
 
 node {

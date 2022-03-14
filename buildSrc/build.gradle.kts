@@ -22,4 +22,5 @@ dependencies {
     implementation(libs.gradleplugin.yaml)
 
     implementation(libs.gradleplugin.node)
+    implementation(libs.gradleplugin.release)
 }

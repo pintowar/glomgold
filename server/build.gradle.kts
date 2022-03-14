@@ -13,11 +13,24 @@ plugins {
     id("glomgold.kotlin-liquibase")
 }
 
-version = "0.1"
-group = "com.github.pintowar"
+description = "Glomgold Web Server"
 
 repositories {
     mavenCentral()
+}
+
+val defaultJavaLang = JavaLanguageVersion.of(17)
+val defaultJavaVendor = JvmVendorSpec.matching("GraalVM Community")
+val defaultJvmArgs = listOf(
+    "-Dmicronaut.environments=dev", "-Duser.timezone=UTC", "-Duser.language=en", "-Duser.region=US",
+    "-Djava.security.egd=file:/dev/./urandom"
+)
+
+java {
+    toolchain {
+        languageVersion.set(defaultJavaLang)
+        vendor.set(defaultJavaVendor)
+    }
 }
 
 dependencies {
@@ -48,15 +61,7 @@ gitProperties {
 
 application {
     mainClass.set("com.github.pintowar.ApplicationKt")
-    applicationDefaultJvmArgs = listOf(
-        "-Dmicronaut.environments=dev", "-Duser.timezone=UTC", "-Djava.security.egd=file:/dev/./urandom"
-    )
-}
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-        vendor.set(JvmVendorSpec.matching("GraalVM Community"))
-    }
+    applicationDefaultJvmArgs = defaultJvmArgs
 }
 
 tasks.withType<KotlinCompile> {
@@ -64,6 +69,11 @@ tasks.withType<KotlinCompile> {
         jvmTarget = "17"
 //            freeCompilerArgs = listOf("-Xjsr305=strict")
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
+    jvmArgs = defaultJvmArgs
 }
 
 tasks {
@@ -91,8 +101,8 @@ graalvmNative {
         named("main") {
             buildArgs("--verbose")
             javaLauncher.set(javaToolchains.launcherFor {
-                languageVersion.set(JavaLanguageVersion.of(17))
-                vendor.set(JvmVendorSpec.matching("GraalVM Community"))
+                languageVersion.set(defaultJavaLang)
+                vendor.set(defaultJavaVendor)
             })
         }
     }
