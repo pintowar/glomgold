@@ -84,8 +84,8 @@ tasks {
 
     dockerfileNative {
         val isProd = project.hasProperty("prod")
-        val commands = defaultJvmArgs.map {
-            if (isProd && it.contains("micronaut.environments")) it.replace("dev", "prod") else it
+        val commands = defaultJvmArgs.filterNot {
+            isProd && it.contains("micronaut.environments")
         }.toTypedArray()
         defaultCommand(*commands)
     }

@@ -4,7 +4,7 @@ import com.github.pintowar.model.Item
 import com.github.pintowar.model.User
 import com.github.pintowar.repo.ItemRepository
 import com.github.pintowar.repo.UserRepository
-import io.micronaut.context.annotation.Requires
+import io.micronaut.context.env.Environment
 import io.micronaut.runtime.event.annotation.EventListener
 import io.micronaut.runtime.server.event.ServerStartupEvent
 import jakarta.inject.Singleton
@@ -16,26 +16,32 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 
-@Requires(property = "micronaut.environments", value = "dev")
 @Singleton
 class SeedInitializer(
+    private val env: Environment,
     private val userRepo: UserRepository,
     private val itemRepo: ItemRepository
 ) : KLogging() {
 
+    private val isProd = env.activeNames.contains("prod")
+    private val isDev = env.activeNames.contains("dev")
+
     @EventListener //does not support `suspend`
     fun onStartUp(e: ServerStartupEvent) {
-        logger.info("starting data initialization at StartUpEvent: $e")
-        runBlocking {
-            val allItems = genUsers()
-                .filter { userRepo.findByUsername(it.username) == null }
-                .map { userRepo.save(it) }
-                .filterNot { it.admin }
-                .flatMap { user ->
-                    val items = genItems(user)
-                    itemRepo.saveAll(items).toList()
-                }
-            logger.info("Data initialization is done!! Generated ${allItems.size} items.")
+        if (isProd || isDev) {
+            logger.info("starting data initialization at StartUpEvent: $e")
+            runBlocking {
+                val allItems = genUsers()
+                    .filter { userRepo.findByUsername(it.username) == null }
+                    .filter { if (isProd) it.admin else true }
+                    .map { userRepo.save(it) }
+                    .filterNot { it.admin }
+                    .flatMap { user ->
+                        val items = genItems(user)
+                        itemRepo.saveAll(items).toList()
+                    }
+                logger.info("Data initialization is done!! Generated ${allItems.size} items.")
+            }
         }
     }
 
