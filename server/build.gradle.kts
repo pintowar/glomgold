@@ -77,12 +77,18 @@ tasks.test {
 }
 
 tasks {
-    val baseName = "${project.name}-app"
-
     val imagesTags = listOf(
         "pintowar/glomgold:$version",
         "pintowar/glomgold:latest"
     )
+
+    dockerfileNative {
+        val isProd = project.hasProperty("prod")
+        val commands = defaultJvmArgs.map {
+            if (isProd && it.contains("micronaut.environments")) it.replace("dev", "prod") else it
+        }.toTypedArray()
+        defaultCommand(*commands)
+    }
 
     dockerBuildNative {
         images.set(imagesTags)
@@ -96,7 +102,7 @@ tasks {
         }
     }
 
-    if (project.hasProperty("web-cli")) {
+    if (project.hasProperty("prod")) {
         processResources {
             val webCli = ":client"
             dependsOn("$webCli:build")
