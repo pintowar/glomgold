@@ -77,6 +77,25 @@ tasks.test {
 }
 
 tasks {
+    val baseName = "${project.name}-app"
+
+    val imagesTags = listOf(
+        "pintowar/glomgold:$version",
+        "pintowar/glomgold:latest"
+    )
+
+    dockerBuildNative {
+        images.set(imagesTags)
+    }
+
+    dockerPushNative {
+        images.set(imagesTags)
+        registryCredentials {
+            username.set(project.findProperty("docker.user")?.toString() ?: System.getenv("DOCKER_USER"))
+            password.set(project.findProperty("docker.pass")?.toString() ?: System.getenv("DOCKER_PASS"))
+        }
+    }
+
     if (project.hasProperty("web-cli")) {
         processResources {
             val webCli = ":client"

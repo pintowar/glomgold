@@ -1,0 +1,46 @@
+name: Glomgold Master CI
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:
+      # Push events on master branch
+      - master
+
+jobs:
+  gradle_build:
+    name: Gradle Test on master
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Seting up Git
+        run: git config user.email "${{ github.actor }}@users.noreply.github.com" && git config user.name "Github Actions"
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.m2/repository
+          key: ${{ runner.os }}-gradle-test-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle-test-
+
+      - name: Setup GraalVM CE
+        uses: DeLaGuardo/setup-graalvm@3.1
+        with:
+          graalvm-version: 22.0.0.2.java17
+      - name: Install Native Image
+        run: gu install native-image
+
+      - name: Running gradle task
+        uses: gradle/gradle-build-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+        with:
+          gradle-version: wrapper
+          arguments: -Pweb-cli clean release :server:dockerPushNative -x test -Prelease.useAutomaticVersion=true
