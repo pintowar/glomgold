@@ -33,3 +33,6 @@ release {
         requireBranch = "master"
     }
 }
+tasks.afterReleaseBuild {
+    dependsOn(":server:dockerPushNative")
+}

@@ -43,4 +43,4 @@ jobs:
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
         with:
           gradle-version: wrapper
-          arguments: -Pweb-cli clean release :server:dockerPushNative -x test -Prelease.useAutomaticVersion=true
+          arguments: -Pweb-cli clean release -Prelease.useAutomaticVersion=true
