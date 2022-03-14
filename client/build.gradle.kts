@@ -15,12 +15,14 @@ node {
 
 tasks {
     register<NpmTask>("run") {
+        dependsOn(npmInstall)
         group = "application"
         description = "Run the client app"
         args.set(listOf("run", "start"))
     }
 
     register<NpmTask>("build") {
+        dependsOn(npmInstall)
         group = "build"
         description = "Build the client bundle"
         args.set(listOf("run", "build"))
