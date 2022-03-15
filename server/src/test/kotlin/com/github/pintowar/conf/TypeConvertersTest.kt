@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.data.forAll
 import io.kotest.data.row
 import io.kotest.matchers.shouldBe
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZoneId
@@ -40,6 +39,5 @@ class TypeConvertersTest : StringSpec({
             val res = converter.convert(Date.from(expected), YearMonth::class.java).get()
             res shouldBe YearMonth.of(year, month)
         }
-
     }
 })

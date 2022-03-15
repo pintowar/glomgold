@@ -23,4 +23,5 @@ dependencies {
 
     implementation(libs.gradleplugin.node)
     implementation(libs.gradleplugin.release)
+    implementation(libs.gradleplugin.ktlint)
 }

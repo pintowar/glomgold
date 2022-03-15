@@ -5,7 +5,6 @@ import io.micronaut.core.convert.TypeConverter
 import jakarta.inject.Singleton
 import java.time.YearMonth
 import java.time.ZoneId
-import java.time.format.DateTimeParseException
 import java.util.*
 
 @Factory
@@ -42,5 +41,4 @@ class TypeConverters {
             Optional.of(ZoneId.of(obj))
         }
     }
-
 }

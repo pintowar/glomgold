@@ -17,7 +17,8 @@ import javax.validation.ConstraintViolationException
 
 @MicronautTest
 class UserRepositoryTest(
-    private val userRepo: UserRepository, private val itemRepo: ItemRepository
+    private val userRepo: UserRepository,
+    private val itemRepo: ItemRepository
 ) : DescribeSpec({
 
     beforeEach {
@@ -52,11 +53,13 @@ class UserRepositoryTest(
     }
 
     describe("item operations") {
-        val user = userRepo.save(User(
-            username = "admin",
-            name = "Administrator",
-            email = "admin@glomgold.com"
-        ).apply { setPassword("admin") })
+        val user = userRepo.save(
+            User(
+                username = "admin",
+                name = "Administrator",
+                email = "admin@glomgold.com"
+            ).apply { setPassword("admin") }
+        )
 
         it("successful persist item") {
             val item = Item(
@@ -85,5 +88,4 @@ class UserRepositoryTest(
             admin.checkPassword("other") shouldBe false
         }
     }
-
 })

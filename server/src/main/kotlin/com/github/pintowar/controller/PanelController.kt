@@ -64,5 +64,4 @@ class PanelController(private val itemRepository: ItemRepository, private val pa
     }
 
     private fun authId(auth: Authentication): Long = auth.attributes["userId"] as Long
-
 }

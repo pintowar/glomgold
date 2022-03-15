@@ -26,7 +26,7 @@ class SeedInitializer(
     private val isProd = env.activeNames.contains("prod")
     private val isDev = env.activeNames.contains("dev")
 
-    @EventListener //does not support `suspend`
+    @EventListener // does not support `suspend`
     fun onStartUp(e: ServerStartupEvent) {
         if (isProd || isDev) {
             logger.info("starting data initialization at StartUpEvent: $e")
@@ -87,5 +87,4 @@ class SeedInitializer(
             }
         }
     }
-
 }

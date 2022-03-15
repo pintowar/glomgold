@@ -12,5 +12,4 @@ class AuthController(private val userRepository: UserRepository) {
     suspend fun panel(auth: Authentication) = userRepository.findByUsername(auth.name)?.let { user ->
         mapOf("username" to user.username, "name" to user.name, "email" to user.email, "roles" to auth.roles)
     } ?: emptyMap()
-
 }

@@ -14,7 +14,8 @@ import kotlinx.coroutines.reactive.asPublisher
 class AuthenticationProviderUserPassword(private val userRepo: UserRepository) : AuthenticationProvider {
 
     override fun authenticate(
-        httpRequest: HttpRequest<*>?, authenticationRequest: AuthenticationRequest<*, *>
+        httpRequest: HttpRequest<*>?,
+        authenticationRequest: AuthenticationRequest<*, *>
     ) = flow {
         userRepo.findByUsername(authenticationRequest.identity.toString())?.let { user ->
             if (user.checkPassword(authenticationRequest.secret.toString())) {

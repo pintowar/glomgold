@@ -31,5 +31,4 @@ class SinglePageAppFilter(private val resolver: ResourceResolver) : HttpServerFi
                 Mono.justOrEmpty(resolver.getResource(index)).map { HttpResponse.ok(StreamedFile(it)) }
             } else Mono.just(response)
         }
-
 }

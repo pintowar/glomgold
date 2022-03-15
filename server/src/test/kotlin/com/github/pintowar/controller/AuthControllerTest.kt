@@ -55,16 +55,14 @@ class JwtAuthenticationTest(
 
             bearerAccessRefreshToken.username shouldBe "admin"
             bearerAccessRefreshToken.accessToken.shouldNotBeNull()
-            //JWTParser.parse(bearerAccessRefreshToken.accessToken) shouldBeType
+            // JWTParser.parse(bearerAccessRefreshToken.accessToken) shouldBeType
 
             val result = panelClient.account("Bearer ${bearerAccessRefreshToken.accessToken}")
 
             result shouldContainKey "username"
             result["username"] shouldBe "admin"
         }
-
     }
-
 })
 
 @Client("/")

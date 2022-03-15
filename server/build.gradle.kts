@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
     kotlin("jvm")
@@ -11,6 +12,7 @@ plugins {
     id("com.gorylenko.gradle-git-properties")
     id("idea")
     id("glomgold.kotlin-liquibase")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 description = "Glomgold Web Server"
@@ -125,10 +127,12 @@ graalvmNative {
     binaries {
         named("main") {
             buildArgs("--verbose")
-            javaLauncher.set(javaToolchains.launcherFor {
-                languageVersion.set(defaultJavaLang)
-                vendor.set(defaultJavaVendor)
-            })
+            javaLauncher.set(
+                javaToolchains.launcherFor {
+                    languageVersion.set(defaultJavaLang)
+                    vendor.set(defaultJavaVendor)
+                }
+            )
         }
     }
 }
@@ -148,5 +152,16 @@ micronaut {
         cacheEnvironment.set(true)
         optimizeClassLoading.set(true)
         deduceEnvironment.set(true)
+    }
+}
+
+ktlint {
+    verbose.set(true)
+    outputToConsole.set(true)
+    coloredOutput.set(true)
+    reporters {
+        reporter(ReporterType.CHECKSTYLE)
+        reporter(ReporterType.JSON)
+        reporter(ReporterType.HTML)
     }
 }
