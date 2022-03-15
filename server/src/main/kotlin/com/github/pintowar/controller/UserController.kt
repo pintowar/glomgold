@@ -6,8 +6,8 @@ import com.github.pintowar.repo.UserRepository
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import java.time.ZoneId
 import java.util.*
 import javax.validation.constraints.Email
@@ -22,8 +22,8 @@ class UserController(private val userRepository: UserRepository) {
         @QueryValue("_end", defaultValue = "25") end: Int,
         @QueryValue("_sort", defaultValue = "id") sort: String,
         @QueryValue("_order", defaultValue = "ASC") order: String
-    ): HttpResponse<Flow<UserCommand>> = HttpResponse
-        .ok(userRepository.findAll(between(start, end, sort, order)).map { UserCommand.toUserCommand(it) })
+    ): HttpResponse<List<UserCommand>> = HttpResponse
+        .ok(userRepository.findAll(between(start, end, sort, order)).map { UserCommand.toUserCommand(it) }.toList())
         .header("X-Total-Count", "${userRepository.count()}")
 
     @Post("/")

@@ -35,7 +35,7 @@ interface ItemRepository : CoroutineCrudRepository<Item, Long>, CoroutineJpaSpec
 
     @Query(
         """
-        SELECT i.period, i.description, sum(i.value) value
+        SELECT i.period, i.description, sum(i.value) as value
         FROM items i
         WHERE i.period = :period AND i.user_id = :userId
         GROUP BY i.period, i.description
@@ -46,7 +46,7 @@ interface ItemRepository : CoroutineCrudRepository<Item, Long>, CoroutineJpaSpec
 
     @Query(
         """
-        SELECT i.period, i.description, sum(i.value) value
+        SELECT i.period, i.description, sum(i.value) as value
         FROM items i
         WHERE extract(year from i.period) = :year AND i.user_id = :userId
         GROUP BY i.period, i.description
@@ -57,7 +57,7 @@ interface ItemRepository : CoroutineCrudRepository<Item, Long>, CoroutineJpaSpec
 
     @Query(
         """
-        SELECT sum(i.value)
+        SELECT sum(i.value) as value
         FROM items i
         WHERE i.period = :period AND i.user_id = :userId
         """

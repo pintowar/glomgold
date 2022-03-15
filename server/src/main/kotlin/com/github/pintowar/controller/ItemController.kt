@@ -10,6 +10,7 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.*
@@ -25,8 +26,8 @@ class ItemController(private val itemRepository: ItemRepository) {
         @QueryValue("_end", defaultValue = "25") end: Int,
         @QueryValue("_sort", defaultValue = "id") sort: String,
         @QueryValue("_order", defaultValue = "ASC") order: String
-    ): HttpResponse<Flow<ItemCommand>> = HttpResponse
-        .ok(itemRepository.findAll(between(start, end, sort, order)).map { ItemCommand.toCommand(it) })
+    ): HttpResponse<List<ItemCommand>> = HttpResponse
+        .ok(itemRepository.findAll(between(start, end, sort, order)).map { ItemCommand.toCommand(it) }.toList())
         .header("X-Total-Count", "${itemRepository.count()}")
 
     @Post("/")
