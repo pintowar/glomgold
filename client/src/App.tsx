@@ -3,7 +3,7 @@ import {
     notificationProvider,
     Layout,
     ErrorComponent,
-    Sider
+    Icons
 } from "@pankod/refine-antd";
 import dataProvider from "@pankod/refine-simple-rest";
 import routerProvider from "@pankod/refine-react-router-v6";
@@ -14,7 +14,7 @@ import { UserList, UserCreate, UserEdit, UserShow } from "pages/users";
 import { ControlPanel, ReportPanel } from "pages/panel";
 import { DashboardPage } from "pages/dashboard";
 import { LoginPage } from "pages/login";
-import { Title } from "title";
+import { Title, Sider } from "components";
 import { generateAuthProvider } from "authProvider";
 
 import { API_URL } from "./constants";
@@ -44,10 +44,10 @@ const App: React.FC = () => {
             dataProvider={dataProvider(API_URL, axiosInstance)}
             resources={[
                 {
-                    name: "users", list: UserList, create: UserCreate, edit: UserEdit, show: UserShow, canDelete: true
+                    name: "users", list: UserList, create: UserCreate, edit: UserEdit, show: UserShow, canDelete: true, icon: <Icons.UsergroupAddOutlined />
                 },
                 {
-                    name: "items", list: ItemList, create: ItemCreate, edit: ItemEdit, show: ItemShow, canDelete: true
+                    name: "items", list: ItemList, create: ItemCreate, edit: ItemEdit, show: ItemShow, canDelete: true, icon: <Icons.ShopOutlined />
                 }
             ]}
             notificationProvider={notificationProvider}
@@ -63,6 +63,7 @@ const App: React.FC = () => {
                 }
             }}
             Title={Title}
+            Sider={Sider}
             LoginPage={LoginPage}
             Layout={Layout}
             DashboardPage={DashboardPage}

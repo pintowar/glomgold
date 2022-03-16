@@ -2,8 +2,8 @@ import React from "react";
 
 import { useRouterContext, TitleProps } from "@pankod/refine-core";
 
-import logo from "./assets/images/glomgold-logo.png";
-import logoCollapsed from "./assets/images/glomgold-logo-collapsed.png";
+import logo from "../assets/images/glomgold-logo.png";
+import logoCollapsed from "../assets/images/glomgold-logo-collapsed.png";
 
 export const Title: React.FC<TitleProps> = ({ collapsed }) => {
     const { Link } = useRouterContext();

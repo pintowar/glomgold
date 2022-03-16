@@ -14,6 +14,7 @@ const { Header, Content, Footer } = Layout;
 export const PanelLayout: React.FC = ({children}) => {
     const storage = LocalStorage.getInstance()
     const isLogged = storage.isLoggedIn()
+    const isAdmin = storage.getUserRoles().includes('ROLE_ADMIN')
 
     const { mutate: logout } = useLogout();
 
@@ -35,6 +36,11 @@ export const PanelLayout: React.FC = ({children}) => {
                     <Menu.Item key="menu-report">
                         <Link to={'/panel/report'}>Report</Link>
                     </Menu.Item>
+                    {isAdmin && 
+                        <Menu.Item key="admin">
+                            <Link to={'/'}>Admin</Link>
+                        </Menu.Item>
+                    }
                     <Menu.Item key="menu-logout" onClick={() => logout()}>Logout</Menu.Item>
                 </Menu>
             </Header>
