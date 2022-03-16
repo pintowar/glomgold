@@ -1,8 +1,4 @@
-# Glomgold
-
-Simple Micronaut application to manage personal finance.
-
-## Micronaut 3.3.3 Documentation
+# Micronaut 3.3.3 Documentation
 
 - [User Guide](https://docs.micronaut.io/3.3.3/guide/index.html)
 - [API Reference](https://docs.micronaut.io/3.3.3/api/index.html)

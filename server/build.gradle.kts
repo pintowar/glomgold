@@ -13,6 +13,8 @@ plugins {
     id("idea")
     id("glomgold.kotlin-liquibase")
     id("org.jlleitschuh.gradle.ktlint")
+    id("org.sonarqube")
+    jacoco
 }
 
 description = "Glomgold Web Server"
@@ -24,8 +26,8 @@ repositories {
 val defaultJavaLang = JavaLanguageVersion.of(17)
 val defaultJavaVendor = JvmVendorSpec.matching("GraalVM Community")
 val defaultJvmArgs = listOf(
-    "-Dmicronaut.environments=dev", "-Duser.timezone=UTC", "-Duser.language=en", "-Duser.region=US",
-    "-Djava.security.egd=file:/dev/./urandom"
+    "-Dmicronaut.environments=dev", "-Duser.timezone=UTC", "-Duser.language=en",
+    "-Duser.region=US", "-Djava.security.egd=file:/dev/./urandom"
 )
 
 java {
@@ -66,19 +68,34 @@ application {
     applicationDefaultJvmArgs = defaultJvmArgs
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "17"
-//            freeCompilerArgs = listOf("-Xjsr305=strict")
+tasks.test {
+    jvmArgs = defaultJvmArgs.filterNot { it.contains("micronaut.environments") }
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(true)
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-    jvmArgs = defaultJvmArgs
-}
-
 tasks {
+
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
+    compileTestKotlin {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
+
     val imagesTags = listOf(
         "pintowar/glomgold:$version",
         "pintowar/glomgold:latest"
@@ -163,5 +180,22 @@ ktlint {
         reporter(ReporterType.CHECKSTYLE)
         reporter(ReporterType.JSON)
         reporter(ReporterType.HTML)
+    }
+}
+
+sonarqube {
+    properties {
+        val jacocoReportPath = "${project.buildDir.absolutePath}/reports/jacoco/test"
+        val sonarToken = project.findProperty("sonar.token")?.toString() ?: System.getenv("SONAR_TOKEN")
+        property("sonar.sourceEncoding", "UTF-8")
+        property("sonar.organization", "pintowar")
+        property("sonar.projectName", "glomgold")
+        property("sonar.projectKey", "pintowar_glomgold")
+        property("sonar.projectVersion", project.version.toString())
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.login", sonarToken)
+        property("sonar.verbose", true)
+        property("sonar.github.repository", "pintowar/glomgold")
+        property("sonar.coverage.jacoco.xmlReportPaths", "$jacocoReportPath/jacocoTestReport.xml")
     }
 }

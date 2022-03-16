@@ -28,6 +28,9 @@ micronaut:
       - pattern: /api/items/**
         access:
           - ROLE_ADMIN
+      - pattern: /management/**
+        access:
+          - ROLE_ADMIN
       - pattern: /login
         access: isAnonymous()
       - pattern: /logout
@@ -44,7 +47,7 @@ endpoints:
   all:
     path: "/management"
     enabled: true
-    sensitive: false
+    sensitive: true
 
 netty:
   default:
