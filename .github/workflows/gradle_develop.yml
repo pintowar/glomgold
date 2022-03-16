@@ -37,6 +37,9 @@ jobs:
 
       - name: Running gradle task
         uses: gradle/gradle-build-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           gradle-version: wrapper
           arguments: clean :server:kotest :server:jacocoTestReport :server:sonarqube --info
