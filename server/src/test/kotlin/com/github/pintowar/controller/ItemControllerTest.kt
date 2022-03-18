@@ -1,15 +1,17 @@
 package com.github.pintowar.controller
 
+import com.github.pintowar.dto.ItemCommand
+import com.github.pintowar.dto.RefinePaginateQuery
+import com.github.pintowar.dto.toCommand
 import com.github.pintowar.model.User
 import com.github.pintowar.repo.ItemRepository
 import com.github.pintowar.repo.UserRepository
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.datatest.withData
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.provided.fakeItems
-import io.micronaut.core.annotation.Introspected
-import io.micronaut.core.annotation.Nullable
 import io.micronaut.http.HttpHeaders
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
@@ -17,7 +19,10 @@ import io.micronaut.http.client.annotation.Client
 import io.micronaut.security.authentication.UsernamePasswordCredentials
 import io.micronaut.test.extensions.kotest.annotation.MicronautTest
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
+import java.math.BigDecimal
+import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 
@@ -53,40 +58,97 @@ class ItemControllerTest(
 
     describe("item controller crud operations") {
 
-        it("paginate items") {
+        context("paginate 25 items") {
             val userId = userRepo.findByUsername("admin")?.id!!
             val totalItems = 25
             itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+            val allItems = itemRepo.findAll().toList().sortedBy { it.id }
 
             val token = auth()
-//            var items = itemClient.index("Bearer $token", 0, 10)
-            var items = itemClient.index("Bearer $token", PaginateBean(0, 10))
-            items.body.get() shouldHaveSize 10
-            items.header("X-Total-Count") shouldBe "$totalItems"
 
-//            items = itemClient.index("Bearer $token", 10, 20)
-            items = itemClient.index("Bearer $token", PaginateBean(10, 20))
-            items.body.get() shouldHaveSize 10
-            items.header("X-Total-Count") shouldBe "$totalItems"
+            data class Page(val start: Int, val end: Int, val size: Int)
+            withData(
+                Page(0, 10, 10),
+                Page(10, 20, 10),
+                Page(20, 30, 5)
+            ) { (start, end, size) ->
+                itemClient.index("Bearer $token", RefinePaginateQuery(start, end, "id", "ASC")).let { items ->
+                    items.body.get().map { it.id } shouldBe (start until (start + size)).map { allItems[it].id }
+                    items.body.get() shouldHaveSize size
+                    items.header("X-Total-Count") shouldBe "$totalItems"
+                }
+            }
 
-//            items = itemClient.index("Bearer $token", 20, 30)
-            items = itemClient.index("Bearer $token", PaginateBean(20, 30))
-            items.body.get() shouldHaveSize 5
-            items.header("X-Total-Count") shouldBe "$totalItems"
         }
 
-        it("save item") {
+        context("save item") {
             val userId = userRepo.findByUsername("admin")?.id!!
             val token = auth()
 
             fakeItems(userId, 5).forEach { item ->
-                val resp = itemClient.create("Bearer $token", ItemCommand.toCommand(item)).body.get().toItem()
+                val resp = itemClient.create("Bearer $token", item.toCommand()).body.get().toItem()
 
                 resp.id.shouldNotBeNull()
                 resp.version shouldBe 0
                 resp.description shouldBe item.description
                 resp.period shouldBe item.period
             }
+        }
+
+        context("read item") {
+            val userId = userRepo.findByUsername("admin")?.id!!
+            val totalItems = 5
+            itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+            val allItems = itemRepo.findAll().toList()
+            val token = auth()
+
+            allItems.forEach { item ->
+                val resp = itemClient.read("Bearer $token", item.id!!).body.get().toItem()
+
+                resp.id shouldBe item.id
+                resp.version shouldBe 0
+                resp.description shouldBe item.description
+                resp.period shouldBe item.period
+            }
+        }
+
+        context("update item") {
+            val userId = userRepo.findByUsername("admin")?.id!!
+            val totalItems = 5
+            itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+            val allItems = itemRepo.findAll().toList()
+            val token = auth()
+
+            allItems.forEach { item ->
+                val now = YearMonth.now()
+                val updatedItem = item.apply {
+                    description = "new desc"
+                    value = BigDecimal(9.99)
+                    period = now
+                }
+                val resp = itemClient.update("Bearer $token", item.id!!, updatedItem.toCommand()).body.get().toItem()
+
+                resp.id shouldBe item.id
+                resp.version shouldBe 1
+                resp.description shouldBe "new desc"
+                resp.period shouldBe now
+                resp.value shouldBe BigDecimal("9.99")
+            }
+        }
+
+        context("delete item") {
+            val userId = userRepo.findByUsername("admin")?.id!!
+            val totalItems = 5
+            itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+            val allItems = itemRepo.findAll().toList()
+            val token = auth()
+
+            allItems.forEach { item ->
+                val resp = itemClient.delete("Bearer $token", item.id!!)
+                resp shouldBe 1
+            }
+
+            itemRepo.count() shouldBe 0
         }
     }
 
@@ -98,7 +160,7 @@ interface ItemClient {
     @Get("/{?_start,_end,_sort,_order}")
     suspend fun index(
         @Header(HttpHeaders.AUTHORIZATION) auth: String,
-        @RequestBean bean: PaginateBean
+        @RequestBean bean: RefinePaginateQuery
     ): HttpResponse<List<ItemCommand>>
 
     @Post("/")
@@ -106,12 +168,20 @@ interface ItemClient {
         @Header(HttpHeaders.AUTHORIZATION) auth: String,
         @Body cmd: ItemCommand
     ): HttpResponse<ItemCommand>
-}
 
-@Introspected
-data class PaginateBean(
-    @field:QueryValue("_start") var start: Int? = null,
-    @field:QueryValue("_end") var end: Int? = null,
-    @field:QueryValue("_sort") var sort: String? = null,
-    @field:QueryValue("_order") var order: String? = null,
-)
+    @Get("/{id}")
+    suspend fun read(
+        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @PathVariable id: Long
+    ): HttpResponse<ItemCommand>
+
+    @Patch("/{id}")
+    suspend fun update(
+        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @PathVariable id: Long,
+        @Body item: ItemCommand
+    ): HttpResponse<ItemCommand>
+
+    @Delete("/{id}")
+    suspend fun delete(@Header(HttpHeaders.AUTHORIZATION) auth: String, @PathVariable id: Long): Int
+}

@@ -68,6 +68,7 @@ liquibase-hibernate = { module = "org.liquibase.ext:liquibase-hibernate5", versi
 
 test-faker = { module = "io.github.serpro69:kotlin-faker", version = "1.10.0" }
 test-mockk = { module = "io.mockk:mockk", version = "1.12.3" }
+test-kotest-dataset = { module = "io.kotest:kotest-framework-datatest", version = "4.6.0" }
 
 [bundles]
 micronaut-kapt = ["micronaut-http-validation", "micronaut-data-processor", "micronaut-security-annotations"]
@@ -81,5 +82,5 @@ kotlin = ["kotlin-reflect", "kotlin-stdlib", "kotlin-logging"]
 kotlin-coroutines = ["kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor"]
 postgresql = ["postgresql-jdbc", "postgresql-r2dbc"]
 testcontainers = ["testcontainers", "testcontainers-r2dbc", "testcontainers-postgresql"]
-ktest = ["test-mockk", "test-faker"]
+ktest = ["test-mockk", "test-faker", "test-kotest-dataset"]
 liquibase = ["liquibase-core", "liquibase-groovy-dsl", "liquibase-picocli", "liquibase-hibernate", "postgresql-jdbc"]
