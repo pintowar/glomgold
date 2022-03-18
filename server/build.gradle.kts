@@ -52,6 +52,7 @@ dependencies {
 
     compileOnly(libs.graalvm.svm)
     testImplementation(libs.bundles.testcontainers)
+    testImplementation(libs.bundles.ktest)
 
     // Should be declared in glomgold.kotlin-liquibase, but is not working
     liquibaseRuntime(libs.bundles.liquibase)

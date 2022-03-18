@@ -69,7 +69,7 @@ class JwtAuthenticationTest(
 interface PanelClient {
 
     @Post("/login")
-    fun login(@Body credentials: UsernamePasswordCredentials): BearerAccessRefreshToken
+    suspend fun login(@Body credentials: UsernamePasswordCredentials): BearerAccessRefreshToken
 
     @Get("/api/auth/me")
     fun account(@Header(AUTHORIZATION) authorization: String): Map<String, String>

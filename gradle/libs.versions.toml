@@ -66,6 +66,9 @@ liquibase-groovy-dsl = { module = "org.liquibase:liquibase-groovy-dsl", version 
 liquibase-picocli = { module = "info.picocli:picocli", version = "4.6.1" }
 liquibase-hibernate = { module = "org.liquibase.ext:liquibase-hibernate5", version = "3.6" }
 
+test-faker = { module = "io.github.serpro69:kotlin-faker", version = "1.10.0" }
+test-mockk = { module = "io.mockk:mockk", version = "1.12.3" }
+
 [bundles]
 micronaut-kapt = ["micronaut-http-validation", "micronaut-data-processor", "micronaut-security-annotations"]
 micronaut = [
@@ -78,4 +81,5 @@ kotlin = ["kotlin-reflect", "kotlin-stdlib", "kotlin-logging"]
 kotlin-coroutines = ["kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor"]
 postgresql = ["postgresql-jdbc", "postgresql-r2dbc"]
 testcontainers = ["testcontainers", "testcontainers-r2dbc", "testcontainers-postgresql"]
+ktest = ["test-mockk", "test-faker"]
 liquibase = ["liquibase-core", "liquibase-groovy-dsl", "liquibase-picocli", "liquibase-hibernate", "postgresql-jdbc"]
