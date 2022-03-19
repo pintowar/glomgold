@@ -31,7 +31,7 @@ class PanelController(private val itemRepository: ItemRepository, private val pa
     @Post("/add-item")
     suspend fun addItem(auth: Authentication, @Body item: ItemBody): HttpResponse<PanelInfo> {
         itemRepository.save(item.toItem(authId(auth)))
-        return HttpResponse.ok(panelService.panelInfo(authId(auth), YearMonth.of(item.year, item.month)))
+        return HttpResponse.ok(panelService.panelInfo(authId(auth), item.period))
     }
 
     @Patch("/edit-item/{id}")

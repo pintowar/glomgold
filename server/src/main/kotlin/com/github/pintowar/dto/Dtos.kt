@@ -25,15 +25,14 @@ data class ItemSummary(
 
 @Introspected
 data class ItemBody(
-    val year: Int,
-    val month: Int,
+    val period: YearMonth,
     val description: String,
     val value: BigDecimal
 ) {
     fun toItem(userId: Long) = Item(
         description,
         value,
-        YearMonth.of(year, month),
+        period,
         userId
     )
 }

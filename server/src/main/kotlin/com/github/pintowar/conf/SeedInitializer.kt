@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import mu.KLogging
 import java.math.BigDecimal
+import java.security.SecureRandom
 import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
@@ -23,7 +24,7 @@ class SeedInitializer(
     private val itemRepo: ItemRepository
 ) : KLogging() {
 
-    private val random = Random(42)
+    private val random = SecureRandom("42".toByteArray())
     private val isProd = env.activeNames.contains("prod")
     private val isDev = env.activeNames.contains("dev")
 

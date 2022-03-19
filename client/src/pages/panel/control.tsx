@@ -55,20 +55,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
     }
 
     const onAddItem = async (description: string, value: number) => {
-        const year = currentPeriod.year()
-        const month = currentPeriod.month() + 1
-
-        const {status, data} = await axios.post("/api/panel/add-item", {year, month, description, value})
+        const {status, data} = await axios.post("/api/panel/add-item", {description, value, period: formattedPeriod})
         if (status === 200) {
             setPanelData(data)
         } else throw Error()
     };
 
     const onEditItem = async (id: number, description: string, value: number) => {
-        const year = currentPeriod.year()
-        const month = currentPeriod.month() + 1
-
-        const {status, data} = await axios.patch(`/api/panel/edit-item/${id}`, {year, month, description, value})
+        const {status, data} = await axios.patch(`/api/panel/edit-item/${id}`, {description, value, period: formattedPeriod})
         if (status === 200) {
             setPanelData(data)
         } else throw Error()
@@ -82,10 +76,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
     };
 
     const onMonthItemCopy = async (items: any[]) => {
-        const year = currentPeriod.year()
-        const month = currentPeriod.month() + 1
-
-        const itemsWithPeriod = items.map(it => ({...it, year, month}))
+        const itemsWithPeriod = items.map(it => ({...it, period: formattedPeriod}))
 
         const {status} = await axios.post(`/api/panel/copy-items`, itemsWithPeriod)
         if (status !== 200) {
