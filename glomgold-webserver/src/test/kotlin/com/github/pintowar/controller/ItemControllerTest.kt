@@ -5,6 +5,7 @@ import com.github.pintowar.dto.RefinePaginateQuery
 import com.github.pintowar.dto.toCommand
 import com.github.pintowar.repo.ItemRepository
 import com.github.pintowar.repo.UserRepository
+import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.collections.shouldHaveSize
@@ -24,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import java.math.BigDecimal
 import java.time.YearMonth
 
+@ExperimentalKotest
 @MicronautTest
 class ItemControllerTest(
     private val userRepo: UserRepository,
@@ -65,7 +67,6 @@ class ItemControllerTest(
                 items.header("X-Total-Count") shouldBe "$totalItems"
             }
         }
-
     }
 
     describe("save item") {
@@ -137,7 +138,6 @@ class ItemControllerTest(
 
         itemRepo.count() shouldBe 0
     }
-
 })
 
 @Client("/api/items")

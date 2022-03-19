@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
@@ -124,7 +124,7 @@ tasks {
 
     if (project.hasProperty("prod")) {
         processResources {
-            val webCli = ":client"
+            val webCli = ":glomgold-webclient"
             dependsOn("$webCli:build")
 
             doLast {

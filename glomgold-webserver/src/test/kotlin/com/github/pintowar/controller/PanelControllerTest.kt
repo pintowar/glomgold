@@ -19,7 +19,6 @@ import io.micronaut.http.annotation.*
 import io.micronaut.http.client.annotation.Client
 import io.micronaut.test.extensions.kotest.annotation.MicronautTest
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.runBlocking
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter

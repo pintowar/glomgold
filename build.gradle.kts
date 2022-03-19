@@ -9,7 +9,7 @@ allprojects {
 
 tasks {
     register("assembleWebApp") {
-        val webServ = ":server"
+        val webServ = ":glomgold-webserver"
         dependsOn("${webServ}:shadowJar")
         group = "build"
         description = "Build web app"
@@ -34,5 +34,5 @@ release {
     }
 }
 tasks.afterReleaseBuild {
-    dependsOn(":server:dockerPushNative")
+    dependsOn(":glomgold-webserver:dockerPushNative")
 }

@@ -42,4 +42,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           gradle-version: wrapper
-          arguments: clean :server:kotest :server:jacocoTestReport :server:sonarqube
+          arguments: clean :glomgold-webserver:kotest :glomgold-webserver:jacocoTestReport :glomgold-webserver:sonarqube

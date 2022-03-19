@@ -1,4 +1,4 @@
 
 rootProject.name="glomgold"
 
-include("server", "client")
+include("glomgold-webserver", "glomgold-webclient")
