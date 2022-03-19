@@ -1,12 +1,12 @@
 package com.github.pintowar.controller
 
-import com.github.pintowar.model.User
 import com.github.pintowar.repo.UserRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.provided.fakeUsers
 import io.micronaut.http.HttpHeaders.AUTHORIZATION
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.Body
@@ -18,46 +18,47 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.security.authentication.UsernamePasswordCredentials
 import io.micronaut.security.token.jwt.render.BearerAccessRefreshToken
 import io.micronaut.test.extensions.kotest.annotation.MicronautTest
-import java.time.ZoneId
-import java.util.*
 
 @MicronautTest
 class JwtAuthenticationTest(
     private val userRepo: UserRepository,
-    private val panelClient: PanelClient
+    private val authClient: AuthClient
 ) : DescribeSpec({
 
     beforeSpec {
         userRepo.deleteAll()
-        val user = User(
-            username = "admin",
-            name = "Administrator",
-            email = "admin@glomgold.com",
-            locale = Locale.US,
-            timezone = ZoneId.of("UTC")
-        ).apply { setPassword("admin") }
-        userRepo.save(user)
+        userRepo.save(fakeUsers().getValue("admin"))
     }
 
     describe("authorization tests") {
 
         it("test access for unauthorized user") {
             val exception = shouldThrow<HttpClientResponseException> {
-                panelClient.account("some auth header")
+                authClient.account("some auth header")
             }
 
             exception.status shouldBe HttpStatus.UNAUTHORIZED
         }
 
+        it("test access with wrong password") {
+            val creds = UsernamePasswordCredentials("admin", "wrong-passwd")
+            val exception = shouldThrow<HttpClientResponseException> {
+                authClient.login(creds)
+            }
+
+            exception.status shouldBe HttpStatus.UNAUTHORIZED
+            exception.message shouldBe "Invalid password."
+        }
+
         it("test access for authorized user") {
             val creds = UsernamePasswordCredentials("admin", "admin")
-            val bearerAccessRefreshToken = panelClient.login(creds)
+            val bearerAccessRefreshToken = authClient.login(creds)
 
             bearerAccessRefreshToken.username shouldBe "admin"
             bearerAccessRefreshToken.accessToken.shouldNotBeNull()
             // JWTParser.parse(bearerAccessRefreshToken.accessToken) shouldBeType
 
-            val result = panelClient.account("Bearer ${bearerAccessRefreshToken.accessToken}")
+            val result = authClient.account("Bearer ${bearerAccessRefreshToken.accessToken}")
 
             result shouldContainKey "username"
             result["username"] shouldBe "admin"
@@ -66,7 +67,7 @@ class JwtAuthenticationTest(
 })
 
 @Client("/")
-interface PanelClient {
+interface AuthClient {
 
     @Post("/login")
     suspend fun login(@Body credentials: UsernamePasswordCredentials): BearerAccessRefreshToken

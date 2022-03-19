@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Row, Col, notification } from 'antd';
@@ -40,15 +40,17 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
         diff: 0
     });
 
+    const formattedPeriod = useMemo(() => currentPeriod.format(periodFormat), [currentPeriod]);
+
     useEffect(() => {
         populateData()
     }, [currentPeriod]);
 
     const populateData = async () => {
-        const {status, data} = await axios.get(`/api/panel?year=${currentPeriod.year()}&month=${currentPeriod.month() + 1}`)
+        const {status, data} = await axios.get(`/api/panel?period=${formattedPeriod}`)
         if (status === 200) {
             setPanelData(data)
-            navigate(`/panel?period=${currentPeriod.format(periodFormat)}`)
+            navigate(`/panel?period=${formattedPeriod}`)
         } else throw Error()
     }
 

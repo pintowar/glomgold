@@ -18,11 +18,12 @@ import java.util.*
 
 @Singleton
 class SeedInitializer(
-    private val env: Environment,
+    env: Environment,
     private val userRepo: UserRepository,
     private val itemRepo: ItemRepository
 ) : KLogging() {
 
+    private val random = Random(42)
     private val isProd = env.activeNames.contains("prod")
     private val isDev = env.activeNames.contains("dev")
 
@@ -33,7 +34,7 @@ class SeedInitializer(
             runBlocking {
                 val allItems = genUsers()
                     .filter { userRepo.findByUsername(it.username) == null }
-                    .filter { if (isProd) it.admin else true }
+                    .filter { !isProd || it.admin } // if (isProd) it.admin else true
                     .map { userRepo.save(it) }
                     .filterNot { it.admin }
                     .flatMap { user ->
@@ -82,7 +83,7 @@ class SeedInitializer(
             Pair("Other services", 800),
         )
         return (0..3).flatMap { extraMonth ->
-            items.filter { Math.random() >= 0.3 }.map { (desc, value) ->
+            items.filter { random.nextDouble() >= 0.3 }.map { (desc, value) ->
                 Item(desc, BigDecimal(value), YearMonth.now().plusMonths(extraMonth.toLong()), user.id!!)
             }
         }

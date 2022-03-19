@@ -5,12 +5,14 @@ import io.micronaut.core.convert.TypeConverter
 import jakarta.inject.Singleton
 import java.time.YearMonth
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Factory
 class TypeConverters {
 
     private val zone = ZoneId.systemDefault()
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM")
 
     @Singleton
     fun periodDateTypeConverter(): TypeConverter<YearMonth, Date> {
@@ -39,6 +41,20 @@ class TypeConverters {
     fun stringZoneTypeConverter(): TypeConverter<String, ZoneId> {
         return TypeConverter<String, ZoneId> { obj, _, _ ->
             Optional.of(ZoneId.of(obj))
+        }
+    }
+
+    @Singleton
+    fun periodStringTypeConverter(): TypeConverter<YearMonth, String> {
+        return TypeConverter<YearMonth, String> { obj, _, _ ->
+            Optional.of(obj.format(formatter))
+        }
+    }
+
+    @Singleton
+    fun stringPeriodTypeConverter(): TypeConverter<String, YearMonth> {
+        return TypeConverter<String, YearMonth> { obj, _, _ ->
+            Optional.of(YearMonth.parse(obj))
         }
     }
 }

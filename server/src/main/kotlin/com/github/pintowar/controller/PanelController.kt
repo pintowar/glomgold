@@ -12,21 +12,19 @@ import io.micronaut.security.authentication.Authentication
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Controller("/api/panel")
 class PanelController(private val itemRepository: ItemRepository, private val panelService: PanelService) {
 
-    @Get("/")
-    suspend fun panel(auth: Authentication, @QueryValue("year") year: Int?, @QueryValue("month") month: Int?) =
-        LocalDate.now().let { now ->
-            panelService.panelInfo(authId(auth), YearMonth.of(year ?: now.year, month ?: now.monthValue))
-        }
+    @Get("/{?period}")
+    suspend fun panel(auth: Authentication, @QueryValue period: YearMonth?) =
+        panelService.panelInfo(authId(auth), period ?: YearMonth.now())
 
-    @Get("/report")
-    suspend fun report(auth: Authentication, @QueryValue("year") year: Int?): PanelAnnualReport {
-        val currentYear = year ?: LocalDate.now().year
+
+    @Get("/report{?year}")
+    suspend fun report(auth: Authentication, @QueryValue year: Int?): PanelAnnualReport {
+        val currentYear = year ?: YearMonth.now().year
         return panelService.annualReport(authId(auth), currentYear)
     }
 

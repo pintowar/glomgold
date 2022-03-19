@@ -28,9 +28,9 @@ class PanelService(private val itemRepository: ItemRepository) {
         val data = rowIndex.map { desc -> columns.map { table[it to desc] } }
 
         val rowSummary = columns.indices.map { col ->
-            rowIndex.indices.map { row -> data[row][col] }.reduce(::nullableSum)
+            rowIndex.indices.map { row -> data[row][col] }.fold(null, ::nullableSum)
         }
-        val colSummary = data.map { it.reduce(::nullableSum) }
+        val colSummary = data.map { it.fold(null, ::nullableSum) }
         val colAverage = colSummary.zip(data.map { row -> row.count { it != null } })
             .map { (sum, count) -> sum?.divide(BigDecimal(count), RoundingMode.HALF_UP) }
 
@@ -42,7 +42,7 @@ class PanelService(private val itemRepository: ItemRepository) {
             calcTrend(rowSummary),
             colSummary,
             colAverage,
-            colSummary.reduce(::nullableSum) ?: BigDecimal.ZERO
+            colSummary.fold(null, ::nullableSum) ?: BigDecimal.ZERO
         )
     }
 
@@ -54,6 +54,7 @@ class PanelService(private val itemRepository: ItemRepository) {
         else BigDecimal.ZERO
 
         return PanelInfo(
+            period,
             itemRepository.listByPeriod(period, userId).toList(),
             itemRepository.monthSummary(period, userId).toList(),
             (periodSummary ?: BigDecimal.ZERO),
@@ -68,7 +69,9 @@ class PanelService(private val itemRepository: ItemRepository) {
 
     fun mean(values: List<BigDecimal?>) = DescriptiveStatistics().let { stats ->
         values.forEach { if (it != null) stats.addValue(it.toDouble()) }
-        values.indices.map { stats.mean.toBigDecimal().setScale(2, RoundingMode.HALF_DOWN) }
+        values.indices.map {
+            if (stats.n > 0) stats.mean.toBigDecimal().setScale(2, RoundingMode.HALF_DOWN) else BigDecimal.ZERO
+        }
     }
 
     fun simpleRegression(values: List<BigDecimal?>) = SimpleRegression().let { reg ->

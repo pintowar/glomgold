@@ -1,9 +1,14 @@
 package io.kotest.provided
 
+import com.github.pintowar.controller.AuthClient
 import com.github.pintowar.model.Item
+import com.github.pintowar.model.User
 import io.github.serpro69.kfaker.faker
+import io.micronaut.security.authentication.UsernamePasswordCredentials
 import java.math.RoundingMode
 import java.time.YearMonth
+import java.time.ZoneId
+import java.util.*
 
 fun fakeItems(userId: Long, numItems: Int = 25): List<Item> {
     val faker = faker { fakerConfig { randomSeed = 42 } }
@@ -16,3 +21,33 @@ fun fakeItems(userId: Long, numItems: Int = 25): List<Item> {
         }
     }
 }
+
+fun fakeUsers(): Map<String, User> {
+    return listOf(
+        User(
+            username = "admin",
+            name = "Administrator",
+            email = "admin@glomgold.com",
+            locale = Locale.US,
+            timezone = ZoneId.of("UTC"),
+            admin = true
+        ).apply { setPassword("admin") },
+        User(
+            username = "scrooge",
+            name = "Scrooge McDuck",
+            email = "scrooge@glomgold.com",
+            locale = Locale.US,
+            timezone = ZoneId.of("UTC"),
+        ).apply { setPassword("scrooge") },
+        User(
+            username = "donald",
+            name = "Donald Duck",
+            email = "donald@glomgold.com",
+            locale = Locale("pt", "BR"),
+            timezone = ZoneId.of("America/Fortaleza")
+        ).apply { setPassword("donald") }
+    ).associateBy { it.username }
+}
+
+suspend fun authHeader(authClient: AuthClient, username: String): String =
+    "Bearer ${authClient.login(UsernamePasswordCredentials(username, username)).accessToken}"

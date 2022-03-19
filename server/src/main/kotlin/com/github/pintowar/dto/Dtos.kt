@@ -40,6 +40,7 @@ data class ItemBody(
 
 @Introspected
 data class PanelInfo(
+    val period: YearMonth,
     val items: List<Item>,
     val stats: List<ItemSummary>,
     val total: BigDecimal,

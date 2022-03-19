@@ -8,3 +8,8 @@ r2dbc:
 
 liquibase:
   enabled: false
+
+logger:
+  levels:
+#    io.micronaut.http.client: TRACE
+#    io.micronaut.data.query: TRACE

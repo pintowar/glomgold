@@ -20,8 +20,8 @@ class EntityListeners(private val validator: Validator) : KLogging() {
 
     private fun generalValidation(entity: Entity): Boolean {
         val violations = validator.validate(entity)
-        return if (violations.isNotEmpty())
-            throw ConstraintViolationException(violations)
-        else true
+        return violations.isEmpty().also {
+            if (!it) throw ConstraintViolationException(violations)
+        }
     }
 }
