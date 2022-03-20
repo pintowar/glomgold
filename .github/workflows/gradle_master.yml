@@ -62,7 +62,7 @@ jobs:
           echo "::set-output name=latest_tag::$LATEST_TAG"
       - name: Last Release
         id: last_release
-        uses: pozetroninc/github-action-get-latest-release@master
+        uses: pozetroninc/github-action-get-latest-release
         with:
           repository: ${{ github.repository }}
           excludes: prerelease,draft
