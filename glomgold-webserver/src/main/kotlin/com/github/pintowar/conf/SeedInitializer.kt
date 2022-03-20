@@ -4,6 +4,7 @@ import com.github.pintowar.model.Item
 import com.github.pintowar.model.User
 import com.github.pintowar.repo.ItemRepository
 import com.github.pintowar.repo.UserRepository
+import io.micronaut.context.annotation.Value
 import io.micronaut.context.env.Environment
 import io.micronaut.runtime.event.annotation.EventListener
 import io.micronaut.runtime.server.event.ServerStartupEvent
@@ -19,12 +20,13 @@ import java.util.*
 
 @Singleton
 class SeedInitializer(
+    @Value("glomgold.random.seed") randomSeed: String,
     env: Environment,
     private val userRepo: UserRepository,
     private val itemRepo: ItemRepository
 ) : KLogging() {
 
-    private val random = SecureRandom("42".toByteArray())
+    private val random = SecureRandom(randomSeed.toByteArray())
     private val isProd = env.activeNames.contains("prod")
     private val isDev = env.activeNames.contains("dev")
 
