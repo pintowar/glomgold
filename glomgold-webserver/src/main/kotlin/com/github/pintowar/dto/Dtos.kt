@@ -114,7 +114,7 @@ data class UserCommand(
     fun toUser() = User(id, version, username, name, email, password, enabled, admin, locale, timezone)
 }
 
-fun User.toUserCommand() = UserCommand(
+fun User.toCommand() = UserCommand(
     this.id, this.version, this.username!!, this.name!!, this.email!!,
     this.passwordHash!!, this.enabled!!, this.admin!!, this.locale!!, this.timezone!!
 )
