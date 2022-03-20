@@ -5,11 +5,8 @@ import com.github.pintowar.model.Item
 import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.Query
 import io.micronaut.data.annotation.Version
-import io.micronaut.data.model.Pageable
 import io.micronaut.data.model.query.builder.sql.Dialect
 import io.micronaut.data.r2dbc.annotation.R2dbcRepository
-import io.micronaut.data.repository.jpa.kotlin.CoroutineJpaSpecificationExecutor
-import io.micronaut.data.repository.kotlin.CoroutineCrudRepository
 import kotlinx.coroutines.flow.Flow
 import java.math.BigDecimal
 import java.time.YearMonth
