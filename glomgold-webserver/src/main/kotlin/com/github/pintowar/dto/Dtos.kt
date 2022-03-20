@@ -118,7 +118,7 @@ data class UserCommand(
         }
 }
 
-fun User.toUserCommand() = UserCommand(
+fun User.toCommand() = UserCommand(
     this.id, this.version, this.username, this.name, this.email,
     this.passwordHash, this.enabled, this.admin, this.locale, this.timezone
 )
