@@ -27,9 +27,10 @@ abstract class CrudRestController<E, CMD, ID>(private val repository: EntityRepo
         .let { if (it != null) HttpResponse.ok(entityToCmd(it)) else HttpResponse.notFound() }
 
     @Patch("/{id}")
-    open suspend fun update(@PathVariable id: ID, @Body cmd: CMD): HttpResponse<CMD> = repository.findById(id)?.let { _ ->
-        repository.update(cmdToEntity(cmd)).let { HttpResponse.ok(entityToCmd(it)) }
-    } ?: HttpResponse.notFound()
+    open suspend fun update(@PathVariable id: ID, @Body cmd: CMD): HttpResponse<CMD> =
+        repository.findById(id)?.let { _ ->
+            repository.update(cmdToEntity(cmd)).let { HttpResponse.ok(entityToCmd(it)) }
+        } ?: HttpResponse.notFound()
 
     @Delete("/{id}")
     open suspend fun delete(@PathVariable id: ID): Int = repository.deleteById(id)

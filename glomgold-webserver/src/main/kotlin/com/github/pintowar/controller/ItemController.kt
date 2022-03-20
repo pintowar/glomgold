@@ -6,9 +6,7 @@ import com.github.pintowar.model.Item
 import com.github.pintowar.repo.ItemRepository
 import com.github.pintowar.repo.UserRepository
 import io.micronaut.http.HttpResponse
-import io.micronaut.http.annotation.Body
 import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.PathVariable
 
 @Controller("/api/items")
 class ItemController(
