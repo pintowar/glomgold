@@ -1,9 +1,6 @@
 package com.github.pintowar.model
 
-import io.micronaut.data.annotation.Index
-import io.micronaut.data.annotation.Indexes
-import io.micronaut.data.annotation.MappedEntity
-import io.micronaut.data.annotation.TypeDef
+import io.micronaut.data.annotation.*
 import io.micronaut.data.model.DataType
 import io.micronaut.data.model.naming.NamingStrategies.UnderScoreSeparatedLowerCase
 import java.math.BigDecimal
@@ -17,12 +14,11 @@ import javax.validation.constraints.NotNull
 )
 @MappedEntity(value = "items", namingStrategy = UnderScoreSeparatedLowerCase::class)
 data class Item(
-    @field:NotBlank var description: String?,
-    @field:NotNull var value: BigDecimal?,
-    @field:TypeDef(type = DataType.TIMESTAMP) var period: YearMonth?,
-    @field:NotNull var userId: Long?
-//    @field:Relation(Relation.Kind.MANY_TO_ONE)
-//    @field:NotNull var user: User?,
+    @field:NotBlank var description: String,
+    @field:NotNull var value: BigDecimal,
+    @field:TypeDef(type = DataType.TIMESTAMP) var period: YearMonth,
+    @field:Relation(Relation.Kind.MANY_TO_ONE, cascade = [Relation.Cascade.NONE])
+    @field:NotNull var user: User,
 ) : Entity() {
 
     constructor(
@@ -31,10 +27,10 @@ data class Item(
         description: String,
         value: BigDecimal,
         period: YearMonth,
-        userId: Long,
+        user: User,
         createdAt: Instant? = null,
         updatedAt: Instant? = null
-    ) : this(description, value, period, userId) {
+    ) : this(description, value, period, user) {
         this.id = id
         this.version = version
         this.createdAt = createdAt

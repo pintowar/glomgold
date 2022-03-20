@@ -66,7 +66,7 @@ class UserRepositoryTest(
                 description = "Water",
                 value = BigDecimal(10),
                 period = YearMonth.now(),
-                userId = user.id!!
+                user = user
             )
 
             val savedItem = itemRepo.save(item)

@@ -20,7 +20,7 @@ class UserController(userRepository: UserRepository) : CrudRestController<User, 
     @Get("/timezones")
     fun timezones(): HttpResponse<List<String>> = HttpResponse.ok(ZoneId.getAvailableZoneIds().sorted())
 
-    override fun cmdToEntity(command: UserCommand): User = command.toUser()
+    override suspend fun cmdToEntity(command: UserCommand): User = command.toUser()
 
-    override fun entityToCmd(entity: User): UserCommand = entity.toCommand()
+    override suspend fun entityToCmd(entity: User): UserCommand = entity.toCommand()
 }

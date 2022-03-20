@@ -87,7 +87,7 @@ class SeedInitializer(
         )
         return (0..3).flatMap { extraMonth ->
             items.filter { random.nextDouble() >= 0.3 }.map { (desc, value) ->
-                Item(desc, BigDecimal(value), YearMonth.now().plusMonths(extraMonth.toLong()), user.id!!)
+                Item(desc, BigDecimal(value), YearMonth.now().plusMonths(extraMonth.toLong()), user)
             }
         }
     }

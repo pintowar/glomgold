@@ -55,7 +55,7 @@ class PanelService(private val itemRepository: ItemRepository) {
 
         return PanelInfo(
             period,
-            itemRepository.listByPeriod(period, userId).toList(),
+            itemRepository.findByPeriodAndUserIdOrderByCreatedAtAndDescription(period, userId).toList(),
             itemRepository.monthSummary(period, userId).toList(),
             (periodSummary ?: BigDecimal.ZERO),
             diffSummary

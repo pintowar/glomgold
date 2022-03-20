@@ -22,15 +22,15 @@ import javax.validation.constraints.NotNull
 )
 @MappedEntity(value = "users", namingStrategy = UnderScoreSeparatedLowerCase::class)
 data class User(
-    @field:NotBlank var username: String?,
-    @field:NotBlank var name: String?,
-    @field:Email var email: String?,
-    @field:NotBlank var passwordHash: String? = "",
-    @field:NotNull var enabled: Boolean? = true,
-    @field:NotNull var admin: Boolean? = false,
-    @field:NotBlank var locale: Locale? = Locale.getDefault(),
+    @field:NotBlank var username: String,
+    @field:NotBlank var name: String,
+    @field:Email var email: String,
+    @field:NotBlank var passwordHash: String = "",
+    @field:NotNull var enabled: Boolean = true,
+    @field:NotNull var admin: Boolean = false,
+    @field:NotBlank var locale: Locale = Locale.getDefault(),
     @field:TypeDef(type = DataType.STRING)
-    @field:NotBlank var timezone: ZoneId? = ZoneId.systemDefault(),
+    @field:NotBlank var timezone: ZoneId = ZoneId.systemDefault(),
 ) : Entity() {
 
     constructor(
@@ -65,12 +65,12 @@ data class User(
 
     fun checkPassword(passwd: String): Boolean {
         logger.info { "Checking password" }
-        return checkPasswordHash(this.passwordHash!!, passwd).also {
+        return checkPasswordHash(this.passwordHash, passwd).also {
             logger.info { "Password checked" }
         }
     }
 
-    fun roles() = listOf(if (true == admin) "ROLE_ADMIN" else "ROLE_USER")
+    fun roles() = listOf(if (admin) "ROLE_ADMIN" else "ROLE_USER")
 
     fun attributes() = Currency.getInstance(locale).let { currency ->
         mapOf(

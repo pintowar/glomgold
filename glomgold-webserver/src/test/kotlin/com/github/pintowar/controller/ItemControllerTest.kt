@@ -48,9 +48,9 @@ class ItemControllerTest(
     }
 
     describe("paginate 25 items") {
-        val userId = userRepo.findByUsername("admin")?.id!!
+        val user = userRepo.findByUsername("admin")!!
         val totalItems = 25
-        itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+        itemRepo.saveAll(fakeItems(user, totalItems)).collect()
         val allItems = itemRepo.findAll().toList().sortedBy { it.id }
 
         val token = authHeader(authClient, testUsername)
@@ -70,11 +70,11 @@ class ItemControllerTest(
     }
 
     describe("save item") {
-        val userId = userRepo.findByUsername("admin")?.id!!
+        val user = userRepo.findByUsername("admin")!!
         val token = authHeader(authClient, testUsername)
 
-        fakeItems(userId, 5).forEach { item ->
-            val resp = itemClient.create(token, item.toCommand()).body.get().toItem()
+        fakeItems(user, 5).forEach { item ->
+            val resp = itemClient.create(token, item.toCommand()).body.get().toItem(userRepo)
 
             resp.id.shouldNotBeNull()
             resp.version shouldBe 0
@@ -84,14 +84,14 @@ class ItemControllerTest(
     }
 
     describe("read item") {
-        val userId = userRepo.findByUsername("admin")?.id!!
+        val user = userRepo.findByUsername("admin")!!
         val totalItems = 5
-        itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+        itemRepo.saveAll(fakeItems(user, totalItems)).collect()
         val allItems = itemRepo.findAll().toList()
         val token = authHeader(authClient, testUsername)
 
         allItems.forEach { item ->
-            val resp = itemClient.read(token, item.id!!).body.get().toItem()
+            val resp = itemClient.read(token, item.id!!).body.get().toItem(userRepo)
 
             resp.id shouldBe item.id
             resp.version shouldBe 0
@@ -101,9 +101,9 @@ class ItemControllerTest(
     }
 
     describe("update item") {
-        val userId = userRepo.findByUsername("admin")?.id!!
+        val user = userRepo.findByUsername("admin")!!
         val totalItems = 5
-        itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+        itemRepo.saveAll(fakeItems(user, totalItems)).collect()
         val allItems = itemRepo.findAll().toList()
         val token = authHeader(authClient, testUsername)
 
@@ -114,7 +114,7 @@ class ItemControllerTest(
                 value = BigDecimal(9.99)
                 period = now
             }
-            val resp = itemClient.update(token, item.id!!, updatedItem.toCommand()).body.get().toItem()
+            val resp = itemClient.update(token, item.id!!, updatedItem.toCommand()).body.get().toItem(userRepo)
 
             resp.id shouldBe item.id
             resp.version shouldBe 1
@@ -125,9 +125,9 @@ class ItemControllerTest(
     }
 
     describe("delete item") {
-        val userId = userRepo.findByUsername("admin")?.id!!
+        val user = userRepo.findByUsername("admin")!!
         val totalItems = 5
-        itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+        itemRepo.saveAll(fakeItems(user, totalItems)).collect()
         val allItems = itemRepo.findAll().toList()
         val token = authHeader(authClient, testUsername)
 

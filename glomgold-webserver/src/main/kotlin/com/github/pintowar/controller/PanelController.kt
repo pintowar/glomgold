@@ -4,7 +4,9 @@ import com.github.pintowar.dto.ItemBody
 import com.github.pintowar.dto.PanelAnnualReport
 import com.github.pintowar.dto.PanelInfo
 import com.github.pintowar.model.Item
+import com.github.pintowar.model.User
 import com.github.pintowar.repo.ItemRepository
+import com.github.pintowar.repo.UserRepository
 import com.github.pintowar.service.PanelService
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
@@ -15,7 +17,11 @@ import kotlinx.coroutines.flow.toSet
 import java.time.YearMonth
 
 @Controller("/api/panel")
-class PanelController(private val itemRepository: ItemRepository, private val panelService: PanelService) {
+class PanelController(
+    private val itemRepository: ItemRepository,
+    private val userRepository: UserRepository,
+    private val panelService: PanelService
+) {
 
     @Get("/{?period}")
     suspend fun panel(auth: Authentication, @QueryValue period: YearMonth?) =
@@ -29,7 +35,7 @@ class PanelController(private val itemRepository: ItemRepository, private val pa
 
     @Post("/add-item")
     suspend fun addItem(auth: Authentication, @Body item: ItemBody): HttpResponse<PanelInfo> {
-        itemRepository.save(item.toItem(authId(auth)))
+        itemRepository.save(item.toItem(authUser(auth)))
         return HttpResponse.ok(panelService.panelInfo(authId(auth), item.period))
     }
 
@@ -37,21 +43,21 @@ class PanelController(private val itemRepository: ItemRepository, private val pa
     suspend fun editItem(auth: Authentication, @PathVariable id: Long, @Body item: ItemBody): HttpResponse<PanelInfo> =
         itemRepository.findByIdAndUserId(id, authId(auth))?.let { foundItem ->
             itemRepository.update(id, foundItem.version!!, item.description, item.value)
-            HttpResponse.ok(panelService.panelInfo(authId(auth), foundItem.period!!))
+            HttpResponse.ok(panelService.panelInfo(authId(auth), foundItem.period))
         } ?: HttpResponse.notFound()
 
     @Delete("/remove-item/{id}")
     suspend fun removeItem(auth: Authentication, @PathVariable id: Long): HttpResponse<PanelInfo> =
         itemRepository.findByIdAndUserId(id, authId(auth))?.let { item ->
             itemRepository.delete(item)
-            HttpResponse.ok(panelService.panelInfo(authId(auth), item.period!!))
+            HttpResponse.ok(panelService.panelInfo(authId(auth), item.period))
         } ?: HttpResponse.notFound()
 
     @Post("/copy-items")
     suspend fun copyItems(auth: Authentication, @Body items: List<ItemBody>): HttpResponse<List<Item>> {
-        val itemsToCopy = items.map { it.toItem(authId(auth)) }.groupBy { it.period }
+        val itemsToCopy = items.map { it.toItem(authUser(auth)) }.groupBy { it.period }
             .flatMap { (period, periodItems) ->
-                val nextPeriod = period!!.plusMonths(1)
+                val nextPeriod = period.plusMonths(1)
                 val nextItemsDesc = itemRepository.findByUserIdAndPeriod(authId(auth), nextPeriod)
                     .map { it.description }.toSet()
                 periodItems.filter { it.description !in nextItemsDesc }.map { it.copy(period = nextPeriod) }
@@ -61,4 +67,6 @@ class PanelController(private val itemRepository: ItemRepository, private val pa
     }
 
     private fun authId(auth: Authentication): Long = auth.attributes["userId"] as Long
+
+    private suspend fun authUser(auth: Authentication): User = userRepository.findByUsername(auth.name)!!
 }

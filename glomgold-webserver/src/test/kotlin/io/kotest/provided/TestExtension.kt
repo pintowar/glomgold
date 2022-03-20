@@ -10,14 +10,14 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 
-fun fakeItems(userId: Long, numItems: Int = 25): List<Item> {
+fun fakeItems(user: User, numItems: Int = 25): List<Item> {
     val faker = faker { fakerConfig { randomSeed = 42 } }
     return (0 until numItems).map {
         faker.randomProvider.randomClassInstance() {
             typeGenerator { faker.coffee.blendName() }
             typeGenerator { (faker.random.nextDouble() * 100).toBigDecimal().setScale(2, RoundingMode.HALF_UP) }
             typeGenerator { YearMonth.now().plusMonths(faker.random.nextLong(24)) }
-            typeGenerator { userId }
+            typeGenerator { user }
         }
     }
 }
@@ -46,7 +46,7 @@ fun fakeUsers(): Map<String, User> {
             locale = Locale("pt", "BR"),
             timezone = ZoneId.of("America/Fortaleza")
         ).apply { setPassword("donald") }
-    ).associateBy { it.username!! }
+    ).associateBy { it.username }
 }
 
 suspend fun authHeader(authClient: AuthClient, username: String): String =

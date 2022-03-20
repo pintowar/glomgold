@@ -2,6 +2,7 @@ package com.github.pintowar.dto
 
 import com.github.pintowar.model.Item
 import com.github.pintowar.model.User
+import com.github.pintowar.repo.UserRepository
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
@@ -29,11 +30,11 @@ data class ItemBody(
     val description: String,
     val value: BigDecimal
 ) {
-    fun toItem(userId: Long) = Item(
+    fun toItem(user: User) = Item(
         description,
         value,
         period,
-        userId
+        user
     )
 }
 
@@ -84,17 +85,18 @@ data class ItemCommand(
     @field:NotBlank val month: Int,
     @field:NotNull val userId: Long
 ) {
-    fun toItem() = Item(id, version, description, value, YearMonth.of(year, month), userId)
+    suspend fun toItem(userRepository: UserRepository) =
+        Item(id, version, description, value, YearMonth.of(year, month), userRepository.findById(userId)!!)
 }
 
 fun Item.toCommand() = ItemCommand(
     this.id,
     this.version,
-    this.description!!,
-    this.value!!,
-    this.period?.year!!,
-    this.period?.monthValue!!,
-    this.userId!!
+    this.description,
+    this.value,
+    this.period.year,
+    this.period.monthValue,
+    this.user.id!!
 )
 
 @Introspected
