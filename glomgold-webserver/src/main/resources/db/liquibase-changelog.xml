@@ -5,4 +5,5 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
     <include file="changelog/20220312150331-create-user-items.sql" relativeToChangelogFile="true"/>
     <include file="changelog/20220312182843-add-locale-zone-to-user.sql" relativeToChangelogFile="true"/>
+    <include file="changelog/20220320194314-add-user-fk-on-items.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>
