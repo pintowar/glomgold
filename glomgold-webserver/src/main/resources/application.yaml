@@ -59,3 +59,7 @@ liquibase:
   datasources:
     liquibase:
       change-log: classpath:db/liquibase-changelog.xml
+
+glomgold:
+  random:
+    seed: 42
