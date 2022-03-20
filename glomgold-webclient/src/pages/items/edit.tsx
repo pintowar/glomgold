@@ -22,9 +22,6 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
         defaultValue: postData?.userId,
     });
 
-    const [selectedTab, setSelectedTab] =
-        useState<"write" | "preview">("write");
-
     return (
         <Edit saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">

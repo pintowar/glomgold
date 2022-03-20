@@ -20,9 +20,6 @@ export const ItemCreate: React.FC<IResourceComponentsProps> = () => {
         optionValue: "id",
     });
 
-    const [selectedTab, setSelectedTab] =
-        useState<"write" | "preview">("write");
-
     return (
         <Create saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">

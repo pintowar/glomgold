@@ -8,6 +8,8 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import java.time.ZoneId
+import java.util.*
 
 @Controller("/api/users")
 class UserController(private val userRepository: UserRepository) {
@@ -33,4 +35,11 @@ class UserController(private val userRepository: UserRepository) {
 
     @Delete("/{id}")
     suspend fun delete(@PathVariable id: Long) = userRepository.deleteById(id)
+
+    @Get("/locales")
+    fun locales(): HttpResponse<List<Locale>> =
+        HttpResponse.ok(Locale.getAvailableLocales().sortedBy { it.toLanguageTag() })
+
+    @Get("/timezones")
+    fun timezones(): HttpResponse<List<String>> = HttpResponse.ok(ZoneId.getAvailableZoneIds().sorted())
 }
