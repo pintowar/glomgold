@@ -34,10 +34,10 @@ class SeedInitializer(
             logger.info("starting data initialization at StartUpEvent: $e")
             runBlocking {
                 val allItems = genUsers()
-                    .filter { userRepo.findByUsername(it.username) == null }
-                    .filter { !isProd || it.admin } // if (isProd) it.admin else true
+                    .filter { userRepo.findByUsername(it.username!!) == null }
+                    .filter { !isProd || it.admin!! } // if (isProd) it.admin else true
                     .map { userRepo.save(it) }
-                    .filterNot { it.admin }
+                    .filterNot { it.admin!! }
                     .flatMap { user ->
                         val items = genItems(user)
                         itemRepo.saveAll(items).toList()

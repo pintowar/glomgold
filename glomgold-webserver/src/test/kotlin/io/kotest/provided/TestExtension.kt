@@ -46,7 +46,7 @@ fun fakeUsers(): Map<String, User> {
             locale = Locale("pt", "BR"),
             timezone = ZoneId.of("America/Fortaleza")
         ).apply { setPassword("donald") }
-    ).associateBy { it.username }
+    ).associateBy { it.username!! }
 }
 
 suspend fun authHeader(authClient: AuthClient, username: String): String =

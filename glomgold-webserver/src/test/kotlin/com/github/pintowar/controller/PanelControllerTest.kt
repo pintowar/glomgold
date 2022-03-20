@@ -149,10 +149,11 @@ class PanelControllerTest(
             }
             itemRepo.saveAll(nextItems).collect()
 
-            val result = panelClient.copyItems(token, actualItems.map { ItemBody(it.period, it.description, it.value) })
+            val result =
+                panelClient.copyItems(token, actualItems.map { ItemBody(it.period!!, it.description!!, it.value!!) })
 
             result.body.get().size shouldBe (totalItems - totalItemsNextMonth)
-            result.body.get().count { it.value < BigDecimal(400) } shouldBe 0
+            result.body.get().count { it.value!! < BigDecimal(400) } shouldBe 0
             result.body.get().all { it.period == actualPeriod.plusMonths(1) } shouldBe true
             result.body.get().all { it.userId == userId } shouldBe true
         }

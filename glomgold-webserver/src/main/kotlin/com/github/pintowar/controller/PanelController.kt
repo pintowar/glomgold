@@ -37,21 +37,21 @@ class PanelController(private val itemRepository: ItemRepository, private val pa
     suspend fun editItem(auth: Authentication, @PathVariable id: Long, @Body item: ItemBody): HttpResponse<PanelInfo> =
         itemRepository.findByIdAndUserId(id, authId(auth))?.let { foundItem ->
             itemRepository.update(id, foundItem.version!!, item.description, item.value)
-            HttpResponse.ok(panelService.panelInfo(authId(auth), foundItem.period))
+            HttpResponse.ok(panelService.panelInfo(authId(auth), foundItem.period!!))
         } ?: HttpResponse.notFound()
 
     @Delete("/remove-item/{id}")
     suspend fun removeItem(auth: Authentication, @PathVariable id: Long): HttpResponse<PanelInfo> =
         itemRepository.findByIdAndUserId(id, authId(auth))?.let { item ->
             itemRepository.delete(item)
-            HttpResponse.ok(panelService.panelInfo(authId(auth), item.period))
+            HttpResponse.ok(panelService.panelInfo(authId(auth), item.period!!))
         } ?: HttpResponse.notFound()
 
     @Post("/copy-items")
     suspend fun copyItems(auth: Authentication, @Body items: List<ItemBody>): HttpResponse<List<Item>> {
         val itemsToCopy = items.map { it.toItem(authId(auth)) }.groupBy { it.period }
             .flatMap { (period, periodItems) ->
-                val nextPeriod = period.plusMonths(1)
+                val nextPeriod = period!!.plusMonths(1)
                 val nextItemsDesc = itemRepository.findByUserIdAndPeriod(authId(auth), nextPeriod)
                     .map { it.description }.toSet()
                 periodItems.filter { it.description !in nextItemsDesc }.map { it.copy(period = nextPeriod) }

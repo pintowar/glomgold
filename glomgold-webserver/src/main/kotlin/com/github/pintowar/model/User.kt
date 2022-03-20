@@ -8,11 +8,15 @@ import io.micronaut.data.model.DataType
 import io.micronaut.data.model.naming.NamingStrategies.UnderScoreSeparatedLowerCase
 import mu.KLogging
 import org.mindrot.jbcrypt.BCrypt
+import java.math.BigDecimal
 import java.security.SecureRandom
+import java.time.Instant
+import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotNull
 
 @Indexes(
     Index(name = "user_username", columns = ["username"], unique = true),
@@ -20,16 +24,37 @@ import javax.validation.constraints.NotBlank
 )
 @MappedEntity(value = "users", namingStrategy = UnderScoreSeparatedLowerCase::class)
 data class User(
-    @field:NotBlank var username: String,
-    @field:NotBlank var name: String,
-    @field:Email var email: String,
-    @field:NotBlank var passwordHash: String = "",
-    var enabled: Boolean = true,
-    var admin: Boolean = false,
-    @field:NotBlank var locale: Locale = Locale.getDefault(),
+    @field:NotBlank var username: String?,
+    @field:NotBlank var name: String?,
+    @field:Email var email: String?,
+    @field:NotBlank var passwordHash: String? = "",
+    @field:NotNull var enabled: Boolean? = true,
+    @field:NotNull var admin: Boolean? = false,
+    @field:NotBlank var locale: Locale? = Locale.getDefault(),
     @field:TypeDef(type = DataType.STRING)
-    @field:NotBlank var timezone: ZoneId = ZoneId.systemDefault(),
+    @field:NotBlank var timezone: ZoneId? = ZoneId.systemDefault(),
 ) : Entity() {
+
+    constructor(
+        id: Long?,
+        version: Int?,
+        username: String,
+        name: String,
+        email: String,
+        password: String,
+        enabled: Boolean = true,
+        admin: Boolean = false,
+        locale: Locale = Locale.getDefault(),
+        timezone: ZoneId = ZoneId.systemDefault(),
+        createdAt: Instant? = null,
+        updatedAt: Instant? = null
+    ) : this(username, name, email, "", enabled, admin, locale, timezone) {
+        this.id = id
+        this.version = version
+        this.createdAt = createdAt
+        this.updatedAt = updatedAt
+        setPassword(password)
+    }
 
     companion object : KLogging() {
         private val secureRandom = SecureRandom()
@@ -42,17 +67,17 @@ data class User(
 
     fun checkPassword(passwd: String): Boolean {
         logger.info { "Checking password" }
-        return checkPasswordHash(this.passwordHash, passwd).also {
+        return checkPasswordHash(this.passwordHash!!, passwd).also {
             logger.info { "Password checked" }
         }
     }
 
-    fun roles() = listOf(if (admin) "ROLE_ADMIN" else "ROLE_USER")
+    fun roles() = listOf(if (true == admin) "ROLE_ADMIN" else "ROLE_USER")
 
     fun attributes() = Currency.getInstance(locale).let { currency ->
         mapOf(
             "userId" to id,
-            "locale" to locale.toLanguageTag(),
+            "locale" to locale?.toLanguageTag(),
             "currency" to currency.currencyCode,
             "symbol" to currency.symbol
         )

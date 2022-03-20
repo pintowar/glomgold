@@ -84,16 +84,17 @@ data class ItemCommand(
     @field:NotBlank val month: Int,
     @field:NotNull val userId: Long
 ) {
-
-    fun toItem() = Item(description, value, YearMonth.of(year, month), userId)
-        .apply {
-            id = this@ItemCommand.id
-            version = this@ItemCommand.version
-        }
+    fun toItem() = Item(id, version, description, value, YearMonth.of(year, month), userId)
 }
 
 fun Item.toCommand() = ItemCommand(
-    this.id, this.version, this.description, this.value, this.period.year, this.period.monthValue, this.userId
+    this.id,
+    this.version,
+    this.description!!,
+    this.value!!,
+    this.period?.year!!,
+    this.period?.monthValue!!,
+    this.userId!!
 )
 
 @Introspected
@@ -110,15 +111,10 @@ data class UserCommand(
     var timezone: ZoneId = ZoneId.systemDefault()
 ) {
 
-    fun toUser() = User(username, name, email, enabled = enabled, admin = admin, locale = locale, timezone = timezone)
-        .apply {
-            id = this@UserCommand.id
-            version = this@UserCommand.version
-            setPassword(password)
-        }
+    fun toUser() = User(id, version, username, name, email, password, enabled, admin, locale, timezone)
 }
 
 fun User.toUserCommand() = UserCommand(
-    this.id, this.version, this.username, this.name, this.email,
-    this.passwordHash, this.enabled, this.admin, this.locale, this.timezone
+    this.id, this.version, this.username!!, this.name!!, this.email!!,
+    this.passwordHash!!, this.enabled!!, this.admin!!, this.locale!!, this.timezone!!
 )

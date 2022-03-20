@@ -24,7 +24,7 @@ class AuthenticationProviderUserPassword(private val userRepo: UserRepository) :
         } ?: fail("No user found!")
     }.asPublisher()
 
-    private fun response(user: User) = AuthenticationResponse.success(user.username, user.roles(), user.attributes())
+    private fun response(user: User) = AuthenticationResponse.success(user.username!!, user.roles(), user.attributes())
 
     private fun fail(message: String): Unit = throw AuthenticationResponse.exception(message)
 }
