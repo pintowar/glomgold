@@ -15,9 +15,7 @@ import java.math.BigDecimal
 import java.time.YearMonth
 
 @R2dbcRepository(dialect = Dialect.POSTGRES)
-interface ItemRepository : CoroutineCrudRepository<Item, Long>, CoroutineJpaSpecificationExecutor<Item> {
-
-    fun findAll(pageable: Pageable): Flow<Item>
+interface ItemRepository : EntityRepository<Item, Long> {
 
     fun findByUserIdAndPeriod(userId: Long, period: YearMonth): Flow<Item>
 
