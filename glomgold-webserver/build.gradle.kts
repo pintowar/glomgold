@@ -138,6 +138,13 @@ tasks {
             }
         }
     }
+
+    register("coverageReport") {
+        dependsOn("kotest", "jacocoTestReport", "sonarqube")
+        doLast {
+            logger.quiet("Finishing Coverage Report!!")
+        }
+    }
 }
 
 graalvmNative {

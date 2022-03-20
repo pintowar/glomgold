@@ -33,6 +33,8 @@ release {
         requireBranch = "master"
     }
 }
+
 tasks.afterReleaseBuild {
-    dependsOn(":glomgold-webserver:dockerPushNative")
+    val webServ = ":glomgold-webserver"
+    dependsOn("$webServ:coverageReport", "$webServ:dockerPushNative")
 }
