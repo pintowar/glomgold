@@ -75,7 +75,7 @@ data class User(
     fun attributes() = Currency.getInstance(locale).let { currency ->
         mapOf(
             "userId" to id,
-            "locale" to locale?.toLanguageTag(),
+            "locale" to locale.toLanguageTag(),
             "currency" to currency.currencyCode,
             "symbol" to currency.symbol
         )
