@@ -12,6 +12,7 @@ import { IItem } from '../../interfaces'
 
 import { PeriodSummaryCard, PeriodNavigationCard, MonthItemsCard, MonthStatsCard } from './components/control'
 import { useGetIdentity } from "@pankod/refine-core";
+import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../constants";
 
 interface ControlPanelData {
     items: IItem[]
@@ -26,9 +27,9 @@ interface ControlPanelProps {
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => { 
     const { data: identity } = useGetIdentity<{locale: string; currency: string; symbol: string}>();
-    const locale = identity?.locale || 'en_USD'
-    const currency = identity?.currency || 'USD'
-    const symbol = identity?.symbol || '$'
+    const locale = identity?.locale || DEFAULT_LOCALE
+    const currency = identity?.currency || DEFAULT_CURRENCY
+    const symbol = identity?.symbol || DEFAULT_SYMBOL
 
     const periodFormat = 'YYYY-MM';
     const location = useLocation();

@@ -10,6 +10,7 @@ import { PanelLayout } from "./layout";
 import { ItemChart, PeriodChart, AnnualTable } from './components/report';
 import { IPanelAnnualReport } from "interfaces";
 import { useGetIdentity } from "@pankod/refine-core";
+import { DEFAULT_LOCALE, DEFAULT_CURRENCY } from "../../constants";
 
 interface ReportPanelProps {
     axios: AxiosInstance
@@ -17,6 +18,9 @@ interface ReportPanelProps {
 
 export const ReportPanel: React.FC<ReportPanelProps> = ({axios}) => {
     const { data: identity } = useGetIdentity<{locale: string; currency: string}>();
+    const locale = identity?.locale || DEFAULT_LOCALE
+    const currency = identity?.currency || DEFAULT_CURRENCY
+
     const periodFormat = 'YYYY';
     const location = useLocation();
     const navigate = useNavigate();
@@ -66,7 +70,7 @@ export const ReportPanel: React.FC<ReportPanelProps> = ({axios}) => {
                             <Space direction="vertical" size={12} style={{width: '100%'}}>
                                 <Tabs>
                                     <Tabs.TabPane tab="Table" key={1}>
-                                        <AnnualTable locale={identity?.locale || 'en_US'} currency={identity?.currency || 'USD'}
+                                        <AnnualTable locale={locale} currency={currency}
                                             columns={dataTable.columns} rowIndex={dataTable.rowIndex} data={dataTable.data}
                                             rowSummary={dataTable.rowSummary} colSummary={dataTable.colSummary} total={dataTable.total}/>
                                     </Tabs.TabPane>
