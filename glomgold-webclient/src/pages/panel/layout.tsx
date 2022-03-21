@@ -3,18 +3,18 @@ import { useLocation } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
 
 import './panel.css'
-import { useLogout } from "@pankod/refine-core";
+import { useAuthenticated, useLogout, usePermissions } from "@pankod/refine-core";
 import routerProvider from "@pankod/refine-react-router-v6";
-import { LocalStorage } from "LocalStorage";
 
 const { Link } = routerProvider;
 
 const { Header, Content, Footer } = Layout;
 
 export const PanelLayout: React.FC = ({children}) => {
-    const storage = LocalStorage.getInstance()
-    const isLogged = storage.isLoggedIn()
-    const isAdmin = storage.getUserRoles().includes('ROLE_ADMIN')
+    const { isSuccess } = useAuthenticated();
+    const { data: permissionsData } = usePermissions();
+
+    const isAdmin = permissionsData?.includes('ROLE_ADMIN');
 
     const { mutate: logout } = useLogout();
 
@@ -23,7 +23,7 @@ export const PanelLayout: React.FC = ({children}) => {
 
     const handleClick = (info: any) => setSelectedMenu(info.key)
 
-    return isLogged ? (
+    return isSuccess ? (
         <Layout>
             <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
                 <div className="logo">

@@ -35,7 +35,7 @@ export const generateAuthProvider = (axios: AxiosInstance): AuthProvider => {
     })
 
     return ({
-        login: async ({ username, password, remember }) => {
+        login: async ({ username, password }) => {
             const { data, status } = await axios.post('/login', { username, password });
             if (status === 200) {
                 storage.setUser(data)
@@ -62,12 +62,7 @@ export const generateAuthProvider = (axios: AxiosInstance): AuthProvider => {
             return storage.getUserRoles()
         },
         getUserIdentity: async () => {
-            const { data, status } = await axios.get(`${API_URL}/auth/me`);
-            if (status === 200) {
-                return data;
-            } else {
-                throw Error();
-            }
+            return storage.getUser()
         },
     });
 }

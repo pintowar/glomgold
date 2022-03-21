@@ -11,7 +11,7 @@ import './panel.css'
 import { IItem } from '../../interfaces'
 
 import { PeriodSummaryCard, PeriodNavigationCard, MonthItemsCard, MonthStatsCard } from './components/control'
-import { LocalStorage } from "LocalStorage";
+import { useGetIdentity } from "@pankod/refine-core";
 
 interface ControlPanelData {
     items: IItem[]
@@ -24,8 +24,11 @@ interface ControlPanelProps {
     axios: AxiosInstance
 }
 
-export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
-    const {locale, currency, symbol} = LocalStorage.getInstance().getUser();
+export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => { 
+    const { data: identity } = useGetIdentity<{locale: string; currency: string; symbol: string}>();
+    const locale = identity?.locale || 'en_USD'
+    const currency = identity?.currency || 'USD'
+    const symbol = identity?.symbol || '$'
 
     const periodFormat = 'YYYY-MM';
     const location = useLocation();
