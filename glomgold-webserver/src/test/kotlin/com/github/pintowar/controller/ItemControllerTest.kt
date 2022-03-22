@@ -15,10 +15,12 @@ import io.kotest.provided.authHeader
 import io.kotest.provided.fakeItems
 import io.kotest.provided.fakeUsers
 import io.micronaut.http.HttpHeaders
+import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
 import io.micronaut.http.client.annotation.Client
 import io.micronaut.test.extensions.kotest.annotation.MicronautTest
+import io.mockk.mockk
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -54,6 +56,7 @@ class ItemControllerTest(
         val allItems = itemRepo.findAll().toList().sortedBy { it.id }
 
         val token = authHeader(authClient, testUsername)
+        val req = mockk<HttpRequest<Any>>()
 
         data class Page(val start: Int, val end: Int, val size: Int)
         withData(
@@ -61,7 +64,7 @@ class ItemControllerTest(
             Page(10, 20, 10),
             Page(20, 30, 5)
         ) { (start, end, size) ->
-            itemClient.index(token, RefinePaginateQuery(start, end, "id", "ASC")).let { items ->
+            itemClient.index(token, RefinePaginateQuery(req, start, end, "id", "ASC")).let { items ->
                 items.body.get().map { it.id } shouldBe (start until (start + size)).map { allItems[it].id }
                 items.body.get() shouldHaveSize size
                 items.header("X-Total-Count") shouldBe "$totalItems"

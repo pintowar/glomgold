@@ -37,15 +37,14 @@ micronaut-jackson = { module = "io.micronaut:micronaut-jackson-databind" }
 micronaut-management = { module = "io.micronaut:micronaut-management" }
 micronaut-runtime = { module = "io.micronaut:micronaut-runtime" }
 micronaut-validation = { module = "io.micronaut:micronaut-validation" }
-#micronaut-cache-caffeine = { module = "io.micronaut.cache:micronaut-cache-caffeine" }
 micronaut-data-r2dbc = { module = "io.micronaut.data:micronaut-data-r2dbc" }
 micronaut-jdbc-hikari = { module = "io.micronaut.sql:micronaut-jdbc-hikari" }
 micronaut-kotlin-runtime = { module = "io.micronaut.kotlin:micronaut-kotlin-runtime" }
 micronaut-liquibase = { module = "io.micronaut.liquibase:micronaut-liquibase" }
 micronaut-micrometer-core = { module = "io.micronaut.micrometer:micronaut-micrometer-core" }
 micronaut-security-jwt = { module = "io.micronaut.security:micronaut-security-jwt" }
-#micronaut-views-thymeleaf = { module = "io.micronaut.views:micronaut-views-thymeleaf" }
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api" }
+jakarta-persistence-api = { module = "jakarta.persistence:jakarta.persistence-api", version = "3.0.0" }
 
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
 logback-classic = { module = "ch.qos.logback:logback-classic" }
@@ -74,9 +73,8 @@ test-kotest-dataset = { module = "io.kotest:kotest-framework-datatest", version 
 micronaut-kapt = ["micronaut-http-validation", "micronaut-data-processor", "micronaut-security-annotations"]
 micronaut = [
     "micronaut-http-client", "micronaut-jackson", "micronaut-management", "micronaut-runtime", "micronaut-validation",
-    "micronaut-kotlin-runtime", "micronaut-data-r2dbc", "micronaut-jdbc-hikari", #"micronaut-cache-caffeine",
-    "micronaut-liquibase", "micronaut-micrometer-core", "jakarta-annotation-api", # "micronaut-views-thymeleaf",
-    "micronaut-security-jwt"
+    "micronaut-kotlin-runtime", "micronaut-data-r2dbc", "micronaut-jdbc-hikari", "micronaut-liquibase",
+    "micronaut-micrometer-core", "jakarta-annotation-api", "jakarta-persistence-api", "micronaut-security-jwt"
 ]
 kotlin = ["kotlin-reflect", "kotlin-stdlib", "kotlin-logging"]
 kotlin-coroutines = ["kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor"]

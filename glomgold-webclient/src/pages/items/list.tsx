@@ -1,4 +1,4 @@
-import { IResourceComponentsProps, useMany } from "@pankod/refine-core";
+import { CrudFilters, IResourceComponentsProps, HttpError, useMany } from "@pankod/refine-core";
 
 import {
     List,
@@ -6,14 +6,17 @@ import {
     TextField,
     Space,
     EditButton,
-    ShowButton,
     DeleteButton,
-    FilterDropdown,
     Select,
-    getDefaultFilter,
     useImport,
-    ImportButton
+    ImportButton,
+    Row,
+    Col,
+    Form,
+    Input,
+    Button
 } from "@pankod/refine-antd";
+import { SearchOutlined } from '@ant-design/icons';
 
 import { useTable, useSelect } from "@pankod/refine-antd";
 
@@ -21,8 +24,29 @@ import { IItem, IUser } from "interfaces";
 
 export const ItemList: React.FC<IResourceComponentsProps> = () => {
     const importProps = useImport<IItem>();
-    const { tableProps, filters } = useTable<IItem>({
+    const { tableProps, searchFormProps } = useTable<IItem, HttpError, {description: string; userId:number}>({
         syncWithLocation: true,
+        onSearch: (params: any) => {
+            const crudFilters: CrudFilters = [];
+            const { description, userId } = params;
+
+            crudFilters.push(
+                {
+                    field: "description",
+                    operator: "eq",
+                    value: description,
+                }
+            )
+            crudFilters.push(
+                {
+                    field: "userId",
+                    operator: "eq",
+                    value: userId,
+                }
+            )
+
+            return crudFilters;
+        }
     });
 
     const userIds =
@@ -39,72 +63,76 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
         resource: "users",
         optionLabel: "name",
         optionValue: "id",
-        defaultValue: getDefaultFilter("userId", filters, "in"),
     });
 
     return (
-        <List pageHeaderProps={{
-            extra: <ImportButton {...importProps} />,
-            }}
-        >
-            <Table {...tableProps} rowKey="id">
-                <Table.Column dataIndex="id" title="ID" />
-                <Table.Column dataIndex="description" title="Description" />
-                <Table.Column dataIndex="value" title="Value" />
-                <Table.Column dataIndex="year" title="Year" />
-                <Table.Column dataIndex="month" title="Month" />
-                <Table.Column
-                    dataIndex="userId"
-                    title="User"
-                    render={(value) => {
-                        if (isLoading) {
-                            return <TextField value="Loading..." />;
-                        }
-
-                        return (
-                            <TextField
-                                value={data?.data.find((user) => user.id === value)?.name}
-                            />
-                        );
+        <Row gutter={[16, 16]}>
+            <Col lg={6} xs={24}>
+                <Form layout="vertical" {...searchFormProps}>
+                    <Form.Item label="Description" name="description">
+                        <Input
+                            placeholder="Description"
+                            prefix={<SearchOutlined />}
+                        />
+                    </Form.Item>
+                    <Form.Item label="User" name="userId">
+                        <Select {...userSelectProps} allowClear/>
+                    </Form.Item>
+                    <Form.Item>
+                        <Button htmlType="submit" type="primary">
+                            Filter
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Col>
+            <Col lg={18} xs={24}>
+                <List pageHeaderProps={{
+                    extra: <ImportButton {...importProps} />,
                     }}
-                    filterDropdown={(props) => (
-                        <FilterDropdown
-                            {...props}
-                            mapValue={(selectedKeys) => selectedKeys.map(Number)}
-                        >
-                            <Select
-                                style={{ minWidth: 200 }}
-                                mode="multiple"
-                                placeholder="Select User"
-                                {...userSelectProps}
-                            />
-                        </FilterDropdown>
-                    )}
-                    defaultFilteredValue={getDefaultFilter(
-                        "userId",
-                        filters,
-                        "in",
-                    )}
-                />
-                <Table.Column<IItem>
-                    title="Actions"
-                    dataIndex="actions"
-                    render={(_, record) => (
-                        <Space>
-                            <EditButton
-                                hideText
-                                size="small"
-                                recordItemId={record.id}
-                            />
-                            <DeleteButton
-                                hideText
-                                size="small"
-                                recordItemId={record.id}
-                            />
-                        </Space>
-                    )}
-                />
-            </Table>
-        </List>
+                >
+                    <Table {...tableProps} rowKey="id">
+                        <Table.Column dataIndex="id" title="ID" />
+                        <Table.Column dataIndex="description" title="Description" />
+                        <Table.Column dataIndex="value" title="Value" />
+                        <Table.Column dataIndex="year" title="Year" />
+                        <Table.Column dataIndex="month" title="Month" />
+                        <Table.Column
+                            dataIndex="userId"
+                            title="User"
+                            render={(value) => {
+                                if (isLoading) {
+                                    return <TextField value="Loading..." />;
+                                }
+
+                                return (
+                                    <TextField
+                                        value={data?.data.find((user) => user.id === value)?.name}
+                                    />
+                                );
+                            }}
+                        />
+                        <Table.Column<IItem>
+                            title="Actions"
+                            dataIndex="actions"
+                            render={(_, record) => (
+                                <Space>
+                                    <EditButton
+                                        hideText
+                                        size="small"
+                                        recordItemId={record.id}
+                                    />
+                                    <DeleteButton
+                                        hideText
+                                        size="small"
+                                        recordItemId={record.id}
+                                    />
+                                </Space>
+                            )}
+                        />
+                    </Table>
+                </List>
+            </Col>
+        </Row>
+        
     );
 };

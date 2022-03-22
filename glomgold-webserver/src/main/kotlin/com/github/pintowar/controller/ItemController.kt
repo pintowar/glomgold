@@ -4,12 +4,12 @@ import com.github.pintowar.dto.ItemCommand
 import com.github.pintowar.dto.toCommand
 import com.github.pintowar.model.Item
 import com.github.pintowar.repo.ItemRepository
-import io.micronaut.http.annotation.*
+import io.micronaut.http.annotation.Controller
 
 @Controller("/api/items")
 class ItemController(itemRepository: ItemRepository) : CrudRestController<Item, ItemCommand, Long>(itemRepository) {
 
-    override fun cmdToEntity(command: ItemCommand): Item = command.toItem()
+    override fun dtoToEntity(dto: ItemCommand): Item = dto.toItem()
 
-    override fun entityToCmd(entity: Item): ItemCommand = entity.toCommand()
+    override fun entityToDto(entity: Item): ItemCommand = entity.toCommand()
 }

@@ -7,6 +7,7 @@ import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
 import io.micronaut.data.model.Pageable
 import io.micronaut.data.model.Sort
+import io.micronaut.http.HttpRequest
 import io.micronaut.http.annotation.QueryValue
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -60,10 +61,11 @@ data class PanelAnnualReport(
 
 @Introspected
 data class RefinePaginateQuery(
-    @field:QueryValue("_start", defaultValue = "0") var start: Int,
-    @field:QueryValue("_end", defaultValue = "25") var end: Int,
-    @field:QueryValue("_sort", defaultValue = "id") var sort: String,
-    @field:QueryValue("_order", defaultValue = "ASC") var order: String,
+    private val httpRequest: HttpRequest<Any>,
+    @field:QueryValue("_start", defaultValue = "0") val start: Int,
+    @field:QueryValue("_end", defaultValue = "25") val end: Int,
+    @field:QueryValue("_sort", defaultValue = "id") val sort: String,
+    @field:QueryValue("_order", defaultValue = "ASC") val order: String,
 ) {
     fun paginate(): Pageable {
         val asc = "asc" == order.trim().lowercase()
@@ -72,6 +74,8 @@ data class RefinePaginateQuery(
         val page = start / size
         return Pageable.from(page, size, Sort.of(sorting))
     }
+
+    fun filterParams() = httpRequest.parameters.asMap().filterKeys { !it.startsWith("_") }
 }
 
 @Introspected

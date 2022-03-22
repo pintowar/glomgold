@@ -18,15 +18,7 @@ interface ItemRepository : EntityRepository<Item, Long> {
 
     suspend fun findByIdAndUserId(id: Long, userId: Long): Item?
 
-    @Query(
-        """
-        SELECT i.*
-        FROM items i
-        WHERE i.period = :period AND i.user_id = :userId
-        ORDER BY i.created_at, i.description
-        """
-    )
-    fun listByPeriod(period: YearMonth, userId: Long): Flow<Item>
+    fun listByPeriodAndUserIdOrderByCreatedAtAndDescription(period: YearMonth, userId: Long): Flow<Item>
 
     @Query(
         """
