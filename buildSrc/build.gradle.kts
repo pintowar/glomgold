@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.gradleplugin.kotlin.allopen)
 
     implementation(libs.gradleplugin.micronaut)
+    implementation(libs.gradleplugin.micronaut.aot)
     implementation(libs.gradleplugin.shadow)
     implementation(libs.gradleplugin.kotest)
     implementation(libs.gradleplugin.git.properties)

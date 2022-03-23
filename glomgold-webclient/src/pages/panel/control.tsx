@@ -75,6 +75,13 @@ export const ControlPanel: React.FC = () => {
         } else throw Error()
     };
 
+    const onBatchDelete = async (itemIds: number[]) => {
+        const {status, data} = await axiosInstance.delete(`/api/panel/remove-items/${formattedPeriod}?ids=${itemIds.join(',')}`)
+        if (status === 200) {
+            setPanelData(data)
+        } else throw Error()
+    };
+
     const onMonthItemCopy = async (items: any[]) => {
         const itemsWithPeriod = items.map(it => ({...it, period: formattedPeriod}))
 
@@ -106,8 +113,8 @@ export const ControlPanel: React.FC = () => {
             <div className="card-row">
                 <Row gutter={[24, 24]}>
                     <Col span={12}>
-                        <MonthItemsCard tableData={tableData} locale={locale} currency={currency}
-                            onAddItem={onAddItem} onDeleteItem={onDeleteItem} onEditItem={onEditItem} onMonthItemCopy={onMonthItemCopy}/>
+                        <MonthItemsCard tableData={tableData} locale={locale} currency={currency} symbol={symbol} onAddItem={onAddItem} 
+                            onDeleteItem={onDeleteItem} onEditItem={onEditItem} onMonthItemCopy={onMonthItemCopy} onBatchDelete={onBatchDelete}/>
                     </Col>
                     <Col span={12}>
                         <MonthStatsCard tableData={panelData.stats} />

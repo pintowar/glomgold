@@ -4,10 +4,11 @@ import { LeftOutlined, RightOutlined, DeleteOutlined, EditOutlined, WalletOutlin
 import Chart from "react-apexcharts";
 
 import { IItem } from '../../../../interfaces'
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ColumnType } from 'antd/lib/table';
 
 import './control.css'
+import d2lIntl from 'd2l-intl';
 
 interface PanelItem {
     key: number
@@ -24,52 +25,69 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
     index: number;
     children: React.ReactNode;
 }
-  
-const EditableCell: React.FC<EditableCellProps> = ({
-    editing,
-    dataIndex,
-    title,
-    inputType,
-    record,
-    index,
-    children,
-    ...restProps
-  }) => {
-    const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
-  
-    return (
-      <td {...restProps}>
-        {editing ? (
-          <Form.Item
-            name={dataIndex}
-            style={{ margin: 0 }}
-            rules={[
-              {
-                required: true,
-                message: `Please Input ${title}!`,
-              },
-            ]}
-          >
-            {inputNode}
-          </Form.Item>
-        ) : (
-          children
-        )}
-      </td>
-    );
-};
 
+const genEditableCell = (
+    inputNumberFormatter: (value: any) => string,
+    inputNumberParser: (value: string | undefined) => number | string
+) => {
+    const EditableCell: React.FC<EditableCellProps> = ({
+        editing,
+        dataIndex,
+        title,
+        inputType,
+        record,
+        index,
+        children,
+        ...restProps
+      }) => {
+        const inputNode = inputType === 'number' ? <InputNumber formatter={inputNumberFormatter} parser={inputNumberParser}/> : <Input />;
+      
+        return (
+          <td {...restProps}>
+            {editing ? (
+              <Form.Item
+                name={dataIndex}
+                style={{ margin: 0 }}
+                rules={[
+                  {
+                    required: true,
+                    message: `Please Input ${title}!`,
+                  },
+                ]}
+              >
+                {inputNode}
+              </Form.Item>
+            ) : (
+              children
+            )}
+          </td>
+        );
+    };
+    return EditableCell;
+}
 interface MonthItemsCardProps {
     tableData: PanelItem[]
     locale: string
     currency: string
+    symbol: string
     onAddItem: (description: string, value: number) => Promise<void>
     onEditItem: (id: number, description: string, value: number) => Promise<void>
     onDeleteItem: (itemId: number) => Promise<void>
     onMonthItemCopy: (items: PanelItem[]) => Promise<void>
+    onBatchDelete: (itemIds: number[]) => Promise<void>
 }
 
-export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, locale, currency, onAddItem, onEditItem, onDeleteItem, onMonthItemCopy}) => {
+export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
+    tableData, 
+    locale, 
+    currency, 
+    symbol, 
+    onAddItem, 
+    onEditItem, 
+    onDeleteItem, 
+    onMonthItemCopy, 
+    onBatchDelete
+}) => {
 
     const [addForm] = Form.useForm()
     const [editForm] = Form.useForm()
@@ -93,6 +111,17 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, locale
         setSelectedRows({keys: [], rows: []})
     }, [tableData])
     // end selected rows
+
+    // start inputnumber formatter / parser
+    const numFmt = useMemo(() => new d2lIntl.NumberFormat(locale, {maximumFractionDigits: 2}), [locale])
+    const numParser = useMemo(() => new d2lIntl.NumberParse(locale), [locale])
+
+    const inputNumberFormatter = (value: any) => {
+        const num = parseFloat(`${value}`)
+        return Number.isNaN(num) ? '' : numFmt.format(num)
+    }
+    const inputNumberParser = (value: string | undefined) => value ? numParser.parse(value) : '';
+    // end inputnumber formatter / parser
 
     // start of editable cells
     const [editingKey, setEditingKey] = useState('');
@@ -231,6 +260,10 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, locale
     const copyNextMonth = async () => {
         await onMonthItemCopy(selectedRows.rows)
     };
+
+    const deleteSelected = async () => {
+        await onBatchDelete(selectedRows.rows.map(r => r.key))
+    };
     
     const columns = [
         {
@@ -297,18 +330,19 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({tableData, locale
                         <Input placeholder="Description"/>
                     </Form.Item>
                     <Form.Item name="value" rules={[{ required: true }]}>
-                        <InputNumber placeholder="Value" />
+                        <InputNumber prefix={`${symbol} `} formatter={inputNumberFormatter} parser={inputNumberParser} placeholder="Value" />
                     </Form.Item>
                 </Form>
                 <Space direction="horizontal" size={12} wrap style={{width: '100%'}}>
                     <Button type="primary" onClick={() => addItem()}>Add Item</Button>
                     <Button type="primary" disabled={selectedRows.keys.length == 0} onClick={() => copyNextMonth()}>Replicate Next Month</Button>
+                    <Button type="default" disabled={selectedRows.keys.length == 0} onClick={() => deleteSelected()} className={"ant-btn-danger"}>Delete Selected</Button>
                 </Space>
                 <Form form={editForm} component={false}>
                     <Table 
                         components={{
                             body: {
-                            cell: EditableCell,
+                            cell: genEditableCell(inputNumberFormatter, inputNumberParser),
                             },
                         }}
                         rowSelection={rowSelection}

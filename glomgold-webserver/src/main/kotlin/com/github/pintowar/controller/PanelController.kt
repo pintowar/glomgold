@@ -47,6 +47,16 @@ class PanelController(private val itemRepository: ItemRepository, private val pa
             HttpResponse.ok(panelService.panelInfo(authId(auth), item.period))
         } ?: HttpResponse.notFound()
 
+    @Delete("/remove-items/{period}{?ids}")
+    suspend fun removeItems(auth: Authentication, @PathVariable period: YearMonth, @QueryValue ids: List<Long>?) =
+        itemRepository.findByIdInAndPeriodAndUserId(ids ?: emptyList(), period, authId(auth)).toList().let { items ->
+            if (items.isEmpty()) HttpResponse.notFound()
+            else {
+                itemRepository.deleteAll(items)
+                HttpResponse.ok(panelService.panelInfo(authId(auth), period))
+            }
+        }
+
     @Post("/copy-items")
     suspend fun copyItems(auth: Authentication, @Body items: List<ItemBody>): HttpResponse<List<Item>> {
         val itemsToCopy = items.map { it.toItem(authId(auth)) }.groupBy { it.period }

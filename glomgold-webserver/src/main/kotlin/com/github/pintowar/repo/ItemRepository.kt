@@ -18,6 +18,8 @@ interface ItemRepository : EntityRepository<Item, Long> {
 
     suspend fun findByIdAndUserId(id: Long, userId: Long): Item?
 
+    fun findByIdInAndPeriodAndUserId(id: List<Long>, period: YearMonth, userId: Long): Flow<Item>
+
     fun listByPeriodAndUserIdOrderByCreatedAtAndDescription(period: YearMonth, userId: Long): Flow<Item>
 
     @Query(
