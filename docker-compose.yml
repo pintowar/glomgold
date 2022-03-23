@@ -21,7 +21,7 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       JWT_GENERATOR_SIGNATURE_SECRET: pleaseChangeThisSecretForANewOneInProduction
-      MICRONAUT_ENVIRONMENTS: prod
+      MICRONAUT_ENVIRONMENTS: prod,sample
     depends_on:
       - database
     restart: on-failure:5

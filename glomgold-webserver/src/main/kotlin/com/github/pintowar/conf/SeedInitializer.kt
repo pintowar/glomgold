@@ -29,6 +29,7 @@ class SeedInitializer(
     private val random = SecureRandom(randomSeed.toByteArray())
     private val isProd = env.activeNames.contains("prod")
     private val isDev = env.activeNames.contains("dev")
+    private val withSample = env.activeNames.contains("sample")
 
     @EventListener // does not support `suspend`
     fun onStartUp(e: ServerStartupEvent) {
@@ -37,7 +38,7 @@ class SeedInitializer(
             runBlocking {
                 val allItems = genUsers()
                     .filter { userRepo.findByUsername(it.username) == null }
-                    .filter { !isProd || it.admin } // if (isProd) it.admin else true
+                    .filter { !(isProd && !withSample) || it.admin } // if (isProd && !withSample) it.admin else true
                     .map { userRepo.save(it) }
                     .filterNot { it.admin }
                     .flatMap { user ->
