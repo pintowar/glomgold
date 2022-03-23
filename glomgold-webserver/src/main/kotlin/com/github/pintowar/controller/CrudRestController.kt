@@ -20,7 +20,7 @@ abstract class CrudRestController<E, DTO, ID>(private val repository: EntityRepo
     }
 
     @Post("/")
-    suspend fun create(@Body cmd: DTO): HttpResponse<DTO> = repository.save(dtoToEntity(cmd))
+    suspend fun create(@Body dto: DTO): HttpResponse<DTO> = repository.save(dtoToEntity(dto))
         .let { HttpResponse.ok(entityToDto(it)) }
 
     @Get("/{id}")
@@ -28,12 +28,24 @@ abstract class CrudRestController<E, DTO, ID>(private val repository: EntityRepo
         .let { if (it != null) HttpResponse.ok(entityToDto(it)) else HttpResponse.notFound() }
 
     @Patch("/{id}")
-    suspend fun update(@PathVariable id: ID, @Body cmd: DTO): HttpResponse<DTO> = repository.findById(id)?.let { _ ->
-        repository.update(dtoToEntity(cmd)).let { HttpResponse.ok(entityToDto(it)) }
-    } ?: HttpResponse.notFound()
+    suspend fun update(@PathVariable id: ID, @Body dto: DTO): HttpResponse<DTO> = repository.findById(id)
+        ?.let { entity ->
+            repository.update(updateEntityFromDto(entity, dto)).let { HttpResponse.ok(entityToDto(it)) }
+        } ?: HttpResponse.notFound()
 
     @Delete("/{id}")
     suspend fun delete(@PathVariable id: ID): Int = repository.deleteById(id)
+
+    /**
+     * By default, this function is the same as [dtoToEntity], however if any customization is needed, this function
+     * can be overrided for further customizations.
+     *
+     * @param entity found on the database.
+     * @param dto information sent to update the loaded [entity].
+     *
+     * @return the new entity to be persisted.
+     */
+    open fun updateEntityFromDto(entity: E, dto: DTO): E = dtoToEntity(dto)
 
     open fun predicates(params: Map<String, List<String>>): PredicateSpecification<E> {
         val cleanParams = params

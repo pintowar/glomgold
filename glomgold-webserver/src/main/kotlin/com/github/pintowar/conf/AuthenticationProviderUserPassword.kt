@@ -18,9 +18,11 @@ class AuthenticationProviderUserPassword(private val userRepo: UserRepository) :
         authenticationRequest: AuthenticationRequest<*, *>
     ) = flow {
         userRepo.findByUsername(authenticationRequest.identity.toString())?.let { user ->
-            if (user.checkPassword(authenticationRequest.secret.toString())) {
-                emit(response(user))
-            } else fail("Invalid password.")
+            when {
+                !user.enabled -> fail("User disabled!")
+                user.checkPassword(authenticationRequest.secret.toString()) -> emit(response(user))
+                else -> fail("Invalid password.")
+            }
         } ?: fail("No user found!")
     }.asPublisher()
 

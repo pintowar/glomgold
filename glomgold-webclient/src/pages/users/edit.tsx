@@ -78,15 +78,6 @@ export const UserEdit: React.FC<IResourceComponentsProps> = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Password"
-                    name="password"
-                    rules={[
-                        { required: true },
-                    ]}
-                >
-                    <Input type={"password"}/>
-                </Form.Item>
-                <Form.Item
                     label="Locale"
                     name="locale"
                     rules={[

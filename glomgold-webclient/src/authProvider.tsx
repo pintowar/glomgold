@@ -1,14 +1,13 @@
 import { AuthProvider } from "@pankod/refine-core";
 
-import { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { LocalStorage } from "LocalStorage";
-import { API_URL } from "./constants";
 
-export const generateAuthProvider = (axios: AxiosInstance): AuthProvider => {
+const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
 
-    const storage = LocalStorage.getInstance()
+    const axiosInstance = axios.create();
 
-    axios.interceptors.request.use(config => {
+    axiosInstance.interceptors.request.use(config => {
         const tokenKey = storage.getToken()
         if(tokenKey) {
             if (!config.headers.Authorization) {
@@ -22,7 +21,7 @@ export const generateAuthProvider = (axios: AxiosInstance): AuthProvider => {
         return Promise.reject(error);
     })
 
-    axios.interceptors.response.use(response => {
+    axiosInstance.interceptors.response.use(response => {
         return response
     }, error => {
         if (401 === error.response.status) {
@@ -34,35 +33,41 @@ export const generateAuthProvider = (axios: AxiosInstance): AuthProvider => {
         }
     })
 
-    return ({
-        login: async ({ username, password }) => {
-            const { data, status } = await axios.post('/login', { username, password });
-            if (status === 200) {
-                storage.setUser(data)
-                const redirectPath = data.roles.includes('ROLE_ADMIN') ? '/' : '/panel'
-                return Promise.resolve(redirectPath)
-            } else {
-                return Promise.reject()
-            }
-        },
-        logout: async () => {
-            storage.clearUser()
-        },
-        checkError: async (error) => {
-            if (error && error.statusCode === 401) {
-                throw Error();
-            }
-        },
-        checkAuth: async (params: any) => {
-            if(storage.getToken().length == 0) {
-                throw Error("No token found!");
-            }
-        },
-        getPermissions: async () => {
-            return storage.getUserRoles()
-        },
-        getUserIdentity: async () => {
-            return storage.getUser()
-        },
-    });
+    return axiosInstance
 }
+
+const storage = LocalStorage.getInstance();
+
+export const axiosInstance = generateAxiosInstance(storage);
+
+export const authProvider: AuthProvider = {
+    login: async ({ username, password }) => {
+        const { data, status } = await axios.post('/login', { username, password });
+        if (status === 200) {
+            storage.setUser(data)
+            const redirectPath = data.roles.includes('ROLE_ADMIN') ? '/' : '/panel'
+            return Promise.resolve(redirectPath)
+        } else {
+            return Promise.reject()
+        }
+    },
+    logout: async () => {
+        storage.clearUser()
+    },
+    checkError: async (error) => {
+        if (error && error.statusCode === 401) {
+            throw Error();
+        }
+    },
+    checkAuth: async (params: any) => {
+        if(storage.getToken().length == 0) {
+            throw Error("No token found!");
+        }
+    },
+    getPermissions: async () => {
+        return storage.getUserRoles()
+    },
+    getUserIdentity: async () => {
+        return storage.getUser()
+    },
+};

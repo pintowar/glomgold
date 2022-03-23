@@ -15,15 +15,11 @@ import { ControlPanel, ReportPanel } from "pages/panel";
 import { DashboardPage } from "pages/dashboard";
 import { LoginPage } from "pages/login";
 import { Title, Sider } from "components";
-import { generateAuthProvider } from "authProvider";
+import { axiosInstance, authProvider } from "authProvider";
 
 import { API_URL } from "./constants";
 
-import axios from 'axios';
 import { LocalStorage } from "LocalStorage";
-
-const axiosInstance = axios.create()
-const authProvider = generateAuthProvider(axiosInstance)
 
 const App: React.FC = () => {
     return (
@@ -32,11 +28,11 @@ const App: React.FC = () => {
                 ...routerProvider,
                 routes: [
                     {
-                        element: <ControlPanel axios={axiosInstance}/>,
+                        element: <ControlPanel />,
                         path: '/panel',
                     },
                     {
-                        element: <ReportPanel axios={axiosInstance}/>,
+                        element: <ReportPanel />,
                         path: '/panel/report',
                     }
                 ]

@@ -107,7 +107,6 @@ data class UserCommand(
     @field:NotBlank var username: String,
     @field:NotBlank var name: String,
     @field:Email var email: String,
-    @field:NotBlank var password: String = "",
     var enabled: Boolean = true,
     var admin: Boolean = false,
     var locale: Locale = Locale.getDefault(),
@@ -118,11 +117,11 @@ data class UserCommand(
         .apply {
             id = this@UserCommand.id
             version = this@UserCommand.version
-            setPassword(password)
+            setPassword(UUID.randomUUID().toString().replace("-", "").take(12))
         }
 }
 
 fun User.toCommand() = UserCommand(
     this.id, this.version, this.username, this.name, this.email,
-    this.passwordHash, this.enabled, this.admin, this.locale, this.timezone
+    this.enabled, this.admin, this.locale, this.timezone
 )

@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Row, Col, Card, Space, DatePicker, Tabs } from 'antd';
 
-import { AxiosInstance } from 'axios';
 import moment from 'moment';
 
 import { PanelLayout } from "./layout";
@@ -11,12 +10,9 @@ import { ItemChart, PeriodChart, AnnualTable } from './components/report';
 import { IPanelAnnualReport } from "interfaces";
 import { useGetIdentity } from "@pankod/refine-core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY } from "../../constants";
+import { axiosInstance } from "authProvider";
 
-interface ReportPanelProps {
-    axios: AxiosInstance
-}
-
-export const ReportPanel: React.FC<ReportPanelProps> = ({axios}) => {
+export const ReportPanel: React.FC = () => {
     const { data: identity } = useGetIdentity<{locale: string; currency: string}>();
     const locale = identity?.locale || DEFAULT_LOCALE
     const currency = identity?.currency || DEFAULT_CURRENCY
@@ -45,7 +41,7 @@ export const ReportPanel: React.FC<ReportPanelProps> = ({axios}) => {
     }, [currentPeriod]);
 
     const populateData = async () => {
-        const {status, data} = await axios.get(`/api/panel/report?year=${currentPeriod.year()}`)
+        const {status, data} = await axiosInstance.get(`/api/panel/report?year=${currentPeriod.year()}`)
         if (status === 200) {
             setDataTable({...data});
             navigate(`/panel/report?period=${currentPeriod.format(periodFormat)}`)

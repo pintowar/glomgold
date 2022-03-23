@@ -36,7 +36,7 @@ export const UserCreate: React.FC<IResourceComponentsProps> = () => {
     return (
         <Create saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">
-            <Form.Item
+                <Form.Item
                     label="Name"
                     name="name"
                     rules={[
@@ -64,22 +64,14 @@ export const UserCreate: React.FC<IResourceComponentsProps> = () => {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Password"
-                    name="password"
-                    rules={[
-                        { required: true },
-                    ]}
-                >
-                    <Input type={"password"}/>
-                </Form.Item>
-                <Form.Item
                     label="Locale"
                     name="locale"
                     rules={[
                         { required: true },
                     ]}
+                    initialValue="en_US"
                 >
-                    <Select defaultValue="en_US" options={localeOptions} showSearch/>
+                    <Select options={localeOptions} showSearch/>
                 </Form.Item>
                 <Form.Item
                     label="Timezone"
@@ -87,8 +79,9 @@ export const UserCreate: React.FC<IResourceComponentsProps> = () => {
                     rules={[
                         { required: true },
                     ]}
+                    initialValue="UTC"
                 >
-                    <Select defaultValue="UTC" options={timezonesOptions} showSearch/>
+                    <Select options={timezonesOptions} showSearch/>
                 </Form.Item>
                 <Form.Item
                     label="Enabled"

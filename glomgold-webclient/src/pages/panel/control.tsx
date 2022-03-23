@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Row, Col, notification } from 'antd';
-import { AxiosInstance } from 'axios';
 import moment from 'moment';
 
 import { PanelLayout } from "./layout";
@@ -13,6 +12,7 @@ import { IItem } from '../../interfaces'
 import { PeriodSummaryCard, PeriodNavigationCard, MonthItemsCard, MonthStatsCard } from './components/control'
 import { useGetIdentity } from "@pankod/refine-core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../constants";
+import { axiosInstance } from "authProvider";
 
 interface ControlPanelData {
     items: IItem[]
@@ -21,11 +21,7 @@ interface ControlPanelData {
     diff: number
 }
 
-interface ControlPanelProps {
-    axios: AxiosInstance
-}
-
-export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => { 
+export const ControlPanel: React.FC = () => { 
     const { data: identity } = useGetIdentity<{locale: string; currency: string; symbol: string}>();
     const locale = identity?.locale || DEFAULT_LOCALE
     const currency = identity?.currency || DEFAULT_CURRENCY
@@ -51,7 +47,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
     }, [currentPeriod]);
 
     const populateData = async () => {
-        const {status, data} = await axios.get(`/api/panel?period=${formattedPeriod}`)
+        const {status, data} = await axiosInstance.get(`/api/panel?period=${formattedPeriod}`)
         if (status === 200) {
             setPanelData(data)
             navigate(`/panel?period=${formattedPeriod}`)
@@ -59,21 +55,21 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
     }
 
     const onAddItem = async (description: string, value: number) => {
-        const {status, data} = await axios.post("/api/panel/add-item", {description, value, period: formattedPeriod})
+        const {status, data} = await axiosInstance.post("/api/panel/add-item", {description, value, period: formattedPeriod})
         if (status === 200) {
             setPanelData(data)
         } else throw Error()
     };
 
     const onEditItem = async (id: number, description: string, value: number) => {
-        const {status, data} = await axios.patch(`/api/panel/edit-item/${id}`, {description, value, period: formattedPeriod})
+        const {status, data} = await axiosInstance.patch(`/api/panel/edit-item/${id}`, {description, value, period: formattedPeriod})
         if (status === 200) {
             setPanelData(data)
         } else throw Error()
     };
 
     const onDeleteItem = async (itemId: number) => {
-        const {status, data} = await axios.delete(`/api/panel/remove-item/${itemId}`)
+        const {status, data} = await axiosInstance.delete(`/api/panel/remove-item/${itemId}`)
         if (status === 200) {
             setPanelData(data)
         } else throw Error()
@@ -82,7 +78,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({axios}) => {
     const onMonthItemCopy = async (items: any[]) => {
         const itemsWithPeriod = items.map(it => ({...it, period: formattedPeriod}))
 
-        const {status} = await axios.post(`/api/panel/copy-items`, itemsWithPeriod)
+        const {status} = await axiosInstance.post(`/api/panel/copy-items`, itemsWithPeriod)
         if (status !== 200) {
             throw Error()
         } else {

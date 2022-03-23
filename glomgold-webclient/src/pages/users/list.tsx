@@ -13,12 +13,11 @@ import { useTable, BooleanField, Icons } from "@pankod/refine-antd";
 import { IUser } from "interfaces";
 
 export const UserList: React.FC<IResourceComponentsProps> = () => {
-    const { tableProps, filters } = useTable<IUser>({
+    const { tableProps } = useTable<IUser>({
         syncWithLocation: true,
     });
 
     const { CloseCircleOutlined, CheckCircleOutlined } = Icons;
-
 
     return (
         <List>
