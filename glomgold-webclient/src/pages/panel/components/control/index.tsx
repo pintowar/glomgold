@@ -32,7 +32,7 @@ import { ColumnType } from "antd/lib/table";
 import "./control.css";
 import d2lIntl from "d2l-intl";
 
-interface PanelItem {
+export interface PanelItem {
     key: number;
     description: string;
     value: number;

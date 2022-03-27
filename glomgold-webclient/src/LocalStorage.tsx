@@ -1,5 +1,18 @@
 import { TOKEN_KEY, USER_KEY } from "./constants";
 
+interface StorageUser {
+    sub: string;
+    symbol: string;
+    nbf: number;
+    roles: string[];
+    iss: string;
+    currency: string;
+    exp: number;
+    locale: string;
+    iat: number;
+    userId: number;
+}
+
 export class LocalStorage {
     private static instance: LocalStorage;
     private readonly storage: Storage;
@@ -22,9 +35,9 @@ export class LocalStorage {
         return LocalStorage.instance;
     }
 
-    public setUser(data: any): void {
-        localStorage.setItem(TOKEN_KEY, data.access_token);
-        localStorage.setItem(USER_KEY, atob(data.access_token.split(".")[1]));
+    public setUser(access_token: string): void {
+        localStorage.setItem(TOKEN_KEY, access_token);
+        localStorage.setItem(USER_KEY, atob(access_token.split(".")[1]));
     }
 
     public clearUser(): void {
@@ -36,7 +49,7 @@ export class LocalStorage {
         return localStorage.getItem(TOKEN_KEY) || "";
     }
 
-    public getUser(): any {
+    public getUser(): StorageUser {
         return JSON.parse(localStorage.getItem(USER_KEY) || "{}");
     }
 

@@ -26,7 +26,7 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
     const importProps = useImport<IItem>();
     const { tableProps, searchFormProps } = useTable<IItem, HttpError, { description: string; userId: number }>({
         syncWithLocation: true,
-        onSearch: (params: any) => {
+        onSearch: (params: { description: string; userId: number }) => {
             const crudFilters: CrudFilters = [];
             const { description, userId } = params;
 

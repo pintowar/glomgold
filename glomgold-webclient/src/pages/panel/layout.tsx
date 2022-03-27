@@ -23,13 +23,13 @@ export const PanelLayout: React.FC = ({ children }) => {
         location.pathname.includes("report") ? "menu-report" : "menu-panel"
     );
 
-    const handleClick = (info: any) => setSelectedMenu(info.key);
+    const handleClick = (key: string) => setSelectedMenu(key);
 
     return isSuccess ? (
         <Layout>
             <Header style={{ position: "fixed", zIndex: 1, width: "100%" }}>
                 <div className="logo">Glomgold</div>
-                <Menu onClick={handleClick} theme="dark" mode="horizontal" selectedKeys={[selectedMenu]}>
+                <Menu onClick={(e) => handleClick(e.key)} theme="dark" mode="horizontal" selectedKeys={[selectedMenu]}>
                     <Menu.Item key="menu-panel">
                         <Link to={"/panel"}>Panel</Link>
                     </Menu.Item>

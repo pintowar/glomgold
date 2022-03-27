@@ -9,7 +9,13 @@ import { PanelLayout } from "./layout";
 import "./panel.css";
 import { IItem } from "../../interfaces";
 
-import { PeriodSummaryCard, PeriodNavigationCard, MonthItemsCard, MonthStatsCard } from "./components/control";
+import {
+    PeriodSummaryCard,
+    PeriodNavigationCard,
+    MonthItemsCard,
+    MonthStatsCard,
+    PanelItem,
+} from "./components/control";
 import { useGetIdentity } from "@pankod/refine-core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../constants";
 import { axiosInstance } from "authProvider";
@@ -92,7 +98,7 @@ export const ControlPanel: React.FC = () => {
         } else throw Error();
     };
 
-    const onMonthItemCopy = async (items: any[]) => {
+    const onMonthItemCopy = async (items: PanelItem[]) => {
         const itemsWithPeriod = items.map((it) => ({ ...it, period: formattedPeriod }));
 
         const { status } = await axiosInstance.post(`/api/panel/copy-items`, itemsWithPeriod);
