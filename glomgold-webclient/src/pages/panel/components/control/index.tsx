@@ -450,7 +450,9 @@ interface PeriodNavigationCardProps {
 }
 
 export const PeriodNavigationCard: React.FC<PeriodNavigationCardProps> = ({ value, format, onValueChange }) => {
-    const onChangePeriod = (date: any, _: string) => onValueChange(date);
+    const onChangePeriod = (date: moment.Moment | null) => {
+        if (date) onValueChange(date);
+    };
 
     return (
         <Card title={"Period Navigation"} bordered={false}>

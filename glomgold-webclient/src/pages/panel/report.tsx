@@ -34,7 +34,9 @@ export const ReportPanel: React.FC = () => {
         total: 0,
     });
 
-    const onChangePeriod = (date: any, _: string) => setCurrentPeriod(date);
+    const onChangePeriod = (date: moment.Moment | null) => {
+        if (date) setCurrentPeriod(date);
+    };
 
     useEffect(() => {
         const populateData = async () => {
