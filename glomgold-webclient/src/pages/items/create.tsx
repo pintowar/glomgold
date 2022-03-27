@@ -23,7 +23,7 @@ export const ItemCreate: React.FC<IResourceComponentsProps> = () => {
     return (
         <Create saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">
-               <Form.Item
+                <Form.Item
                     label="Description"
                     name="description"
                     rules={[

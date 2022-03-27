@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { IResourceComponentsProps } from "@pankod/refine-core";
 
 import { Edit, Form, Input, Select } from "@pankod/refine-antd";
@@ -25,18 +25,10 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
     return (
         <Edit saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">
-                <Form.Item
-                    label="ID"
-                    name="id"
-                    hidden={true}
-                >
+                <Form.Item label="ID" name="id" hidden={true}>
                     <Input />
                 </Form.Item>
-                <Form.Item
-                    label="Version"
-                    name="version"
-                    hidden={true}
-                >
+                <Form.Item label="Version" name="version" hidden={true}>
                     <Input />
                 </Form.Item>
                 <Form.Item

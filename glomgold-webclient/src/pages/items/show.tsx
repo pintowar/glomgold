@@ -11,14 +11,13 @@ export const ItemShow: React.FC<IResourceComponentsProps> = () => {
     const { data, isLoading } = queryResult;
     const record = data?.data;
 
-    const { data: userData, isLoading: userIsLoading } =
-        useOne<IUser>({
-            resource: "users",
-            id: record?.userId || "",
-            queryOptions: {
-                enabled: !!record,
-            },
-        });
+    const { data: userData, isLoading: userIsLoading } = useOne<IUser>({
+        resource: "users",
+        id: record?.userId || "",
+        queryOptions: {
+            enabled: !!record,
+        },
+    });
 
     return (
         <Show isLoading={isLoading}>
@@ -32,14 +31,12 @@ export const ItemShow: React.FC<IResourceComponentsProps> = () => {
             <Text>{record?.value}</Text>
 
             <Title level={5}>Period</Title>
-            <Text>{record?.year}-{record?.month}</Text>
-
-            <Title level={5}>User</Title>
             <Text>
-                {userIsLoading ? "Loading..." : userData?.data.name}
+                {record?.year}-{record?.month}
             </Text>
 
-            
+            <Title level={5}>User</Title>
+            <Text>{userIsLoading ? "Loading..." : userData?.data.name}</Text>
         </Show>
     );
 };

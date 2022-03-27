@@ -1,12 +1,6 @@
-import { IResourceComponentsProps, useMany } from "@pankod/refine-core";
+import { IResourceComponentsProps } from "@pankod/refine-core";
 
-import {
-    List,
-    Table,
-    Space,
-    EditButton,
-    DeleteButton,
-} from "@pankod/refine-antd";
+import { List, Table, Space, EditButton, DeleteButton } from "@pankod/refine-antd";
 
 import { useTable, BooleanField, Icons } from "@pankod/refine-antd";
 
@@ -26,24 +20,32 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
                 <Table.Column dataIndex="name" title="Name" />
                 <Table.Column dataIndex="username" title="Username" />
                 <Table.Column dataIndex="email" title="E-mail" />
-                <Table.Column dataIndex="enabled" title="Enabled" render={(value) =>
-                    <BooleanField
-                        value={value}
-                        trueIcon={<CheckCircleOutlined />}
-                        falseIcon={<CloseCircleOutlined />}
-                        valueLabelTrue="Yes"
-                        valueLabelFalse="No"
-                    />
-                }/>
-                <Table.Column dataIndex="admin" title="Admin" render={(value) =>
-                    <BooleanField
-                        value={value}
-                        trueIcon={<CheckCircleOutlined />}
-                        falseIcon={<CloseCircleOutlined />}
-                        valueLabelTrue="Yes"
-                        valueLabelFalse="No"
-                    />
-                }/>
+                <Table.Column
+                    dataIndex="enabled"
+                    title="Enabled"
+                    render={(value) => (
+                        <BooleanField
+                            value={value}
+                            trueIcon={<CheckCircleOutlined />}
+                            falseIcon={<CloseCircleOutlined />}
+                            valueLabelTrue="Yes"
+                            valueLabelFalse="No"
+                        />
+                    )}
+                />
+                <Table.Column
+                    dataIndex="admin"
+                    title="Admin"
+                    render={(value) => (
+                        <BooleanField
+                            value={value}
+                            trueIcon={<CheckCircleOutlined />}
+                            falseIcon={<CloseCircleOutlined />}
+                            valueLabelTrue="Yes"
+                            valueLabelFalse="No"
+                        />
+                    )}
+                />
                 <Table.Column dataIndex="locale" title="Locale" />
                 <Table.Column dataIndex="timezone" title="Timezone" />
 
@@ -52,16 +54,8 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
                     dataIndex="actions"
                     render={(_, record) => (
                         <Space>
-                            <EditButton
-                                hideText
-                                size="small"
-                                recordItemId={record.id}
-                            />
-                            <DeleteButton
-                                hideText
-                                size="small"
-                                recordItemId={record.id}
-                            />
+                            <EditButton hideText size="small" recordItemId={record.id} />
+                            <DeleteButton hideText size="small" recordItemId={record.id} />
                         </Space>
                     )}
                 />
