@@ -258,11 +258,11 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             ),
     });
     // end of filter components
-    const addItemOnEnter = async(e: React.KeyboardEvent) => {
-        if(e.key === "Enter") {
-            addItem()
+    const addItemOnEnter = async (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            addItem();
         }
-    }
+    };
 
     const addItem = async () => {
         try {
@@ -372,7 +372,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             <Space direction="vertical" size={12} wrap style={{ width: "100%" }}>
                 <Form form={addForm} layout="inline">
                     <Form.Item name="description" rules={[{ required: true }]}>
-                        <Input placeholder="Description" onKeyPress={addItemOnEnter}/>
+                        <Input placeholder="Description" onKeyPress={addItemOnEnter} />
                     </Form.Item>
                     <Form.Item name="value" rules={[{ required: true }]}>
                         <InputNumber
