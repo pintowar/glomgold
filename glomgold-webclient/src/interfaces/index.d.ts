@@ -35,12 +35,12 @@ export interface IUser {
 }
 
 export interface IPanelAnnualReport {
-    columns: string[]
-    rowIndex: string[]
-    data: number[][]
-    rowSummary: number[]
-    rowTrend: number[]
-    colSummary: number[]
-    colAverage: number[]
-    total: number
+    columns: string[];
+    rowIndex: string[];
+    data: number[][];
+    rowSummary: number[];
+    rowTrend: number[];
+    colSummary: number[];
+    colAverage: number[];
+    total: number;
 }

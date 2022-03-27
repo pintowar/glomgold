@@ -22,29 +22,29 @@ export class LocalStorage {
         return LocalStorage.instance;
     }
 
-    public setUser(data: any) : void {
+    public setUser(data: any): void {
         localStorage.setItem(TOKEN_KEY, data.access_token);
-        localStorage.setItem(USER_KEY, atob(data.access_token.split('.')[1]));
+        localStorage.setItem(USER_KEY, atob(data.access_token.split(".")[1]));
     }
 
-    public clearUser() : void {
+    public clearUser(): void {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
     }
 
-    public getToken() : string {
-        return localStorage.getItem(TOKEN_KEY) || ''
+    public getToken(): string {
+        return localStorage.getItem(TOKEN_KEY) || "";
     }
 
-    public getUser() : any {
-        return JSON.parse(localStorage.getItem(USER_KEY) || '{}')
+    public getUser(): any {
+        return JSON.parse(localStorage.getItem(USER_KEY) || "{}");
     }
 
     public isLoggedIn(): boolean {
         return Object.keys(this.getUser()).length !== 0;
     }
 
-    public getUserRoles() : string[] {
-        return this.getUser().roles || []
+    public getUserRoles(): string[] {
+        return this.getUser().roles || [];
     }
 }

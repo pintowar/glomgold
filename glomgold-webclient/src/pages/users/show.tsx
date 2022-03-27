@@ -36,7 +36,6 @@ export const UserShow: React.FC<IResourceComponentsProps> = () => {
 
             <Title level={5}>Admin</Title>
             <Text>{record?.admin}</Text>
-            
         </Show>
     );
 };

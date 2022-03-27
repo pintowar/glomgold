@@ -1,26 +1,11 @@
 import React from "react";
-import {
-    Row,
-    Col,
-    Layout,
-    Card,
-    Typography,
-    Form,
-    Input,
-    Button,
-    Checkbox,
-} from "antd";
+import { Row, Col, Layout, Card, Typography, Form, Input, Button } from "antd";
 import { useLogin, useTranslate } from "@pankod/refine-core";
 
-import {
-    layoutStyles,
-    containerStyles,
-    titleStyles,
-    imageContainer,
-} from "./styles";
-import logo from "../../assets/images/glomgold-logo.png"
+import { layoutStyles, containerStyles, titleStyles, imageContainer } from "./styles";
+import logo from "../../assets/images/glomgold-logo.png";
 
-const { Text, Title } = Typography;
+const { Title } = Typography;
 export interface ILoginForm {
     username: string;
     password: string;
@@ -72,34 +57,18 @@ export const LoginPage: React.FC = () => {
                             >
                                 <Form.Item
                                     name="username"
-                                    label={translate(
-                                        "pages.login.username",
-                                        "Username",
-                                    )}
+                                    label={translate("pages.login.username", "Username")}
                                     rules={[{ required: true }]}
                                 >
-                                    <Input
-                                        size="large"
-                                        placeholder={translate(
-                                            "pages.login.username",
-                                            "Username",
-                                        )}
-                                    />
+                                    <Input size="large" placeholder={translate("pages.login.username", "Username")} />
                                 </Form.Item>
                                 <Form.Item
                                     name="password"
-                                    label={translate(
-                                        "pages.login.password",
-                                        "Password",
-                                    )}
+                                    label={translate("pages.login.password", "Password")}
                                     rules={[{ required: true }]}
                                     style={{ marginBottom: "12px" }}
                                 >
-                                    <Input
-                                        type="password"
-                                        placeholder="●●●●●●●●"
-                                        size="large"
-                                    />
+                                    <Input type="password" placeholder="●●●●●●●●" size="large" />
                                 </Form.Item>
                                 {/* <div style={{ marginBottom: "12px" }}>
                                     <Form.Item
@@ -132,13 +101,7 @@ export const LoginPage: React.FC = () => {
                                         )}
                                     </a>
                                 </div> */}
-                                <Button
-                                    type="primary"
-                                    size="large"
-                                    htmlType="submit"
-                                    loading={isLoading}
-                                    block
-                                >
+                                <Button type="primary" size="large" htmlType="submit" loading={isLoading} block>
                                     {translate("pages.login.signin", "Sign in")}
                                 </Button>
                             </Form>

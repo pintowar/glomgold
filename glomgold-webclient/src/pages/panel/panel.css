@@ -13,7 +13,7 @@
     /* background: #fff;
     background-color: #508bfc;*/
     background: radial-gradient(50% 50% at 50% 50%, rgb(99, 56, 106) 0%, rgb(49, 4, 56) 100%) 0% 0% / cover;
-    min-height: 100vh; 
+    min-height: 100vh;
     padding: 0 50px;
     margin-top: 64px;
 }

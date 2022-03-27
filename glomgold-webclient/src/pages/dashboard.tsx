@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
 
 import { useApiUrl, useCustom } from "@pankod/refine-core";
-import { useSelect } from "@pankod/refine-antd"
+import { useSelect } from "@pankod/refine-antd";
 import { Row, Col, Card, Space, notification } from "@pankod/refine-antd";
-import { Form, Input, Button, Select } from 'antd';
+import { Form, Input, Button, Select } from "antd";
 import { IUser } from "interfaces";
 
 import { axiosInstance } from "authProvider";
@@ -17,10 +17,10 @@ const ManagementInfoCard: React.FC = () => {
     const appInfo = useMemo(() => {
         const branch = data?.data?.git?.branch;
         const version = data?.data?.git?.build?.version;
-        return {branch, version}
+        return { branch, version };
     }, [data]);
 
-    return(
+    return (
         <Card
             title="Management Info"
             style={{ height: "300px", borderRadius: "15px" }}
@@ -33,29 +33,35 @@ const ManagementInfoCard: React.FC = () => {
                 </ul>
             </Space>
         </Card>
-    )
-}
+    );
+};
 
 const ChangePasswordCard: React.FC = () => {
     const apiUrl = useApiUrl();
 
-    const onFinish = async (values: any) => {
-        const { status } = await axiosInstance.patch(`${apiUrl}/users/${values.userId}/password`, {password: values.password})
+    const onFinish = async (values: PasswordForm) => {
+        const { status } = await axiosInstance.patch(`${apiUrl}/users/${values.userId}/password`, {
+            password: values.password,
+        });
         if (status === 200) {
-            notification['success']({
-                message: 'Successfuly Operation',
-                description: 'Password changed for selected user.'
-            })
+            notification["success"]({
+                message: "Successfuly Operation",
+                description: "Password changed for selected user.",
+            });
         } else {
-            console.log('arre emma')
-            notification['error']({
-                message: 'Operation Error',
-                description: 'Could not change possword for selected user.'
-            })
+            notification["error"]({
+                message: "Operation Error",
+                description: "Could not change possword for selected user.",
+            });
         }
-      };
+    };
 
-    const [form] = Form.useForm();
+    interface PasswordForm {
+        userId: number;
+        password: string;
+    }
+
+    const [form] = Form.useForm<PasswordForm>();
 
     const { selectProps } = useSelect<IUser>({
         resource: "users",
@@ -63,7 +69,7 @@ const ChangePasswordCard: React.FC = () => {
         optionValue: "id",
     });
 
-    return(
+    return (
         <Card
             title="Change Password"
             style={{ height: "300px", borderRadius: "15px" }}
@@ -83,8 +89,8 @@ const ChangePasswordCard: React.FC = () => {
                 </Form.Item>
             </Form>
         </Card>
-    )
-}
+    );
+};
 
 export const DashboardPage: React.FC = () => {
     return (

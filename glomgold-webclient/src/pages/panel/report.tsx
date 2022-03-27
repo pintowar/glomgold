@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from "react-router-dom";
 
-import { Row, Col, Card, Space, DatePicker, Tabs } from 'antd';
+import { Row, Col, Card, Space, DatePicker, Tabs } from "antd";
 
-import moment from 'moment';
+import moment from "moment";
 
 import { PanelLayout } from "./layout";
-import { ItemChart, PeriodChart, AnnualTable } from './components/report';
+import { ItemChart, PeriodChart, AnnualTable } from "./components/report";
 import { IPanelAnnualReport } from "interfaces";
 import { useGetIdentity } from "@pankod/refine-core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY } from "../../constants";
 import { axiosInstance } from "authProvider";
 
 export const ReportPanel: React.FC = () => {
-    const { data: identity } = useGetIdentity<{locale: string; currency: string}>();
-    const locale = identity?.locale || DEFAULT_LOCALE
-    const currency = identity?.currency || DEFAULT_CURRENCY
+    const { data: identity } = useGetIdentity<{ locale: string; currency: string }>();
+    const locale = identity?.locale || DEFAULT_LOCALE;
+    const currency = identity?.currency || DEFAULT_CURRENCY;
 
-    const periodFormat = 'YYYY';
+    const periodFormat = "YYYY";
     const location = useLocation();
     const navigate = useNavigate();
     const period = new URLSearchParams(location.search).get("period") || moment().format(periodFormat);
@@ -31,22 +31,22 @@ export const ReportPanel: React.FC = () => {
         rowTrend: [],
         colSummary: [],
         colAverage: [],
-        total: 0
+        total: 0,
     });
 
     const onChangePeriod = (date: any, _: string) => setCurrentPeriod(date);
 
     useEffect(() => {
-        populateData()
-    }, [currentPeriod]);
+        const populateData = async () => {
+            const { status, data } = await axiosInstance.get(`/api/panel/report?year=${currentPeriod.year()}`);
+            if (status === 200) {
+                setDataTable({ ...data });
+                navigate(`/panel/report?period=${currentPeriod.format(periodFormat)}`);
+            } else throw Error();
+        };
 
-    const populateData = async () => {
-        const {status, data} = await axiosInstance.get(`/api/panel/report?year=${currentPeriod.year()}`)
-        if (status === 200) {
-            setDataTable({...data});
-            navigate(`/panel/report?period=${currentPeriod.format(periodFormat)}`)
-        } else throw Error()
-    }
+        populateData();
+    }, [currentPeriod, navigate]);
 
     return (
         <PanelLayout>
@@ -54,7 +54,12 @@ export const ReportPanel: React.FC = () => {
                 <Row gutter={[24, 24]}>
                     <Col span={24}>
                         <Card title={"Report Navigation"} bordered={false}>
-                            <DatePicker value={currentPeriod} picker="year" onChange={onChangePeriod} allowClear={false}/>
+                            <DatePicker
+                                value={currentPeriod}
+                                picker="year"
+                                onChange={onChangePeriod}
+                                allowClear={false}
+                            />
                         </Card>
                     </Col>
                 </Row>
@@ -63,17 +68,28 @@ export const ReportPanel: React.FC = () => {
                 <Row gutter={[24, 24]}>
                     <Col span={24}>
                         <Card bordered={false}>
-                            <Space direction="vertical" size={12} style={{width: '100%'}}>
+                            <Space direction="vertical" size={12} style={{ width: "100%" }}>
                                 <Tabs>
                                     <Tabs.TabPane tab="Table" key={1}>
-                                        <AnnualTable locale={locale} currency={currency}
-                                            columns={dataTable.columns} rowIndex={dataTable.rowIndex} data={dataTable.data}
-                                            rowSummary={dataTable.rowSummary} colSummary={dataTable.colSummary} total={dataTable.total}/>
+                                        <AnnualTable
+                                            locale={locale}
+                                            currency={currency}
+                                            columns={dataTable.columns}
+                                            rowIndex={dataTable.rowIndex}
+                                            data={dataTable.data}
+                                            rowSummary={dataTable.rowSummary}
+                                            colSummary={dataTable.colSummary}
+                                            total={dataTable.total}
+                                        />
                                     </Tabs.TabPane>
                                     <Tabs.TabPane tab="Chart" key={2}>
-                                        <Space direction="vertical" size={12} style={{width: '100%'}}>
-                                            <PeriodChart cols={dataTable.columns} data={dataTable.rowSummary} trend={dataTable.rowTrend}/>
-                                            <ItemChart cols={dataTable.rowIndex} data={dataTable.colAverage}/>
+                                        <Space direction="vertical" size={12} style={{ width: "100%" }}>
+                                            <PeriodChart
+                                                cols={dataTable.columns}
+                                                data={dataTable.rowSummary}
+                                                trend={dataTable.rowTrend}
+                                            />
+                                            <ItemChart cols={dataTable.rowIndex} data={dataTable.colAverage} />
                                         </Space>
                                     </Tabs.TabPane>
                                 </Tabs>
@@ -84,4 +100,4 @@ export const ReportPanel: React.FC = () => {
             </div>
         </PanelLayout>
     );
-}
+};
