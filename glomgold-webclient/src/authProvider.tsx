@@ -49,7 +49,7 @@ export const authProvider: AuthProvider = {
     login: async ({ username, password }) => {
         const { data, status } = await axios.post("/login", { username, password });
         if (status === 200) {
-            storage.setUser(data);
+            storage.setUser(data.access_token);
             const redirectPath = data.roles.includes("ROLE_ADMIN") ? "/" : "/panel";
             return Promise.resolve(redirectPath);
         } else {
