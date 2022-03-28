@@ -10,6 +10,7 @@ import {
     Form,
     Typography,
     Popconfirm,
+    Modal,
 } from "antd";
 import Highlighter from "react-highlight-words";
 import {
@@ -26,7 +27,7 @@ import {
 import Chart from "react-apexcharts";
 
 import { IItem } from "../../../../interfaces";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ColumnType } from "antd/lib/table";
 
 import "./control.css";
@@ -117,6 +118,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 }) => {
     const [addForm] = Form.useForm();
     const [editForm] = Form.useForm();
+    const descInputRef = useRef<Input>(null);
 
     // start selected rows
     const [selectedRows, setSelectedRows] = useState({
@@ -269,6 +271,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             const { description, value } = await addForm.validateFields();
             await onAddItem(description, value);
             addForm.resetFields();
+            descInputRef.current?.focus();
         } catch (errInfo) {
             console.error("Validate Failed:", errInfo);
         }
@@ -292,6 +295,15 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 
     const copyNextMonth = async () => {
         await onMonthItemCopy(selectedRows.rows);
+    };
+
+    const confirmDeleteSelected = () => {
+        Modal.confirm({
+            title: "Sure to delete all selected?",
+            async onOk() {
+                deleteSelected();
+            },
+        });
     };
 
     const deleteSelected = async () => {
@@ -372,7 +384,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             <Space direction="vertical" size={12} wrap style={{ width: "100%" }}>
                 <Form form={addForm} layout="inline">
                     <Form.Item name="description" rules={[{ required: true }]}>
-                        <Input placeholder="Description" onKeyPress={addItemOnEnter} />
+                        <Input ref={descInputRef} placeholder="Description" onKeyPress={addItemOnEnter} />
                     </Form.Item>
                     <Form.Item name="value" rules={[{ required: true }]}>
                         <InputNumber
@@ -395,7 +407,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
                     <Button
                         type="default"
                         disabled={selectedRows.keys.length === 0}
-                        onClick={() => deleteSelected()}
+                        onClick={() => confirmDeleteSelected()}
                         className={"ant-btn-danger"}
                     >
                         Delete Selected
