@@ -1,7 +1,7 @@
 [versions]
 kotlin = "1.6.10"
 kotlin-coroutines = "1.6.0"
-micronaut-gradle = "3.3.1"
+micronaut-gradle = "3.3.2"
 kotest-gradle = "0.3.9"
 git-gradle = "2.4.0"
 liquibase-gradle = "2.1.1"
