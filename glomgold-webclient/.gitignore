@@ -4,12 +4,14 @@
 /node_modules
 /.pnp
 .pnp.js
+.nyc_output
 
 # testing
 /coverage
 
 # production
 /build
+/cypress/videos
 
 # misc
 .DS_Store
