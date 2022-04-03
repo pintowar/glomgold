@@ -170,9 +170,9 @@ micronaut {
         annotations("com.github.pintowar.*")
     }
     aot {
-        version.set("1.0.0")
+        version.set("1.0.2")
         optimizeServiceLoading.set(true)
-        convertYamlToJava.set(true)
+        // convertYamlToJava.set(true)
         precomputeOperations.set(true)
         cacheEnvironment.set(true)
         optimizeClassLoading.set(true)

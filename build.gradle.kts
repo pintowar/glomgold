@@ -36,5 +36,5 @@ release {
 
 tasks.afterReleaseBuild {
     val webServ = ":glomgold-webserver"
-    dependsOn("$webServ:coverageReport", "$webServ:dockerPushNative")
+    dependsOn("$webServ:coverageReport", "$webServ:optimizedDockerPushNative")
 }
