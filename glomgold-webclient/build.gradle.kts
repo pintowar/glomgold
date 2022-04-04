@@ -28,7 +28,22 @@ tasks {
         args.set(listOf("run", "build"))
     }
 
+    register<NpmTask>("test") {
+        dependsOn(npmInstall)
+        group = "test"
+        description = "e2e test"
+        args.set(listOf("run", "e2e"))
+    }
+
     register<Delete>("clean") {
-        delete(rootProject.buildDir)
+        delete(project.buildDir)
+        delete("${project.projectDir}/coverage")
+    }
+
+    register("coverageReport") {
+        dependsOn("test")
+        doLast {
+            logger.quiet("Finishing Coverage Report!!")
+        }
     }
 }
