@@ -13,6 +13,7 @@ plugins {
     id("idea")
     id("glomgold.kotlin-liquibase")
     id("org.jlleitschuh.gradle.ktlint")
+//    id("org.sonarqube")
     jacoco
 }
 
@@ -43,7 +44,7 @@ dependencies {
     implementation(libs.bundles.kotlin.coroutines)
     implementation(libs.bundles.micronaut)
     implementation(libs.jbcrypt)
-    implementation(libs.commons.math)
+    implementation(libs.kotlin.stats)
 
     runtimeOnly(libs.logback.classic)
     runtimeOnly(libs.bundles.postgresql)
@@ -169,7 +170,7 @@ micronaut {
         annotations("com.github.pintowar.*")
     }
     aot {
-        version.set("1.0.2")
+//        version.set("1.1.0")
         optimizeServiceLoading.set(true)
         // convertYamlToJava.set(true)
         precomputeOperations.set(true)
@@ -189,3 +190,12 @@ ktlint {
         reporter(ReporterType.HTML)
     }
 }
+
+//sonarqube {
+//    properties {
+//        val jacocoReportPath = "${buildDir.absolutePath}/reports/jacoco/test"
+//        property("sonar.sources", "src/main/kotlin")
+//        property("sonar.tests", "src/test/kotlin")
+//        property("sonar.coverage.jacoco.xmlReportPaths", "$jacocoReportPath/jacocoTestReport.xml")
+//    }
+//}

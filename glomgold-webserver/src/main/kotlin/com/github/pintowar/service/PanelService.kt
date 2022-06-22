@@ -5,8 +5,8 @@ import com.github.pintowar.dto.PanelInfo
 import com.github.pintowar.repo.ItemRepository
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.toList
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics
-import org.apache.commons.math3.stat.regression.SimpleRegression
+import org.nield.kotlinstatistics.average
+import org.nield.kotlinstatistics.simpleRegression
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.YearMonth
@@ -67,15 +67,17 @@ class PanelService(private val itemRepository: ItemRepository) {
     fun calcTrend(values: List<BigDecimal?>) = if (values.count { it != null } > 2)
         simpleRegression(values) else mean(values)
 
-    fun mean(values: List<BigDecimal?>) = DescriptiveStatistics().let { stats ->
-        values.forEach { if (it != null) stats.addValue(it.toDouble()) }
-        values.indices.map {
-            if (stats.n > 0) stats.mean.toBigDecimal().setScale(2, RoundingMode.HALF_DOWN) else BigDecimal.ZERO
+    fun mean(values: List<BigDecimal?>) = values.filterNotNull()
+        .let { valid ->
+            if (valid.isEmpty()) values.indices.map { BigDecimal.ZERO }
+            else valid.average().setScale(2, RoundingMode.HALF_DOWN)
+                .let { avg -> values.indices.map { avg } }
         }
-    }
 
-    fun simpleRegression(values: List<BigDecimal?>) = SimpleRegression().let { reg ->
-        values.forEachIndexed { idx, it -> if (it != null) reg.addData(idx.toDouble(), it.toDouble()) }
-        values.indices.map { reg.predict(it.toDouble()).toBigDecimal().setScale(2, RoundingMode.HALF_DOWN) }
-    }
+    fun simpleRegression(values: List<BigDecimal?>) = values.withIndex()
+        .filter { (_, it) -> it != null }
+        .simpleRegression(xSelector = { it.index }, ySelector = { it.value!! })
+        .let { reg ->
+            values.indices.map { reg.predict(it.toDouble()).toBigDecimal().setScale(2, RoundingMode.HALF_DOWN) }
+        }
 }
