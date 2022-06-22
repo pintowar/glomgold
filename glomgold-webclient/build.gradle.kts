@@ -2,6 +2,7 @@ import com.github.gradle.node.npm.task.NpmTask
 
 plugins {
     id("com.github.node-gradle.node")
+//    id("org.sonarqube")
 }
 
 description = "Glomgold Web Client"
@@ -47,3 +48,12 @@ tasks {
         }
     }
 }
+
+//sonarqube {
+//    properties {
+//        val lcovReportPath = "${projectDir.absolutePath}/coverage/"
+//        property("sonar.sources", "src")
+//        property("sonar.tests", "cypress")
+//        property("sonar.typescript.lcov.reportPaths", "$lcovReportPath/lcov.info")
+//    }
+//}

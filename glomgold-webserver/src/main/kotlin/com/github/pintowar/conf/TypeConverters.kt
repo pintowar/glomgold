@@ -3,6 +3,7 @@ package com.github.pintowar.conf
 import io.micronaut.context.annotation.Factory
 import io.micronaut.core.convert.TypeConverter
 import jakarta.inject.Singleton
+import java.time.Instant
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -15,18 +16,17 @@ class TypeConverters {
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM")
 
     @Singleton
-    fun periodDateTypeConverter(): TypeConverter<YearMonth, Date> {
-        return TypeConverter<YearMonth, Date> { obj, _, _ ->
+    fun periodDateTypeConverter(): TypeConverter<YearMonth, Instant> {
+        return TypeConverter<YearMonth, Instant> { obj, _, _ ->
             val startOfMonth = obj.atDay(1).atStartOfDay().atZone(zone).toInstant()
-            Optional.of(Date.from(startOfMonth))
+            Optional.of(startOfMonth)
         }
     }
 
     @Singleton
-    fun datePeriodTypeConverter(): TypeConverter<Date, YearMonth> {
-        return TypeConverter<Date, YearMonth> { obj, _, _ ->
-            val instant = obj.toInstant().atZone(zone)
-            Optional.of(YearMonth.from(instant))
+    fun datePeriodTypeConverter(): TypeConverter<Instant, YearMonth> {
+        return TypeConverter<Instant, YearMonth> { obj, _, _ ->
+            Optional.of(YearMonth.from(obj.atZone(zone)))
         }
     }
 

@@ -1,7 +1,7 @@
 [versions]
-kotlin = "1.6.10"
-kotlin-coroutines = "1.6.0"
-micronaut-gradle = "3.3.2"
+kotlin = "1.6.21"
+kotlin-coroutines = "1.6.2"
+micronaut-gradle = "3.4.1"
 kotest-gradle = "0.3.9"
 git-gradle = "2.4.0"
 liquibase-gradle = "2.1.1"
@@ -53,9 +53,10 @@ graalvm-svm = { module = "org.graalvm.nativeimage:svm" }
 jbcrypt = { module = "org.mindrot:jbcrypt", version = "0.4" }
 
 postgresql-jdbc = { module = "org.postgresql:postgresql", version = "42.3.1" }
-postgresql-r2dbc = { module = "io.r2dbc:r2dbc-postgresql" }
+postgresql-r2dbc = { module = "org.postgresql:r2dbc-postgresql" }
+r2dbc-pool = { module = "io.r2dbc:r2dbc-pool", version = "0.9.0.RELEASE" }
 
-commons-math = { module = "org.apache.commons:commons-math3", version = "3.6.1" }
+kotlin-stats = { module = "org.nield:kotlin-statistics", version = "1.2.1" }
 
 testcontainers = { module = "org.testcontainers:testcontainers" }
 testcontainers-r2dbc = { module = "org.testcontainers:r2dbc" }
@@ -79,7 +80,7 @@ micronaut = [
 ]
 kotlin = ["kotlin-reflect", "kotlin-stdlib", "kotlin-logging"]
 kotlin-coroutines = ["kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor"]
-postgresql = ["postgresql-jdbc", "postgresql-r2dbc"]
+postgresql = ["postgresql-jdbc", "postgresql-r2dbc", "r2dbc-pool"]
 testcontainers = ["testcontainers", "testcontainers-r2dbc", "testcontainers-postgresql"]
 ktest = ["test-mockk", "test-faker", "test-kotest-dataset"]
 liquibase = ["liquibase-core", "liquibase-groovy-dsl", "liquibase-picocli", "liquibase-hibernate", "postgresql-jdbc"]
