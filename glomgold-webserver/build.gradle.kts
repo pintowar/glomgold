@@ -13,7 +13,7 @@ plugins {
     id("idea")
     id("glomgold.kotlin-liquibase")
     id("org.jlleitschuh.gradle.ktlint")
-//    id("org.sonarqube")
+    id("org.sonarqube")
     jacoco
 }
 
@@ -191,11 +191,11 @@ ktlint {
     }
 }
 
-//sonarqube {
-//    properties {
-//        val jacocoReportPath = "${buildDir.absolutePath}/reports/jacoco/test"
-//        property("sonar.sources", "src/main/kotlin")
-//        property("sonar.tests", "src/test/kotlin")
-//        property("sonar.coverage.jacoco.xmlReportPaths", "$jacocoReportPath/jacocoTestReport.xml")
-//    }
-//}
+sonarqube {
+    properties {
+        val jacocoReportPath = "${buildDir.absolutePath}/reports/jacoco/test"
+        property("sonar.sources", "src/main/kotlin")
+        property("sonar.tests", "src/test/kotlin")
+        property("sonar.coverage.jacoco.xmlReportPaths", "$jacocoReportPath/jacocoTestReport.xml")
+    }
+}
