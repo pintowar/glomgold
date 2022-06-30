@@ -10,7 +10,7 @@ description = "Glomgold Web Client"
 project.buildDir = file("build")
 
 node {
-    version.set("16.14.0")
+    version.set("16.15.1")
     download.set(true)
 }
 

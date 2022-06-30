@@ -4,14 +4,14 @@ import axios, { AxiosInstance } from "axios";
 import { LocalStorage } from "LocalStorage";
 
 const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
-    const axiosInstance = axios.create();
+    const axiosCli = axios.create();
 
-    axiosInstance.interceptors.request.use(
+    axiosCli.interceptors.request.use(
         (config) => {
             const tokenKey = storage.getToken();
             if (tokenKey) {
-                if (!config.headers.Authorization) {
-                    config.headers.Authorization = `Bearer ${tokenKey}`;
+                if (!config?.headers?.Authorization) {
+                    config.headers = { Authorization: `Bearer ${tokenKey}` };
                 } else {
                     config.headers.Authorization = "";
                 }
@@ -23,7 +23,7 @@ const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
         }
     );
 
-    axiosInstance.interceptors.response.use(
+    axiosCli.interceptors.response.use(
         (response) => {
             return response;
         },
@@ -38,7 +38,7 @@ const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
         }
     );
 
-    return axiosInstance;
+    return axiosCli;
 };
 
 const storage = LocalStorage.getInstance();

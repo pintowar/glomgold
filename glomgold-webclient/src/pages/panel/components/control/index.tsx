@@ -58,8 +58,6 @@ const genEditableCell = (
         dataIndex,
         title,
         inputType,
-        record,
-        index,
         children,
         ...restProps
     }) => {
@@ -126,8 +124,8 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         rows: [] as PanelItem[],
     });
 
-    const onSelectRowChange = (selectedRowKeys: React.Key[], selectedRows: PanelItem[]) => {
-        setSelectedRows({ keys: selectedRowKeys, rows: selectedRows });
+    const onSelectRowChange = (selectedRowKeys: React.Key[], selected: PanelItem[]) => {
+        setSelectedRows({ keys: selectedRowKeys, rows: selected });
     };
 
     const rowSelection = {
@@ -245,19 +243,19 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
                 setTimeout(() => searchInput?.select(), 100);
             }
         },
-        render: (text) =>
-            filterState.searchedColumn === dataIndex ? (
+        render: (text) => {
+            const amount = format ? currencyFormat(text) : text;
+            return filterState.searchedColumn === dataIndex ? (
                 <Highlighter
                     highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
                     searchWords={[filterState.searchText]}
                     autoEscape
-                    textToHighlight={text ? `${format ? currencyFormat(text) : text}` : ""}
+                    textToHighlight={text ? amount : ""}
                 />
-            ) : format ? (
-                currencyFormat(text)
             ) : (
-                text
-            ),
+                amount
+            );
+        },
     });
     // end of filter components
     const addItemOnEnter = async (e: React.KeyboardEvent) => {

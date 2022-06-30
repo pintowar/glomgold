@@ -1,9 +1,8 @@
 micronaut:
   application:
     name: glomgold-dev
-  views:
-    thymeleaf:
-      cacheable: true
+  server:
+    http-to-https-redirect: true
 
 r2dbc:
   datasources:

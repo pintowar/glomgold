@@ -15,10 +15,10 @@ import {
     Form,
     Input,
     Button,
+    useTable,
+    useSelect,
 } from "@pankod/refine-antd";
 import { SearchOutlined } from "@ant-design/icons";
-
-import { useTable, useSelect } from "@pankod/refine-antd";
 
 import { IItem, IUser } from "interfaces";
 

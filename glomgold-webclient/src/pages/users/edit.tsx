@@ -1,9 +1,7 @@
 import React, { useMemo } from "react";
 import { IResourceComponentsProps, useApiUrl, useCustom } from "@pankod/refine-core";
 
-import { Edit, Form, Input, Checkbox, Select } from "@pankod/refine-antd";
-
-import { useForm } from "@pankod/refine-antd";
+import { Edit, Form, Input, Checkbox, Select, useForm } from "@pankod/refine-antd";
 
 import "react-mde/lib/styles/css/react-mde-all.css";
 
