@@ -1,3 +1,5 @@
+import React from "react";
+
 import { IResourceComponentsProps } from "@pankod/refine-core";
 
 import { List, Table, Space, EditButton, DeleteButton, useTable, BooleanField, Icons } from "@pankod/refine-antd";
@@ -11,7 +13,7 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
 
     const { CloseCircleOutlined, CheckCircleOutlined } = Icons;
 
-    const boolField = (value: Boolean) => (
+    const boolField = (value: boolean) => (
         <BooleanField
             value={value}
             trueIcon={<CheckCircleOutlined />}
@@ -19,7 +21,7 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
             valueLabelTrue="Yes"
             valueLabelFalse="No"
         />
-    )
+    );
 
     return (
         <List>

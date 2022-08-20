@@ -1,3 +1,4 @@
+import React from "react";
 import { Refine } from "@pankod/refine-core";
 import { notificationProvider, Layout, ErrorComponent, Icons } from "@pankod/refine-antd";
 import dataProvider from "@pankod/refine-simple-rest";

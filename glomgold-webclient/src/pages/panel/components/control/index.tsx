@@ -1,3 +1,5 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
 import {
     Card,
     Space,
@@ -28,11 +30,11 @@ import {
 import Chart from "react-apexcharts";
 
 import { IItem } from "../../../../interfaces";
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ColumnType } from "antd/lib/table";
 
 import "./control.css";
 import d2lIntl from "d2l-intl";
+import moment from "moment";
 
 export interface PanelItem {
     key: number;
@@ -165,7 +167,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     // end of editable cells
 
     // start of filter components
-    let searchInput = useRef<InputRef>(null);
+    const searchInput = useRef<InputRef>(null);
     const [filterState, setFilterState] = useState({
         searchText: "",
         searchedColumn: "",

@@ -58,7 +58,7 @@ export const authProvider: AuthProvider = {
     },
     logout: async () => {
         storage.clearUser();
-        return "/"
+        return "/";
     },
     checkError: async (error) => {
         if (error && error.statusCode === 401) {
