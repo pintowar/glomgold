@@ -18,7 +18,7 @@ import {
 } from "./components/control";
 import { useGetIdentity } from "@pankod/refine-core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../constants";
-import { axiosInstance } from "authProvider";
+import { axiosInstance } from "../../authProvider";
 
 interface ControlPanelData {
     items: IItem[];

@@ -3,9 +3,7 @@ import { IResourceComponentsProps, useApiUrl, useCustom } from "@pankod/refine-c
 
 import { Create, Form, Input, Checkbox, Select, useForm } from "@pankod/refine-antd";
 
-import "react-mde/lib/styles/css/react-mde-all.css";
-
-import { IUser } from "interfaces";
+import { IUser } from "../../interfaces";
 
 export const UserCreate: React.FC<IResourceComponentsProps> = () => {
     const apiUrl = useApiUrl();

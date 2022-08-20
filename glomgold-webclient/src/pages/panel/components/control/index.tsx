@@ -3,6 +3,7 @@ import {
     Space,
     DatePicker,
     Input,
+    InputRef,
     InputNumber,
     Button,
     Table,
@@ -116,7 +117,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 }) => {
     const [addForm] = Form.useForm();
     const [editForm] = Form.useForm();
-    const descInputRef = useRef<Input>(null);
+    const descInputRef = useRef<InputRef>(null);
 
     // start selected rows
     const [selectedRows, setSelectedRows] = useState({
@@ -164,7 +165,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     // end of editable cells
 
     // start of filter components
-    let searchInput: Input | null = null;
+    let searchInput = useRef<InputRef>(null);
     const [filterState, setFilterState] = useState({
         searchText: "",
         searchedColumn: "",
@@ -189,9 +190,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
             <div style={{ padding: 8 }}>
                 <Input
-                    ref={(node) => {
-                        searchInput = node;
-                    }}
+                    ref={searchInput}
                     placeholder={`Search ${dataIndex}`}
                     value={selectedKeys[0]}
                     onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
@@ -240,7 +239,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         },
         onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
-                setTimeout(() => searchInput?.select(), 100);
+                setTimeout(() => searchInput.current?.select(), 100);
             }
         },
         render: (text) => {

@@ -2,7 +2,7 @@ import { useShow, IResourceComponentsProps, useOne } from "@pankod/refine-core";
 
 import { Show, Typography } from "@pankod/refine-antd";
 
-import { IItem, IUser } from "interfaces";
+import { IItem, IUser } from "../../interfaces";
 
 const { Title, Text } = Typography;
 

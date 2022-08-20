@@ -4,9 +4,9 @@ import { useApiUrl, useCustom } from "@pankod/refine-core";
 import { useSelect } from "@pankod/refine-antd";
 import { Row, Col, Card, Space, notification } from "@pankod/refine-antd";
 import { Form, Input, Button, Select } from "antd";
-import { IUser } from "interfaces";
+import { IUser } from "../interfaces";
 
-import { axiosInstance } from "authProvider";
+import { axiosInstance } from "../authProvider";
 
 const ManagementInfoCard: React.FC = () => {
     const { data } = useCustom({

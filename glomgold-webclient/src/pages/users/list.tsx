@@ -1,9 +1,8 @@
 import { IResourceComponentsProps } from "@pankod/refine-core";
 
 import { List, Table, Space, EditButton, DeleteButton, useTable, BooleanField, Icons } from "@pankod/refine-antd";
-import { BooleanFieldProps } from "@pankod/refine-antd/dist/components/fields/boolean";
 
-import { IUser } from "interfaces";
+import { IUser } from "../../interfaces";
 
 export const UserList: React.FC<IResourceComponentsProps> = () => {
     const { tableProps } = useTable<IUser>({
@@ -12,7 +11,7 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
 
     const { CloseCircleOutlined, CheckCircleOutlined } = Icons;
 
-    const BoolField: React.FC<BooleanFieldProps> = (value: BooleanFieldProps) => (
+    const boolField = (value: Boolean) => (
         <BooleanField
             value={value}
             trueIcon={<CheckCircleOutlined />}
@@ -20,7 +19,7 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
             valueLabelTrue="Yes"
             valueLabelFalse="No"
         />
-    );
+    )
 
     return (
         <List>
@@ -29,8 +28,8 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
                 <Table.Column dataIndex="name" title="Name" />
                 <Table.Column dataIndex="username" title="Username" />
                 <Table.Column dataIndex="email" title="E-mail" />
-                <Table.Column dataIndex="enabled" title="Enabled" render={(value) => <BoolField value={value} />} />
-                <Table.Column dataIndex="admin" title="Admin" render={(value) => <BoolField value={value} />} />
+                <Table.Column dataIndex="enabled" title="Enabled" render={boolField} />
+                <Table.Column dataIndex="admin" title="Admin" render={boolField} />
                 <Table.Column dataIndex="locale" title="Locale" />
                 <Table.Column dataIndex="timezone" title="Timezone" />
 

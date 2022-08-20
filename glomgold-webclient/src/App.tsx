@@ -4,17 +4,17 @@ import dataProvider from "@pankod/refine-simple-rest";
 import routerProvider from "@pankod/refine-react-router-v6";
 import "@pankod/refine-antd/dist/styles.min.css";
 
-import { ItemList, ItemCreate, ItemEdit, ItemShow } from "pages/items";
-import { UserList, UserCreate, UserEdit, UserShow } from "pages/users";
-import { ControlPanel, ReportPanel } from "pages/panel";
-import { DashboardPage } from "pages/dashboard";
-import { LoginPage } from "pages/login";
-import { Title, Sider } from "components";
-import { axiosInstance, authProvider } from "authProvider";
+import { ItemList, ItemCreate, ItemEdit, ItemShow } from "./pages/items";
+import { UserList, UserCreate, UserEdit, UserShow } from "./pages/users";
+import { ControlPanel, ReportPanel } from "./pages/panel";
+import { DashboardPage } from "./pages/dashboard";
+import { LoginPage } from "./pages/login";
+import { Title, Sider } from "./components";
+import { axiosInstance, authProvider } from "./authProvider";
 
 import { API_URL } from "./constants";
 
-import { LocalStorage } from "LocalStorage";
+import { LocalStorage } from "./LocalStorage";
 
 const App: React.FC = () => {
     return (

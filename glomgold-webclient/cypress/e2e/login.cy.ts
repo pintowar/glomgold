@@ -12,7 +12,7 @@ describe("Login Tests", () => {
 
             const { username, password } = user;
 
-            cy.visit("/login");
+            cy.visit("/");
 
             cy.get("#username").type(username);
             cy.get("#password").type(password);
@@ -35,7 +35,7 @@ describe("Login Tests", () => {
 
             const { username, password } = user;
 
-            cy.visit("/login");
+            cy.visit("/");
 
             cy.get("#username").type(username);
             cy.get("#password").type(password);
@@ -61,7 +61,7 @@ describe("Login Tests", () => {
 
             const { username, password } = user;
 
-            cy.visit("/login");
+            cy.visit("/");
 
             cy.get("#username").type(username);
             cy.get("#password").type(password);
