@@ -1,12 +1,20 @@
-import { defineConfig } from 'cypress'
+import { defineConfig } from "cypress";
+import registerCodeCoverageTasks from "@cypress/code-coverage/task";
 
 export default defineConfig({
-  e2e: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
-    setupNodeEvents(on, config) {
-      return require('./cypress/plugins/index.js')(on, config)
+    component: {
+        devServer: {
+            framework: "react",
+            bundler: "vite",
+        },
     },
-    baseUrl: 'http://localhost:3000',
-  },
-})
+    e2e: {
+        // We've imported your old cypress plugins here.
+        // You may want to clean this up later by importing these.
+        setupNodeEvents(on, config) {
+            registerCodeCoverageTasks(on, config);
+            return config;
+        },
+        baseUrl: "http://localhost:3000",
+    },
+});

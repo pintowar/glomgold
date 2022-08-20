@@ -7,10 +7,10 @@ import moment from "moment";
 
 import { PanelLayout } from "./layout";
 import { ItemChart, PeriodChart, AnnualTable } from "./components/report";
-import { IPanelAnnualReport } from "interfaces";
+import { IPanelAnnualReport } from "../../interfaces";
 import { useGetIdentity } from "@pankod/refine-core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY } from "../../constants";
-import { axiosInstance } from "authProvider";
+import { axiosInstance } from "../../authProvider";
 
 export const ReportPanel: React.FC = () => {
     const { data: identity } = useGetIdentity<{ locale: string; currency: string }>();

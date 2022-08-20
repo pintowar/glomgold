@@ -1,8 +1,10 @@
+import React from "react";
+
 import { useShow, IResourceComponentsProps } from "@pankod/refine-core";
 
 import { Show, Typography } from "@pankod/refine-antd";
 
-import { IUser } from "interfaces";
+import { IUser } from "../../interfaces";
 
 const { Title, Text } = Typography;
 

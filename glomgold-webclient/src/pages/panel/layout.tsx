@@ -10,7 +10,7 @@ const { Link } = routerProvider;
 
 const { Header, Content, Footer } = Layout;
 
-export const PanelLayout: React.FC = ({ children }) => {
+export const PanelLayout: React.FC<React.PropsWithChildren> = ({ children }) => {
     const { isSuccess } = useAuthenticated();
     const { data: permissionsData } = usePermissions();
 

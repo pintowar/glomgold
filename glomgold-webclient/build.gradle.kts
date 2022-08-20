@@ -7,7 +7,7 @@ plugins {
 
 description = "Glomgold Web Client"
 
-project.buildDir = file("build")
+project.buildDir = file("dist")
 
 node {
     version.set("16.15.1")
@@ -19,7 +19,7 @@ tasks {
         dependsOn(npmInstall)
         group = "application"
         description = "Run the client app"
-        args.set(listOf("run", "start"))
+        args.set(listOf("run", "dev"))
     }
 
     register<NpmTask>("build") {
@@ -39,6 +39,7 @@ tasks {
     register<Delete>("clean") {
         delete(project.buildDir)
         delete("${project.projectDir}/coverage")
+        delete("${project.projectDir}/.nyc_output")
     }
 
     register("coverageReport") {

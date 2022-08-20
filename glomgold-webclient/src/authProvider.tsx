@@ -1,7 +1,7 @@
 import { AuthProvider } from "@pankod/refine-core";
 
 import axios, { AxiosInstance } from "axios";
-import { LocalStorage } from "LocalStorage";
+import { LocalStorage } from "./LocalStorage";
 
 const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
     const axiosCli = axios.create();
@@ -58,6 +58,7 @@ export const authProvider: AuthProvider = {
     },
     logout: async () => {
         storage.clearUser();
+        return "/";
     },
     checkError: async (error) => {
         if (error && error.statusCode === 401) {

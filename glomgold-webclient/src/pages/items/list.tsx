@@ -1,3 +1,5 @@
+import React from "react";
+
 import { CrudFilters, IResourceComponentsProps, HttpError, useMany } from "@pankod/refine-core";
 
 import {
@@ -20,7 +22,7 @@ import {
 } from "@pankod/refine-antd";
 import { SearchOutlined } from "@ant-design/icons";
 
-import { IItem, IUser } from "interfaces";
+import { IItem, IUser } from "../../interfaces";
 
 export const ItemList: React.FC<IResourceComponentsProps> = () => {
     const importProps = useImport<IItem>();

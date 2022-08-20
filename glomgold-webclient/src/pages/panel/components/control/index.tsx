@@ -1,8 +1,11 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
 import {
     Card,
     Space,
     DatePicker,
     Input,
+    InputRef,
     InputNumber,
     Button,
     Table,
@@ -27,11 +30,11 @@ import {
 import Chart from "react-apexcharts";
 
 import { IItem } from "../../../../interfaces";
-import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ColumnType } from "antd/lib/table";
 
 import "./control.css";
 import d2lIntl from "d2l-intl";
+import moment from "moment";
 
 export interface PanelItem {
     key: number;
@@ -116,7 +119,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 }) => {
     const [addForm] = Form.useForm();
     const [editForm] = Form.useForm();
-    const descInputRef = useRef<Input>(null);
+    const descInputRef = useRef<InputRef>(null);
 
     // start selected rows
     const [selectedRows, setSelectedRows] = useState({
@@ -164,7 +167,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     // end of editable cells
 
     // start of filter components
-    let searchInput: Input | null = null;
+    const searchInput = useRef<InputRef>(null);
     const [filterState, setFilterState] = useState({
         searchText: "",
         searchedColumn: "",
@@ -189,9 +192,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
             <div style={{ padding: 8 }}>
                 <Input
-                    ref={(node) => {
-                        searchInput = node;
-                    }}
+                    ref={searchInput}
                     placeholder={`Search ${dataIndex}`}
                     value={selectedKeys[0]}
                     onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
@@ -240,7 +241,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         },
         onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
-                setTimeout(() => searchInput?.select(), 100);
+                setTimeout(() => searchInput.current?.select(), 100);
             }
         },
         render: (text) => {

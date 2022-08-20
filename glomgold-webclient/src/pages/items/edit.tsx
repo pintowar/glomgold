@@ -3,9 +3,7 @@ import { IResourceComponentsProps } from "@pankod/refine-core";
 
 import { Edit, Form, Input, Select, useForm, useSelect } from "@pankod/refine-antd";
 
-import "react-mde/lib/styles/css/react-mde-all.css";
-
-import { IItem, IUser } from "interfaces";
+import { IItem, IUser } from "../../interfaces";
 
 export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
     const { formProps, saveButtonProps, queryResult } = useForm<IItem>({

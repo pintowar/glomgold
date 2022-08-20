@@ -3,9 +3,7 @@ import { IResourceComponentsProps, useApiUrl, useCustom } from "@pankod/refine-c
 
 import { Edit, Form, Input, Checkbox, Select, useForm } from "@pankod/refine-antd";
 
-import "react-mde/lib/styles/css/react-mde-all.css";
-
-import { IUser } from "interfaces";
+import { IUser } from "../../interfaces";
 
 export const UserEdit: React.FC<IResourceComponentsProps> = () => {
     const apiUrl = useApiUrl();

@@ -31,7 +31,9 @@ jobs:
       - name: Setup GraalVM CE
         uses: DeLaGuardo/setup-graalvm@3.1
         with:
-          graalvm-version: 22.0.0.2.java17
+          graalvm: '22.2.0'
+          java: 'java17'
+          arch: 'amd64'
       - name: Install Native Image
         run: gu install native-image
 
