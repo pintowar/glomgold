@@ -94,11 +94,10 @@ export const AnnualTable: React.FC<AnnualTableProps> = ({
 
     const tableCols = [{ title: "", dataIndex: "desc", key: "desc", render: (value?: number) => <>{value}</> }]
         .concat(
-            columns.map((col: string, idx: number) => ({
+            columns.map((col: string) => ({
                 title: col,
                 dataIndex: col,
                 key: col,
-                // render: currencyFormatFactory(idx + 1),
                 render: (value?: number) => <>{value}</>,
             }))
         )
@@ -106,14 +105,11 @@ export const AnnualTable: React.FC<AnnualTableProps> = ({
 
     const source = rowIndex.map((desc, row) => {
         const summary = { key: row, desc: desc, total: colSummary[row] };
-        const dataCols = columns.reduce(
-            (acc, col, idx) => {
-                const cell = data[row][idx];
-                const formattedCell = cell ? currencyFormatFactory(idx + 1, desc)(cell) : cell;
-                return { [col]: formattedCell, ...acc };
-            }, //({ [col]: data[row][idx] ? currencyFormat(data[row][idx]) : data[row][idx], ...acc }),
-            {}
-        );
+        const dataCols = columns.reduce((acc, col, idx) => {
+            const cell = data[row][idx];
+            const formattedCell = cell ? currencyFormatFactory(idx + 1, desc)(cell) : cell;
+            return { [col]: formattedCell, ...acc };
+        }, {});
 
         return { ...dataCols, ...summary };
     });
