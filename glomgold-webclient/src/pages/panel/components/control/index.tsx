@@ -99,6 +99,7 @@ interface MonthItemsCardProps {
     locale: string;
     currency: string;
     symbol: string;
+    initialSearch: string;
     onAddItem: (description: string, value: number) => Promise<void>;
     onEditItem: (id: number, description: string, value: number) => Promise<void>;
     onDeleteItem: (itemId: number) => Promise<void>;
@@ -107,6 +108,7 @@ interface MonthItemsCardProps {
 }
 
 export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
+    initialSearch,
     tableData,
     locale,
     currency,
@@ -323,6 +325,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
                 title: "Description",
                 editing: isEditing(record),
             }),
+            defaultFilteredValue: [initialSearch],
             ...getColumnSearchProps("description"),
         },
         {

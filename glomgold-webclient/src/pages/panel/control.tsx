@@ -37,6 +37,7 @@ export const ControlPanel: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const period = new URLSearchParams(location.search).get("period") || moment().format(periodFormat);
+    const desc = new URLSearchParams(location.search).get("desc") || "";
 
     const [currentPeriod, setCurrentPeriod] = useState(moment(period, periodFormat));
     const [panelData, setPanelData] = useState<ControlPanelData>({
@@ -53,12 +54,13 @@ export const ControlPanel: React.FC = () => {
             const { status, data } = await axiosInstance.get(`/api/panel?period=${formattedPeriod}`);
             if (status === 200) {
                 setPanelData(data);
-                navigate(`/panel?period=${formattedPeriod}`);
+                const descParam = desc ? `&desc=${desc}` : "";
+                navigate(`/panel?period=${formattedPeriod}${descParam}`);
             } else throw Error();
         };
 
         populateData();
-    }, [formattedPeriod, navigate]);
+    }, [formattedPeriod, desc, navigate]);
 
     const onAddItem = async (description: string, value: number) => {
         const { status, data } = await axiosInstance.post("/api/panel/add-item", {
@@ -139,6 +141,7 @@ export const ControlPanel: React.FC = () => {
                 <Row gutter={[24, 24]}>
                     <Col span={12}>
                         <MonthItemsCard
+                            initialSearch={desc}
                             tableData={tableData}
                             locale={locale}
                             currency={currency}
