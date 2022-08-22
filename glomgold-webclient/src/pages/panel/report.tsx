@@ -74,6 +74,7 @@ export const ReportPanel: React.FC = () => {
                                 <Tabs>
                                     <Tabs.TabPane tab="Table" key={1}>
                                         <AnnualTable
+                                            year={currentPeriod.format(periodFormat)}
                                             locale={locale}
                                             currency={currency}
                                             columns={dataTable.columns}

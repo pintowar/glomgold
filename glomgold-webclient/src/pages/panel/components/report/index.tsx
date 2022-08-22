@@ -55,6 +55,7 @@ export const ItemChart: React.FC<ChartReportProps> = ({ cols, data }) => {
 };
 
 interface AnnualTableProps {
+    year: string;
     locale: string;
     currency: string;
     columns: string[];
@@ -66,6 +67,7 @@ interface AnnualTableProps {
 }
 
 export const AnnualTable: React.FC<AnnualTableProps> = ({
+    year,
     locale,
     currency,
     columns,
@@ -75,16 +77,43 @@ export const AnnualTable: React.FC<AnnualTableProps> = ({
     colSummary,
     total,
 }) => {
-    const currencyFormat = (value?: number) =>
-        value ? value.toLocaleString(locale, { style: "currency", currency: currency }) : "";
+    const currencyFormatFactory = (month?: number, desc?: string) => {
+        const currencyFormat = (value?: number) => {
+            const valueFormat = value ? value.toLocaleString(locale, { style: "currency", currency: currency }) : "";
+            if (month && desc) {
+                const formattedMonth = `${month}`.padStart(2, "0");
+                return <a href={`/panel?period=${year}-${formattedMonth}&desc=${desc}`}>{valueFormat}</a>;
+            } else {
+                return <>{valueFormat}</>;
+            }
+        };
+        return currencyFormat;
+    };
 
-    const tableCols = [{ title: "", dataIndex: "desc", key: "desc", render: currencyFormat }]
-        .concat(columns.map((col: string) => ({ title: col, dataIndex: col, key: col, render: currencyFormat })))
-        .concat([{ title: "Total", dataIndex: "total", key: "total", render: currencyFormat }]);
+    const currencyFormat = currencyFormatFactory();
+
+    const tableCols = [{ title: "", dataIndex: "desc", key: "desc", render: (value?: number) => <>{value}</> }]
+        .concat(
+            columns.map((col: string, idx: number) => ({
+                title: col,
+                dataIndex: col,
+                key: col,
+                // render: currencyFormatFactory(idx + 1),
+                render: (value?: number) => <>{value}</>,
+            }))
+        )
+        .concat([{ title: "Total", dataIndex: "total", key: "total", render: currencyFormatFactory() }]);
 
     const source = rowIndex.map((desc, row) => {
         const summary = { key: row, desc: desc, total: colSummary[row] };
-        const dataCols = columns.reduce((acc, col, idx) => ({ [col]: data[row][idx], ...acc }), {});
+        const dataCols = columns.reduce(
+            (acc, col, idx) => {
+                const cell = data[row][idx];
+                const formattedCell = cell ? currencyFormatFactory(idx + 1, desc)(cell) : cell;
+                return { [col]: formattedCell, ...acc };
+            }, //({ [col]: data[row][idx] ? currencyFormat(data[row][idx]) : data[row][idx], ...acc }),
+            {}
+        );
 
         return { ...dataCols, ...summary };
     });
