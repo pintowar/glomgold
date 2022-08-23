@@ -27,6 +27,14 @@ class PanelController(private val itemRepository: ItemRepository, private val pa
         return panelService.annualReport(authId(auth), currentYear)
     }
 
+    @Get("/item-complete{?description}")
+    suspend fun itemComplete(auth: Authentication, @QueryValue description: String?): List<String> {
+        val desc = if (description != null) "$description%" else ""
+        return if(desc.isNotEmpty())
+            itemRepository.findDistinctDescriptionByUserIdAndDescriptionIlike(authId(auth), desc)
+        else emptyList()
+    }
+
     @Post("/add-item")
     suspend fun addItem(auth: Authentication, @Body item: ItemBody): HttpResponse<PanelInfo> {
         itemRepository.save(item.toItem(authId(auth)))

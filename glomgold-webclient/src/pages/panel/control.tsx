@@ -39,6 +39,7 @@ export const ControlPanel: React.FC = () => {
     const period = new URLSearchParams(location.search).get("period") || moment().format(periodFormat);
     const desc = new URLSearchParams(location.search).get("desc") || "";
 
+    const [autoCompleteOptions, setAutoCompleteOptions] = useState<{ value: string }[]>([]);
     const [currentPeriod, setCurrentPeriod] = useState(moment(period, periodFormat));
     const [panelData, setPanelData] = useState<ControlPanelData>({
         items: [],
@@ -114,6 +115,17 @@ export const ControlPanel: React.FC = () => {
         }
     };
 
+    const onSearch = async (searchText: string) => {
+        const { status, data } = await axiosInstance.get<string[]>(
+            `/api/panel/item-complete?description=${searchText}`
+        );
+        if (status !== 200) {
+            throw Error();
+        } else {
+            setAutoCompleteOptions(data.map((r) => ({ value: r })));
+        }
+    };
+
     const tableData = panelData.items.map(({ id, description, value }) => ({ key: id, description, value }));
 
     return (
@@ -141,11 +153,13 @@ export const ControlPanel: React.FC = () => {
                 <Row gutter={[24, 24]}>
                     <Col span={12}>
                         <MonthItemsCard
+                            autoCompleteOptions={autoCompleteOptions}
                             initialSearch={desc}
                             tableData={tableData}
                             locale={locale}
                             currency={currency}
                             symbol={symbol}
+                            onSearch={onSearch}
                             onAddItem={onAddItem}
                             onDeleteItem={onDeleteItem}
                             onEditItem={onEditItem}
