@@ -7,7 +7,7 @@ import "@pankod/refine-antd/dist/styles.min.css";
 
 import { ItemList, ItemCreate, ItemEdit, ItemShow } from "./pages/items";
 import { UserList, UserCreate, UserEdit, UserShow } from "./pages/users";
-import { ControlPanel, ReportPanel } from "./pages/panel";
+import { ControlPanel, ReportPanel, ProfilePanel } from "./pages/panel";
 import { DashboardPage } from "./pages/dashboard";
 import { LoginPage } from "./pages/login";
 import { Title, Sider } from "./components";
@@ -30,6 +30,10 @@ const App: React.FC = () => {
                     {
                         element: <ReportPanel />,
                         path: "/panel/report",
+                    },
+                    {
+                        element: <ProfilePanel />,
+                        path: "/panel/profile",
                     },
                 ],
             }}

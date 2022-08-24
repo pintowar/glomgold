@@ -25,6 +25,12 @@ data class ItemSummary(
 )
 
 @Introspected
+data class ChangePassword(
+    val actualPassword: String,
+    val newPassword: String
+)
+
+@Introspected
 data class ItemBody(
     val period: YearMonth,
     val description: String,

@@ -51,7 +51,7 @@ const ChangePasswordCard: React.FC = () => {
         } else {
             notification["error"]({
                 message: "Operation Error",
-                description: "Could not change possword for selected user.",
+                description: "Could not change password for selected user.",
             });
         }
     };

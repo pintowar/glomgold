@@ -8,9 +8,10 @@ import {
     useNavigation,
     CanAccess,
     useIsExistAuthentication,
+    useMenu,
 } from "@pankod/refine-core";
 
-import { useMenu, Title as DefaultTitle } from "@pankod/refine-antd";
+import { Title as DefaultTitle } from "@pankod/refine-antd";
 
 import { antLayoutSider, antLayoutSiderMobile } from "./styles";
 

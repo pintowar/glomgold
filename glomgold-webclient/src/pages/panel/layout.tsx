@@ -20,7 +20,11 @@ export const PanelLayout: React.FC<React.PropsWithChildren> = ({ children }) => 
 
     const location = useLocation();
     const [selectedMenu, setSelectedMenu] = useState(
-        location.pathname.includes("report") ? "menu-report" : "menu-panel"
+        location.pathname.includes("report")
+            ? "menu-report"
+            : location.pathname.includes("profile")
+            ? "menu-profile"
+            : "menu-panel"
     );
 
     const handleClick = (key: string) => setSelectedMenu(key);
@@ -28,6 +32,7 @@ export const PanelLayout: React.FC<React.PropsWithChildren> = ({ children }) => 
     const menuItems = [
         { key: "menu-panel", label: <Link to={"/panel"}>Panel</Link> },
         { key: "menu-report", label: <Link to={"/panel/report"}>Report</Link> },
+        { key: "menu-profile", label: <Link to={"/panel/profile"}>Profile</Link> },
         { key: `${isAdmin ? "admin" : ""}`, label: <Link to={"/"}>Admin</Link> },
         { key: "menu-logout", label: <div onClick={() => logout()}>Logout</div> },
     ].filter(({ key }) => key);
