@@ -7,6 +7,7 @@ import {
     Input,
     InputRef,
     InputNumber,
+    AutoComplete,
     Button,
     Table,
     Statistic,
@@ -15,6 +16,7 @@ import {
     Popconfirm,
     Modal,
 } from "antd";
+import { BaseSelectRef } from "rc-select";
 import Highlighter from "react-highlight-words";
 import {
     LeftOutlined,
@@ -99,14 +101,19 @@ interface MonthItemsCardProps {
     locale: string;
     currency: string;
     symbol: string;
+    initialSearch: string;
+    autoCompleteOptions: { value: string }[];
     onAddItem: (description: string, value: number) => Promise<void>;
     onEditItem: (id: number, description: string, value: number) => Promise<void>;
     onDeleteItem: (itemId: number) => Promise<void>;
     onMonthItemCopy: (items: PanelItem[]) => Promise<void>;
     onBatchDelete: (itemIds: number[]) => Promise<void>;
+    onSearch: (searchText: string) => Promise<void>;
 }
 
 export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
+    initialSearch,
+    autoCompleteOptions,
     tableData,
     locale,
     currency,
@@ -116,10 +123,11 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     onDeleteItem,
     onMonthItemCopy,
     onBatchDelete,
+    onSearch,
 }) => {
     const [addForm] = Form.useForm();
     const [editForm] = Form.useForm();
-    const descInputRef = useRef<InputRef>(null);
+    const descInputRef = useRef<BaseSelectRef>(null);
 
     // start selected rows
     const [selectedRows, setSelectedRows] = useState({
@@ -323,6 +331,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
                 title: "Description",
                 editing: isEditing(record),
             }),
+            defaultFilteredValue: [initialSearch],
             ...getColumnSearchProps("description"),
         },
         {
@@ -383,7 +392,13 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             <Space direction="vertical" size={12} wrap style={{ width: "100%" }}>
                 <Form form={addForm} layout="inline">
                     <Form.Item name="description" rules={[{ required: true }]}>
-                        <Input ref={descInputRef} placeholder="Description" onKeyPress={addItemOnEnter} />
+                        <AutoComplete
+                            ref={descInputRef}
+                            options={autoCompleteOptions}
+                            onSearch={onSearch}
+                            placeholder="Description"
+                            style={{ width: 250 }}
+                        />
                     </Form.Item>
                     <Form.Item name="value" rules={[{ required: true }]}>
                         <InputNumber

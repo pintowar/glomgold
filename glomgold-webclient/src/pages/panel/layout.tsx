@@ -25,26 +25,24 @@ export const PanelLayout: React.FC<React.PropsWithChildren> = ({ children }) => 
 
     const handleClick = (key: string) => setSelectedMenu(key);
 
+    const menuItems = [
+        { key: "menu-panel", label: <Link to={"/panel"}>Panel</Link> },
+        { key: "menu-report", label: <Link to={"/panel/report"}>Report</Link> },
+        { key: `${isAdmin ? "admin" : ""}`, label: <Link to={"/"}>Admin</Link> },
+        { key: "menu-logout", label: <div onClick={() => logout()}>Logout</div> },
+    ].filter(({ key }) => key);
+
     return isSuccess ? (
         <Layout>
             <Header style={{ position: "fixed", zIndex: 1, width: "100%" }}>
                 <div className="logo">Glomgold</div>
-                <Menu onClick={(e) => handleClick(e.key)} theme="dark" mode="horizontal" selectedKeys={[selectedMenu]}>
-                    <Menu.Item key="menu-panel">
-                        <Link to={"/panel"}>Panel</Link>
-                    </Menu.Item>
-                    <Menu.Item key="menu-report">
-                        <Link to={"/panel/report"}>Report</Link>
-                    </Menu.Item>
-                    {isAdmin && (
-                        <Menu.Item key="admin">
-                            <Link to={"/"}>Admin</Link>
-                        </Menu.Item>
-                    )}
-                    <Menu.Item key="menu-logout" onClick={() => logout()}>
-                        Logout
-                    </Menu.Item>
-                </Menu>
+                <Menu
+                    onClick={(e) => handleClick(e.key)}
+                    theme="dark"
+                    mode="horizontal"
+                    selectedKeys={[selectedMenu]}
+                    items={menuItems}
+                ></Menu>
             </Header>
             <Content className="site-layout">{children}</Content>
             <Footer style={{ textAlign: "center" }}>Glomgold ©2022 Created by pintowar</Footer>
