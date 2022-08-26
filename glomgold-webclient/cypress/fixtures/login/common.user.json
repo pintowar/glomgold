@@ -1,0 +1,7 @@
+{
+  "username": "donald",
+  "roles": ["ROLE_USER"],
+  "access_token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkb25hbGQiLCJzeW1ib2wiOiJSJCIsIm5iZiI6MTY0ODg2MjU1MSwicm9sZXMiOlsiUk9MRV9VU0VSIl0sImlzcyI6Imdsb21nb2xkLWRldiIsImN1cnJlbmN5IjoiQlJMIiwiZXhwIjoxNjQ4ODY2MTUxLCJsb2NhbGUiOiJwdC1CUiIsImlhdCI6MTY0ODg2MjU1MSwidXNlcklkIjozfQ.fYwF29DDcDv-mP_j--df2xGjq6XPi2taVZ_jgRhUNiU",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}

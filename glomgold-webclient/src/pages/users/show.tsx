@@ -1,8 +1,10 @@
+import React from "react";
+
 import { useShow, IResourceComponentsProps } from "@pankod/refine-core";
 
 import { Show, Typography } from "@pankod/refine-antd";
 
-import { IUser } from "interfaces";
+import { IUser } from "../../interfaces";
 
 const { Title, Text } = Typography;
 
@@ -36,7 +38,6 @@ export const UserShow: React.FC<IResourceComponentsProps> = () => {
 
             <Title level={5}>Admin</Title>
             <Text>{record?.admin}</Text>
-            
         </Show>
     );
 };

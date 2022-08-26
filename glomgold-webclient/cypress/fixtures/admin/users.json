@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "version": 0,
+    "username": "admin",
+    "name": "Administrator",
+    "email": "admin@glomgold.com",
+    "enabled": true,
+    "admin": true,
+    "locale": "en_US",
+    "timezone": "UTC"
+  },
+  {
+    "id": 2,
+    "version": 0,
+    "username": "scrooge",
+    "name": "Scrooge McDuck",
+    "email": "scrooge@glomgold.com",
+    "enabled": true,
+    "admin": false,
+    "locale": "en_US",
+    "timezone": "UTC"
+  },
+  {
+    "id": 3,
+    "version": 0,
+    "username": "donald",
+    "name": "Donald Duck",
+    "email": "donald@glomgold.com",
+    "enabled": true,
+    "admin": false,
+    "locale": "pt_BR",
+    "timezone": "America/Fortaleza"
+  }
+]

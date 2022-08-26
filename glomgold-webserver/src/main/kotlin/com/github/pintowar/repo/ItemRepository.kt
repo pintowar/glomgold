@@ -53,5 +53,7 @@ interface ItemRepository : EntityRepository<Item, Long> {
     )
     suspend fun periodSummary(period: YearMonth, userId: Long): BigDecimal?
 
+    suspend fun findDistinctDescriptionByUserIdAndDescriptionIlike(userId: Long, description: String): List<String>
+
     suspend fun update(@Id id: Long, @Version version: Int, description: String, value: BigDecimal): Long
 }

@@ -1,10 +1,12 @@
 package com.github.pintowar.controller
 
+import com.github.pintowar.dto.ChangePassword
 import com.github.pintowar.dto.ItemBody
 import com.github.pintowar.dto.PanelAnnualReport
 import com.github.pintowar.dto.PanelInfo
 import com.github.pintowar.model.Item
 import com.github.pintowar.repo.ItemRepository
+import com.github.pintowar.repo.UserRepository
 import com.github.pintowar.service.PanelService
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.*
@@ -15,7 +17,11 @@ import kotlinx.coroutines.flow.toSet
 import java.time.YearMonth
 
 @Controller("/api/panel")
-class PanelController(private val itemRepository: ItemRepository, private val panelService: PanelService) {
+class PanelController(
+    private val userRepository: UserRepository,
+    private val itemRepository: ItemRepository,
+    private val panelService: PanelService
+) {
 
     @Get("/{?period}")
     suspend fun panel(auth: Authentication, @QueryValue period: YearMonth?) =
@@ -25,6 +31,24 @@ class PanelController(private val itemRepository: ItemRepository, private val pa
     suspend fun report(auth: Authentication, @QueryValue year: Int?): PanelAnnualReport {
         val currentYear = year ?: YearMonth.now().year
         return panelService.annualReport(authId(auth), currentYear)
+    }
+
+    @Post("/profile/password")
+    suspend fun profilePassword(auth: Authentication, passwords: ChangePassword): HttpResponse<Void> {
+        return userRepository.findById(authId(auth)).let { user ->
+            if (user?.checkPassword(passwords.actualPassword) == true) {
+                userRepository.update(user.apply { setPassword(passwords.newPassword) })
+                HttpResponse.ok()
+            } else HttpResponse.notModified()
+        }
+    }
+
+    @Get("/item-complete{?description}")
+    suspend fun itemComplete(auth: Authentication, @QueryValue description: String?): List<String> {
+        val desc = if (description != null) "$description%" else ""
+        return if (desc.isNotEmpty())
+            itemRepository.findDistinctDescriptionByUserIdAndDescriptionIlike(authId(auth), desc)
+        else emptyList()
     }
 
     @Post("/add-item")

@@ -8,9 +8,10 @@ import {
     useNavigation,
     CanAccess,
     useIsExistAuthentication,
+    useMenu,
 } from "@pankod/refine-core";
 
-import { useMenu, Title as DefaultTitle } from "@pankod/refine-antd";
+import { Title as DefaultTitle } from "@pankod/refine-antd";
 
 import { antLayoutSider, antLayoutSiderMobile } from "./styles";
 
@@ -54,25 +55,17 @@ export const Sider: React.FC = () => {
                     push(key as string);
                 }}
             >
-                <Menu.Item key="panel" style={{fontWeight: "bold"}} icon={<DollarOutlined />}>
-                    <div style={{display: "flex", justifyContent: "space-between", alignItems: "center" }} >
-                        Panel
-                    </div>
+                <Menu.Item key="panel" style={{ fontWeight: "bold" }} icon={<DollarOutlined />}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>Panel</div>
                 </Menu.Item>
-                <Menu.Item key="panel/report" style={{fontWeight: "bold"}} icon={<LineChartOutlined />}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }} >
-                        Report
-                    </div>
+                <Menu.Item key="panel/report" style={{ fontWeight: "bold" }} icon={<LineChartOutlined />}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>Report</div>
                 </Menu.Item>
                 <Menu.Divider />
                 {menuItems.map(({ icon, label, route, name }) => {
                     const isSelected = route === selectedKey;
                     return (
-                        <CanAccess
-                            key={route}
-                            resource={name.toLowerCase()}
-                            action="list"
-                        >
+                        <CanAccess key={route} resource={name.toLowerCase()} action="list">
                             <Menu.Item
                                 style={{
                                     fontWeight: isSelected ? "bold" : "normal",
@@ -87,9 +80,7 @@ export const Sider: React.FC = () => {
                                     }}
                                 >
                                     {label}
-                                    {!collapsed && isSelected && (
-                                        <RightOutlined />
-                                    )}
+                                    {!collapsed && isSelected && <RightOutlined />}
                                 </div>
                             </Menu.Item>
                         </CanAccess>

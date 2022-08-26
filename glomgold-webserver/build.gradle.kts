@@ -44,7 +44,7 @@ dependencies {
     implementation(libs.bundles.kotlin.coroutines)
     implementation(libs.bundles.micronaut)
     implementation(libs.jbcrypt)
-    implementation(libs.commons.math)
+    implementation(libs.kotlin.stats)
 
     runtimeOnly(libs.logback.classic)
     runtimeOnly(libs.bundles.postgresql)
@@ -140,7 +140,7 @@ tasks {
     }
 
     register("coverageReport") {
-        dependsOn("kotest", "jacocoTestReport", "sonarqube")
+        dependsOn("kotest", "jacocoTestReport")
         doLast {
             logger.quiet("Finishing Coverage Report!!")
         }
@@ -170,9 +170,8 @@ micronaut {
         annotations("com.github.pintowar.*")
     }
     aot {
-        version.set("1.0.0")
         optimizeServiceLoading.set(true)
-        convertYamlToJava.set(true)
+        // convertYamlToJava.set(true)
         precomputeOperations.set(true)
         cacheEnvironment.set(true)
         optimizeClassLoading.set(true)
@@ -193,17 +192,9 @@ ktlint {
 
 sonarqube {
     properties {
-        val jacocoReportPath = "${project.buildDir.absolutePath}/reports/jacoco/test"
-        val sonarToken = project.findProperty("sonar.token")?.toString() ?: System.getenv("SONAR_TOKEN")
-        property("sonar.sourceEncoding", "UTF-8")
-        property("sonar.organization", "pintowar")
-        property("sonar.projectName", "glomgold")
-        property("sonar.projectKey", "pintowar_glomgold")
-        property("sonar.projectVersion", project.version.toString())
-        property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.login", sonarToken)
-        property("sonar.verbose", true)
-        property("sonar.github.repository", "pintowar/glomgold")
+        val jacocoReportPath = "${buildDir.absolutePath}/reports/jacoco/test"
+        property("sonar.sources", "src/main/kotlin")
+        property("sonar.tests", "src/test/kotlin")
         property("sonar.coverage.jacoco.xmlReportPaths", "$jacocoReportPath/jacocoTestReport.xml")
     }
 }

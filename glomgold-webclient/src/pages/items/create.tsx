@@ -5,9 +5,7 @@ import { Create, Form, Input, Select } from "@pankod/refine-antd";
 
 import { useForm, useSelect } from "@pankod/refine-antd";
 
-import "react-mde/lib/styles/css/react-mde-all.css";
-
-import { IItem, IUser } from "interfaces";
+import { IItem, IUser } from "../../interfaces";
 
 export const ItemCreate: React.FC<IResourceComponentsProps> = () => {
     const { formProps, saveButtonProps } = useForm<IItem>({
@@ -23,7 +21,7 @@ export const ItemCreate: React.FC<IResourceComponentsProps> = () => {
     return (
         <Create saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">
-               <Form.Item
+                <Form.Item
                     label="Description"
                     name="description"
                     rules={[

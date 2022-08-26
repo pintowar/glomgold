@@ -1,13 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { IResourceComponentsProps } from "@pankod/refine-core";
 
-import { Edit, Form, Input, Select } from "@pankod/refine-antd";
+import { Edit, Form, Input, Select, useForm, useSelect } from "@pankod/refine-antd";
 
-import { useForm, useSelect } from "@pankod/refine-antd";
-
-import "react-mde/lib/styles/css/react-mde-all.css";
-
-import { IItem, IUser } from "interfaces";
+import { IItem, IUser } from "../../interfaces";
 
 export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
     const { formProps, saveButtonProps, queryResult } = useForm<IItem>({
@@ -25,18 +21,10 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
     return (
         <Edit saveButtonProps={saveButtonProps}>
             <Form {...formProps} layout="vertical">
-                <Form.Item
-                    label="ID"
-                    name="id"
-                    hidden={true}
-                >
+                <Form.Item label="ID" name="id" hidden={true}>
                     <Input />
                 </Form.Item>
-                <Form.Item
-                    label="Version"
-                    name="version"
-                    hidden={true}
-                >
+                <Form.Item label="Version" name="version" hidden={true}>
                     <Input />
                 </Form.Item>
                 <Form.Item

@@ -1,0 +1,7 @@
+{
+  "username": "admin",
+  "roles": ["ROLE_ADMIN"],
+  "access_token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInN5bWJvbCI6IiQiLCJuYmYiOjE2NDg4NjI2ODIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaXNzIjoiZ2xvbWdvbGQtZGV2IiwiY3VycmVuY3kiOiJVU0QiLCJleHAiOjE2NDg4NjYyODIsImxvY2FsZSI6ImVuLVVTIiwiaWF0IjoxNjQ4ODYyNjgyLCJ1c2VySWQiOjF9.QUrYlcoxcMzDTT7VwldITFL6n188sFXUj7SfgTJ-SR0",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}

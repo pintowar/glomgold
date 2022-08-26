@@ -1,0 +1,45 @@
+{
+  "git": {
+    "dirty": "true",
+    "total": {
+      "commit": {
+        "count": "110"
+      }
+    },
+    "build": {
+      "host": "ocelot",
+      "version": "0.9.6-SNAPSHOT",
+      "user": {
+        "name": "Thiago Oliveira",
+        "email": "pintowar@gmail.com"
+      }
+    },
+    "commit": {
+      "id": "7b9ecc74bd943408217a112a5b9408c7f82b73a3",
+      "time": "2022-04-01T22:07+0000",
+      "message": {
+        "short": "upgrading micronaut + gradle versions",
+        "full": "upgrading micronaut + gradle versions\n"
+      },
+      "user": {
+        "name": "Thiago Oliveira",
+        "email": "pintowar@gmail.com"
+      }
+    },
+    "remote": {
+      "origin": {
+        "url": "git@github.com:pintowar/glomgold.git"
+      }
+    },
+    "branch": "feature/e2e",
+    "tags": "",
+    "closest": {
+      "tag": {
+        "commit": {
+          "count": ""
+        },
+        "name": ""
+      }
+    }
+  }
+}

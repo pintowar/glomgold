@@ -1,6 +1,7 @@
 plugins {
     base
     id("net.researchgate.release")
+    id("org.sonarqube")
 }
 
 allprojects {
@@ -26,6 +27,26 @@ tasks {
     }
 }
 
+sonarqube {
+    properties {
+        val sonarToken = project.findProperty("sonar.token")?.toString() ?: System.getenv("SONAR_TOKEN")
+        val (webServ, webCli) = ":glomgold-webserver" to ":glomgold-webclient"
+        val jacocoReportPath = "${project(webServ).buildDir.absolutePath}/reports/jacoco/test"
+        val lcovReportPath = "${project(webCli).projectDir.absolutePath}/coverage/"
+        property("sonar.sourceEncoding", "UTF-8")
+        property("sonar.organization", "pintowar")
+        property("sonar.projectName", "glomgold")
+        property("sonar.projectKey", "pintowar_glomgold")
+        property("sonar.projectVersion", project.version.toString())
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.login", sonarToken)
+        property("sonar.verbose", true)
+        property("sonar.github.repository", "pintowar/glomgold")
+        property("sonar.coverage.jacoco.xmlReportPaths", "$jacocoReportPath/jacocoTestReport.xml")
+        property("sonar.typescript.lcov.reportPaths", "$lcovReportPath/lcov.info")
+    }
+}
+
 release {
     tagTemplate = "v\$version"
 
@@ -36,5 +57,5 @@ release {
 
 tasks.afterReleaseBuild {
     val webServ = ":glomgold-webserver"
-    dependsOn("$webServ:coverageReport", "$webServ:dockerPushNative")
+    dependsOn("$webServ:coverageReport", "$webServ:optimizedDockerPushNative")
 }

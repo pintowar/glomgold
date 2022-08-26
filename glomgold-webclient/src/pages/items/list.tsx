@@ -1,3 +1,5 @@
+import React from "react";
+
 import { CrudFilters, IResourceComponentsProps, HttpError, useMany } from "@pankod/refine-core";
 
 import {
@@ -14,43 +16,38 @@ import {
     Col,
     Form,
     Input,
-    Button
+    Button,
+    useTable,
+    useSelect,
 } from "@pankod/refine-antd";
-import { SearchOutlined } from '@ant-design/icons';
+import { SearchOutlined } from "@ant-design/icons";
 
-import { useTable, useSelect } from "@pankod/refine-antd";
-
-import { IItem, IUser } from "interfaces";
+import { IItem, IUser } from "../../interfaces";
 
 export const ItemList: React.FC<IResourceComponentsProps> = () => {
     const importProps = useImport<IItem>();
-    const { tableProps, searchFormProps } = useTable<IItem, HttpError, {description: string; userId:number}>({
+    const { tableProps, searchFormProps } = useTable<IItem, HttpError, { description: string; userId: number }>({
         syncWithLocation: true,
-        onSearch: (params: any) => {
+        onSearch: (params: { description: string; userId: number }) => {
             const crudFilters: CrudFilters = [];
             const { description, userId } = params;
 
-            crudFilters.push(
-                {
-                    field: "description",
-                    operator: "eq",
-                    value: description,
-                }
-            )
-            crudFilters.push(
-                {
-                    field: "userId",
-                    operator: "eq",
-                    value: userId,
-                }
-            )
+            crudFilters.push({
+                field: "description",
+                operator: "eq",
+                value: description,
+            });
+            crudFilters.push({
+                field: "userId",
+                operator: "eq",
+                value: userId,
+            });
 
             return crudFilters;
-        }
+        },
     });
 
-    const userIds =
-        tableProps?.dataSource?.map((item) => item.userId) ?? [];
+    const userIds = tableProps?.dataSource?.map((item) => item.userId) ?? [];
     const { data, isLoading } = useMany<IUser>({
         resource: "users",
         ids: userIds,
@@ -70,13 +67,10 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
             <Col lg={6} xs={24}>
                 <Form layout="vertical" {...searchFormProps}>
                     <Form.Item label="Description" name="description">
-                        <Input
-                            placeholder="Description"
-                            prefix={<SearchOutlined />}
-                        />
+                        <Input placeholder="Description" prefix={<SearchOutlined />} />
                     </Form.Item>
                     <Form.Item label="User" name="userId">
-                        <Select {...userSelectProps} allowClear/>
+                        <Select {...userSelectProps} allowClear />
                     </Form.Item>
                     <Form.Item>
                         <Button htmlType="submit" type="primary">
@@ -86,8 +80,9 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
                 </Form>
             </Col>
             <Col lg={18} xs={24}>
-                <List pageHeaderProps={{
-                    extra: <ImportButton {...importProps} />,
+                <List
+                    pageHeaderProps={{
+                        extra: <ImportButton {...importProps} />,
                     }}
                 >
                     <Table {...tableProps} rowKey="id">
@@ -104,11 +99,7 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
                                     return <TextField value="Loading..." />;
                                 }
 
-                                return (
-                                    <TextField
-                                        value={data?.data.find((user) => user.id === value)?.name}
-                                    />
-                                );
+                                return <TextField value={data?.data.find((user) => user.id === value)?.name} />;
                             }}
                         />
                         <Table.Column<IItem>
@@ -116,16 +107,8 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
                             dataIndex="actions"
                             render={(_, record) => (
                                 <Space>
-                                    <EditButton
-                                        hideText
-                                        size="small"
-                                        recordItemId={record.id}
-                                    />
-                                    <DeleteButton
-                                        hideText
-                                        size="small"
-                                        recordItemId={record.id}
-                                    />
+                                    <EditButton hideText size="small" recordItemId={record.id} />
+                                    <DeleteButton hideText size="small" recordItemId={record.id} />
                                 </Space>
                             )}
                         />
@@ -133,6 +116,5 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
                 </List>
             </Col>
         </Row>
-        
     );
 };
