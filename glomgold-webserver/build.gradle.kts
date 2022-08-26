@@ -114,7 +114,7 @@ tasks {
         images.set(imagesTags)
     }
 
-    dockerPushNative {
+    optimizedDockerPushNative {
         images.set(imagesTags)
         registryCredentials {
             username.set(project.findProperty("docker.user")?.toString() ?: System.getenv("DOCKER_USER"))
