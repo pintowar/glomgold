@@ -110,7 +110,7 @@ tasks {
         defaultCommand(*commands)
     }
 
-    dockerBuildNative {
+    optimizedDockerBuildNative {
         images.set(imagesTags)
     }
 
