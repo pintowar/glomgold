@@ -102,7 +102,7 @@ tasks {
         "pintowar/glomgold:latest"
     )
 
-    dockerfileNative {
+    optimizedDockerfileNative {
         val isProd = project.hasProperty("prod")
         val commands = defaultJvmArgs.filterNot {
             isProd && it.contains("micronaut.environments")
