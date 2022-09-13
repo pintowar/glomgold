@@ -28,6 +28,8 @@ micronaut:
       - pattern: /api/items/**
         access:
           - ROLE_ADMIN
+      - pattern: /management/health
+        access: isAnonymous()
       - pattern: /management/**
         access:
           - ROLE_ADMIN
