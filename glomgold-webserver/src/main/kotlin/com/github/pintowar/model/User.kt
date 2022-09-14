@@ -41,9 +41,9 @@ data class User(
     }
 
     fun checkPassword(passwd: String): Boolean {
-        logger.info { "Checking password" }
+        logger.debug { "Checking password" }
         return checkPasswordHash(this.passwordHash, passwd).also {
-            logger.info { "Password checked" }
+            logger.debug { "Password checked" }
         }
     }
 

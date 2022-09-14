@@ -1,6 +1,6 @@
 package com.github.pintowar.conf
 
-import io.micronaut.context.annotation.Requires
+import io.micronaut.context.env.Environment
 import io.micronaut.core.io.ResourceResolver
 import io.micronaut.http.HttpMethod.GET
 import io.micronaut.http.HttpRequest
@@ -15,18 +15,21 @@ import mu.KLogging
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-@Requires(property = "micronaut.environments", value = "prod")
 @Filter(methods = [GET], value = ["/**"]) // "/login", "/logout", "/panel", "/report", "/users", "/items"
-class SinglePageAppFilter(private val resolver: ResourceResolver) : HttpServerFilter {
+class SinglePageAppFilter(
+    private val resolver: ResourceResolver,
+    env: Environment,
+) : HttpServerFilter {
 
     companion object : KLogging()
 
+    private val isProd = env.activeNames.contains("prod")
     private val index = "classpath:public/index.html"
 
     override fun doFilter(request: HttpRequest<*>, chain: ServerFilterChain) = Flux
         .from(chain.proceed(request))
         .flatMap { response ->
-            if (response.status() in listOf(NOT_FOUND, METHOD_NOT_ALLOWED)) {
+            if (isProd && response.status() in listOf(NOT_FOUND, METHOD_NOT_ALLOWED)) {
                 logger.info { "SPA render on path: (${response.status()}) ${request.method}: ${request.path}" }
                 Mono.justOrEmpty(resolver.getResource(index)).map { HttpResponse.ok(StreamedFile(it)) }
             } else Mono.just(response)
