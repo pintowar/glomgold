@@ -1,6 +1,6 @@
 [versions]
-kotlin = "1.7.10"
-kotlin-coroutines = "1.6.4"
+kotlin = "1.9.0"
+kotlin-coroutines = "1.7.2"
 micronaut-gradle = "3.5.3"
 kotest-gradle = "0.3.9"
 git-gradle = "2.4.0"
