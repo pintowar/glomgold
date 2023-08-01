@@ -2,9 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { Row, Col, notification } from "antd";
-import moment from "moment";
-
-import { PanelLayout } from "./layout";
+import * as dayjs from "dayjs";
 
 import "./panel.css";
 import { IItem } from "../../interfaces";
@@ -16,7 +14,7 @@ import {
     MonthStatsCard,
     PanelItem,
 } from "./components/control";
-import { useGetIdentity } from "@pankod/refine-core";
+import { useGetIdentity } from "@refinedev/core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../constants";
 import { axiosInstance } from "../../authProvider";
 
@@ -36,11 +34,11 @@ export const ControlPanel: React.FC = () => {
     const periodFormat = "YYYY-MM";
     const location = useLocation();
     const navigate = useNavigate();
-    const period = new URLSearchParams(location.search).get("period") || moment().format(periodFormat);
+    const period = new URLSearchParams(location.search).get("period") || dayjs().format(periodFormat);
     const desc = new URLSearchParams(location.search).get("desc") || "";
 
     const [autoCompleteOptions, setAutoCompleteOptions] = useState<{ value: string }[]>([]);
-    const [currentPeriod, setCurrentPeriod] = useState(moment(period, periodFormat));
+    const [currentPeriod, setCurrentPeriod] = useState(dayjs(period, periodFormat));
     const [panelData, setPanelData] = useState<ControlPanelData>({
         items: [],
         stats: [],
@@ -129,7 +127,7 @@ export const ControlPanel: React.FC = () => {
     const tableData = panelData.items.map(({ id, description, value }) => ({ key: id, description, value }));
 
     return (
-        <PanelLayout>
+        <>
             <div className="card-row">
                 <Row gutter={[24, 24]}>
                     <Col span={12}>
@@ -168,10 +166,14 @@ export const ControlPanel: React.FC = () => {
                         />
                     </Col>
                     <Col span={12}>
-                        <MonthStatsCard tableData={panelData.stats} />
+                        <MonthStatsCard 
+                            tableData={panelData.stats} 
+                            locale={locale}
+                            currency={currency}
+                        />
                     </Col>
                 </Row>
             </div>
-        </PanelLayout>
+        </>
     );
 };

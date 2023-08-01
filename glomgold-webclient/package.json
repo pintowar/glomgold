@@ -1,51 +1,69 @@
 {
   "name": "webclient",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "dependencies": {
+    "@ant-design/icons": "^5.0.1",
+    "@refinedev/antd": "^5.7.0",
+    "@refinedev/cli": "^2.7.4",
+    "@refinedev/core": "^4.28.2",
+    "@refinedev/inferencer": "^4.3.2",
+    "@refinedev/kbar": "^1.1.2",
+    "@refinedev/react-router-v6": "^4.1.0",
+    "@refinedev/simple-rest": "^4.0.0",
+    "antd": "^5.0.5",
+    "apexcharts": "^3.41.1",
+    "axios": "^1.4.0",
+    "d2l-intl": "^2.1.0",
+    "react": "^18.0.0",
+    "react-apexcharts": "^1.4.1",
+    "react-dom": "^18.0.0",
+    "react-highlight-words": "^0.20.0",
+    "react-router-dom": "^6.8.1"
+  },
+  "devDependencies": {
+    "@cypress/code-coverage": "^3.11.0",
+    "@types/node": "^18.16.2",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@types/react-highlight-words": "^0.16.4",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "@vitejs/plugin-react": "^4.0.0",
+    "cypress": "^12.17.2",
+    "cypress-localstorage-commands": "^2.2.3",
+    "eslint": "^8.38.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.3.4",
+    "start-server-and-test": "^2.0.0",
+    "typescript": "^4.7.4",
+    "vite": "^4.3.1",
+    "vite-plugin-istanbul": "^5.0.0"
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "dev": "refine dev",
+    "build": "tsc && refine build",
+    "preview": "refine start",
+    "refine": "refine",
     "start": "vite",
     "test": "cypress run",
     "cy:open": "cypress open",
-    "e2e": "start-test 3000",
-    "lint:fix": "eslint ./src --ext .jsx,.js,.ts,.tsx --quiet --fix --ignore-path ./.gitignore",
-    "lint:format": "prettier  --loglevel warn --write \"./**/*.{js,jsx,ts,tsx,css,md,json}\" ",
-    "lint": "yarn lint:format && yarn lint:fix ",
-    "type-check": "tsc"
+    "e2e": "start-test 3000"
   },
-  "dependencies": {
-    "@pankod/refine-antd": "^3.37.0",
-    "@pankod/refine-core": "^3.58.1",
-    "@pankod/refine-react-router-v6": "^3.31.0",
-    "@pankod/refine-simple-rest": "^3.27.0",
-    "@types/react-highlight-words": "^0.16.4",
-    "d2l-intl": "^2.1.0",
-    "react": "^18.2.0",
-    "react-apexcharts": "^1.4.0",
-    "react-dom": "^18.2.0",
-    "react-highlight-words": "^0.18.0"
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
-  "devDependencies": {
-    "@cypress/code-coverage": "^3.10.0",
-    "@types/react": "^18.0.17",
-    "@types/react-dom": "^18.0.6",
-    "@typescript-eslint/eslint-plugin": "^5.33.1",
-    "@typescript-eslint/parser": "^5.33.1",
-    "@vitejs/plugin-react": "^2.0.1",
-    "cypress": "^10.6.0",
-    "cypress-localstorage-commands": "^2.2.0",
-    "eslint": "^8.22.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-react": "^7.30.1",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^2.7.1",
-    "start-server-and-test": "^1.14.0",
-    "typescript": "^4.6.4",
-    "vite": "^3.0.7",
-    "vite-plugin-istanbul": "^2.9.0"
+  "refine": {
+    "projectId": "Z2NNOn-x1Mp4V-EHjdgI"
   }
 }

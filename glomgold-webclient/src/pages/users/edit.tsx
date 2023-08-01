@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
-import { IResourceComponentsProps, useApiUrl, useCustom } from "@pankod/refine-core";
+import { IResourceComponentsProps, useApiUrl, useCustom } from "@refinedev/core";
 
-import { Edit, Form, Input, Checkbox, Select, useForm } from "@pankod/refine-antd";
+import { Edit, useForm } from "@refinedev/antd";
+import { Form, Input, Checkbox, Select } from "antd";
 
 import { IUser } from "../../interfaces";
 

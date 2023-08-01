@@ -1,8 +1,10 @@
 import React from "react";
 
-import { IResourceComponentsProps } from "@pankod/refine-core";
+import { IResourceComponentsProps } from "@refinedev/core";
 
-import { List, Table, Space, EditButton, DeleteButton, useTable, BooleanField, Icons } from "@pankod/refine-antd";
+import { List, EditButton, DeleteButton, useTable, BooleanField } from "@refinedev/antd";
+import { Table, Space } from "antd";
+import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 
 import { IUser } from "../../interfaces";
 
@@ -10,8 +12,6 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
     const { tableProps } = useTable<IUser>({
         syncWithLocation: true,
     });
-
-    const { CloseCircleOutlined, CheckCircleOutlined } = Icons;
 
     const boolField = (value: boolean) => (
         <BooleanField

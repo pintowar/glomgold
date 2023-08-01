@@ -1,25 +1,28 @@
 import React from "react";
 
-import { CrudFilters, IResourceComponentsProps, HttpError, useMany } from "@pankod/refine-core";
+import { CrudFilters, IResourceComponentsProps, HttpError, useMany } from "@refinedev/core";
 
 import {
     List,
-    Table,
     TextField,
-    Space,
     EditButton,
     DeleteButton,
-    Select,
     useImport,
     ImportButton,
+    useTable,
+    useSelect,
+} from "@refinedev/antd";
+import {
+    Table,
+    Space,
+    Select,
     Row,
     Col,
     Form,
     Input,
     Button,
-    useTable,
-    useSelect,
-} from "@pankod/refine-antd";
+} from "antd";
+
 import { SearchOutlined } from "@ant-design/icons";
 
 import { IItem, IUser } from "../../interfaces";
@@ -81,8 +84,8 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
             </Col>
             <Col lg={18} xs={24}>
                 <List
-                    pageHeaderProps={{
-                        extra: <ImportButton {...importProps} />,
+                    headerProps={{
+                        extra: (<ImportButton {...importProps} />),
                     }}
                 >
                     <Table {...tableProps} rowKey="id">

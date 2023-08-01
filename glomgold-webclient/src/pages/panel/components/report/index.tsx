@@ -1,22 +1,34 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
-import { Table } from "antd";
+import { Table, theme } from "antd";
+import { Link } from "react-router-dom";
+import { ColorModeContext } from "../../../../contexts/color-mode";
 
 interface ChartReportProps {
     cols: string[];
     data: number[];
     trend?: number[];
+    locale: string;
+    currency: string;
 }
 
-export const PeriodChart: React.FC<ChartReportProps> = ({ cols, data, trend }) => {
+export const PeriodChart: React.FC<ChartReportProps> = ({ cols, data, trend, locale, currency }) => {
+    const { mode } = useContext(ColorModeContext);
+    const { useToken } = theme;
+    const { token } = useToken();
+
+    const currencyFormat = (value: number | null) => value?.toLocaleString(locale, { style: "currency", currency });
+
     const lineChartConfig = {
         options: {
             title: { text: "Month Evolution" },
-            chart: { id: "line" },
+            chart: { id: "line", background: token.colorBgContainer },
             stroke: { curve: "smooth", dashArray: [0, 8], width: [3, 2] },
             colors: ["#77B6EA", "#F36565"],
+            theme: { mode },
+            tooltip: { y: { formatter: currencyFormat } },
             xaxis: { categories: cols },
         } as ApexOptions,
         series: [
@@ -36,14 +48,22 @@ export const PeriodChart: React.FC<ChartReportProps> = ({ cols, data, trend }) =
     );
 };
 
-export const ItemChart: React.FC<ChartReportProps> = ({ cols, data }) => {
+export const ItemChart: React.FC<ChartReportProps> = ({ cols, data, locale, currency }) => {
+    const { mode } = useContext(ColorModeContext);
+    const { useToken } = theme;
+    const { token } = useToken();
+
+    const currencyFormat = (value: number) => value.toLocaleString(locale, { style: "currency", currency });
+
     const barChartConfig = {
         options: {
             title: { text: "Average Item Cost" },
-            chart: { id: "bar" },
+            chart: { id: "bar", background: token.colorBgContainer },
             plotOptions: { bar: { borderRadius: 4 } },
             dataLabels: { enabled: false },
             colors: ["#77B6EA"],
+            theme: { mode },
+            tooltip: { y: { formatter: currencyFormat } },
             xaxis: { categories: cols },
         } as ApexOptions,
         series: [{ name: "value", data: data.map((it) => (it !== 0 ? it : null)) }],
@@ -82,7 +102,7 @@ export const AnnualTable: React.FC<AnnualTableProps> = ({
             const valueFormat = value ? value.toLocaleString(locale, { style: "currency", currency: currency }) : "";
             if (month && desc) {
                 const formattedMonth = `${month}`.padStart(2, "0");
-                return <a href={`/panel?period=${year}-${formattedMonth}&desc=${desc}`}>{valueFormat}</a>;
+                return <Link to={`/panel?period=${year}-${formattedMonth}&desc=${desc}`} >{valueFormat}</Link>
             } else {
                 return <>{valueFormat}</>;
             }

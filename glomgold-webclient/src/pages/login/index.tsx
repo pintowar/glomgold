@@ -1,6 +1,6 @@
 import React from "react";
 import { Row, Col, Layout, Card, Typography, Form, Input, Button } from "antd";
-import { useLogin, useTranslate } from "@pankod/refine-core";
+import { useLogin, useTranslate } from "@refinedev/core";
 
 import { layoutStyles, containerStyles, titleStyles, imageContainer } from "./styles";
 import logo from "../../assets/images/glomgold-logo.png";
@@ -17,7 +17,7 @@ export interface ILoginForm {
  *
  * @see {@link https://refine.dev/docs/api-references/components/refine-config#loginpage} for more details.
  */
-export const LoginPage: React.FC = () => {
+export const Login: React.FC = () => {
     const [form] = Form.useForm<ILoginForm>();
     const translate = useTranslate();
 
@@ -41,7 +41,7 @@ export const LoginPage: React.FC = () => {
                 <Col xs={22}>
                     <div style={containerStyles}>
                         <div style={imageContainer}>
-                            <img src={logo} alt="Refine Logo" />
+                            <img src={logo} alt="Glomgold Logo" />
                         </div>
                         <Card title={CardTitle} headStyle={{ borderBottom: 0 }}>
                             <Form<ILoginForm>

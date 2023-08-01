@@ -1,10 +1,9 @@
 import React from "react";
 
-import { Row, Col, Card, Form, Input, Button, notification } from "@pankod/refine-antd";
+import { Row, Col, Card, Form, Input, Button, notification } from "antd";
 
-import { PanelLayout } from "./layout";
 import { axiosInstance } from "../../authProvider";
-import { useApiUrl, useLogout } from "@pankod/refine-core";
+import { useApiUrl, useLogout } from "@refinedev/core";
 
 interface PasswordForm {
     actualPassword: string;
@@ -38,28 +37,26 @@ export const ProfilePanel: React.FC = () => {
     };
 
     return (
-        <PanelLayout>
-            <div className="card-row">
-                <Row gutter={[24, 24]}>
-                    <Col span={24}>
-                        <Card title={"Change Password"} bordered={false}>
-                            <Form form={form} name="user-form" onFinish={onFinish}>
-                                <Form.Item label="Actual Password" name="actualPassword" rules={[{ required: true }]}>
-                                    <Input.Password />
-                                </Form.Item>
-                                <Form.Item label="New Password" name="newPassword" rules={[{ required: true }]}>
-                                    <Input.Password />
-                                </Form.Item>
-                                <Form.Item>
-                                    <Button type="primary" htmlType="submit">
-                                        Change
-                                    </Button>
-                                </Form.Item>
-                            </Form>
-                        </Card>
-                    </Col>
-                </Row>
-            </div>
-        </PanelLayout>
+        <div className="card-row">
+            <Row gutter={[24, 24]}>
+                <Col span={24}>
+                    <Card title={"Change Password"} bordered={false}>
+                        <Form form={form} name="user-form" onFinish={onFinish}>
+                            <Form.Item label="Actual Password" name="actualPassword" rules={[{ required: true }]}>
+                                <Input.Password />
+                            </Form.Item>
+                            <Form.Item label="New Password" name="newPassword" rules={[{ required: true }]}>
+                                <Input.Password />
+                            </Form.Item>
+                            <Form.Item>
+                                <Button type="primary" htmlType="submit">
+                                    Change
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                    </Card>
+                </Col>
+            </Row>
+        </div>
     );
 };

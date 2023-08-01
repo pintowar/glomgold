@@ -1,8 +1,9 @@
 import React from "react";
 
-import { useShow, IResourceComponentsProps } from "@pankod/refine-core";
+import { useShow, IResourceComponentsProps } from "@refinedev/core";
 
-import { Show, Typography } from "@pankod/refine-antd";
+import { Show } from "@refinedev/antd";
+import { Typography } from "antd";
 
 import { IUser } from "../../interfaces";
 

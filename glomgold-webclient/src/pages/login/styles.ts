@@ -12,14 +12,15 @@ export const containerStyles: CSSProperties = {
 
 export const titleStyles: CSSProperties = {
     textAlign: "center",
-    color: "#626262",
     fontSize: "30px",
     letterSpacing: "-0.04em",
+    marginTop: "15px",
+    marginBottom: "15px",
 };
 
 export const imageContainer: CSSProperties = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: "28px",
+    marginBottom: "18px",
 };

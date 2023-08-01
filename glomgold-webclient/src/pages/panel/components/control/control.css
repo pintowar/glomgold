@@ -4,14 +4,6 @@
     font-size: 12px;
 }
 
-a.ant-typography:hover {
-    background-color: #dbdbdb;
-}
-
-a.ant-typography.panel-nav {
-    color: #626262;
-}
-
 a.ant-typography.panel-edit {
     color: #626262;
 }
@@ -26,12 +18,4 @@ a.ant-typography.panel-confirm {
 
 a.ant-typography.panel-cancel {
     color: #fb4f14;
-}
-
-.ant-btn-danger {
-    color: #fff;
-    border-color: #ff496c;
-    background: #ff496c;
-    text-shadow: 0 -1px 0 rgb(0 0 0 / 12%);
-    box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
 }

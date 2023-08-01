@@ -1,9 +1,8 @@
 import React, { useMemo } from "react";
 
-import { useApiUrl, useCustom } from "@pankod/refine-core";
-import { useSelect } from "@pankod/refine-antd";
-import { Row, Col, Card, Space, notification } from "@pankod/refine-antd";
-import { Form, Input, Button, Select } from "antd";
+import { useApiUrl, useCustom } from "@refinedev/core";
+import { useSelect } from "@refinedev/antd";
+import { Form, Input, Button, Select, Row, Col, Card, Space, notification } from "antd";
 import { IUser } from "../interfaces";
 
 import { axiosInstance } from "../authProvider";

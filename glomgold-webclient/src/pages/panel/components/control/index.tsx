@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import {
     Card,
@@ -15,6 +15,7 @@ import {
     Typography,
     Popconfirm,
     Modal,
+    theme,
 } from "antd";
 import { BaseSelectRef } from "rc-select";
 import Highlighter from "react-highlight-words";
@@ -36,7 +37,8 @@ import { ColumnType } from "antd/lib/table";
 
 import "./control.css";
 import d2lIntl from "d2l-intl";
-import moment from "moment";
+import * as dayjs from "dayjs";
+import { ColorModeContext } from "../../../../contexts/color-mode";
 
 export interface PanelItem {
     key: number;
@@ -247,7 +249,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
                     return false;
             }
         },
-        onFilterDropdownVisibleChange: (visible) => {
+        onFilterDropdownOpenChange: (visible) => {
             if (visible) {
                 setTimeout(() => searchInput.current?.select(), 100);
             }
@@ -419,7 +421,8 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
                         Replicate Next Month
                     </Button>
                     <Button
-                        type="default"
+                        type="primary"
+                        danger
                         disabled={selectedRows.keys.length === 0}
                         onClick={() => confirmDeleteSelected()}
                         className={"ant-btn-danger"}
@@ -448,19 +451,35 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 
 interface MonthStatsCardProps {
     tableData: IItem[];
+    locale: string;
+    currency: string;
 }
 
-export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData }) => {
+export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ 
+    tableData,
+    locale,
+    currency
+ }) => {
+    const { mode } = useContext(ColorModeContext);
+    const { useToken } = theme;
+    const { token } = useToken();
+
+    const currencyFormat = (value: number) => value.toLocaleString(locale, { style: "currency", currency });
+
     const barChartConfig = {
         options: {
-            chart: { id: "basic-bar" },
+            chart: { id: "basic-bar", background: token.colorBgContainer },
             plotOptions: { bar: { horizontal: true } },
-            dataLabels: { enabled: false },
+            dataLabels: { enabled: false, formatter: currencyFormat },
             colors: ["#77B6EA"],
-            xaxis: { categories: tableData.map((it) => it.description) },
+            theme: { mode },
+            tooltip: { y: { formatter: currencyFormat } },
+            xaxis: { 
+                categories: tableData.map((it) => it.description) ,
+            },
         },
         series: [{ name: "value", data: tableData.map((it) => it.value) }],
-    };
+    }
 
     return (
         <Card title="Month Stats" bordered={false}>
@@ -471,28 +490,22 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData }) => 
 
 interface PeriodNavigationCardProps {
     format: string;
-    value: moment.Moment;
-    onValueChange: React.Dispatch<React.SetStateAction<moment.Moment>>;
+    value: dayjs.Dayjs;
+    onValueChange: React.Dispatch<React.SetStateAction<dayjs.Dayjs>>;
 }
 
 export const PeriodNavigationCard: React.FC<PeriodNavigationCardProps> = ({ value, format, onValueChange }) => {
-    const onChangePeriod = (date: moment.Moment | null) => {
+    const onChangePeriod = (date: dayjs.Dayjs | null) => {
         if (date) onValueChange(date);
     };
 
     return (
         <Card title={"Period Navigation"} bordered={false}>
             <Space direction="horizontal" size={12}>
-                <Typography.Link
-                    onClick={() => onValueChange((period) => period.clone().add(-1, "M"))}
-                    className="panel-nav"
-                >
+                <Typography.Link onClick={() => onValueChange((period) => period.clone().add(-1, "M"))} >
                     <LeftOutlined />
                 </Typography.Link>
-                <Typography.Link
-                    onClick={() => onValueChange((period) => period.clone().add(1, "M"))}
-                    className="panel-nav"
-                >
+                <Typography.Link onClick={() => onValueChange((period) => period.clone().add(1, "M"))} >
                     <RightOutlined />
                 </Typography.Link>
                 <DatePicker value={value} format={format} onChange={onChangePeriod} picker="month" allowClear={false} />
