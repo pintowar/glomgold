@@ -1,9 +1,9 @@
 .card-row {
-    margin-top: 24px;
+  margin-top: 24px;
 }
 
 .site-layout {
-    background: radial-gradient(50% 50% at 50% 50%, rgb(99, 56, 106) 0%, rgb(49, 4, 56) 100%) 0% 0% / cover;
-    min-height: 100vh;
-    padding: 0 50px;
+  background: radial-gradient(50% 50% at 50% 50%, rgb(99, 56, 106) 0%, rgb(49, 4, 56) 100%) 0% 0% / cover;
+  min-height: 100vh;
+  padding: 0 50px;
 }

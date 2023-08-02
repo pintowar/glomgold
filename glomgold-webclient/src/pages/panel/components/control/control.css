@@ -1,21 +1,21 @@
 .editable-row .ant-form-item-explain {
-    position: absolute;
-    top: 100%;
-    font-size: 12px;
+  position: absolute;
+  top: 100%;
+  font-size: 12px;
 }
 
 a.ant-typography.panel-edit {
-    color: #626262;
+  color: #626262;
 }
 
 a.ant-typography.panel-delete {
-    color: #ff496c;
+  color: #ff496c;
 }
 
 a.ant-typography.panel-confirm {
-    color: #89cff0;
+  color: #89cff0;
 }
 
 a.ant-typography.panel-cancel {
-    color: #fb4f14;
+  color: #fb4f14;
 }

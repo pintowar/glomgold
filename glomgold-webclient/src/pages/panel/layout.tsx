@@ -7,11 +7,11 @@ const { Content, Footer } = Layout;
 import { Header } from "../../components";
 
 export const PanelLayout: React.FC<React.PropsWithChildren> = ({ children }) => {
-    return (
-        <Layout>
-            <Header sticky/>
-            <Content className="site-layout">{children}</Content>
-            <Footer style={{ textAlign: "center" }}>Glomgold ©2023 Created by pintowar</Footer>
-        </Layout>
-    );
+  return (
+    <Layout>
+      <Header sticky />
+      <Content className="site-layout">{children}</Content>
+      <Footer style={{ textAlign: "center" }}>Glomgold ©2023 Created by pintowar</Footer>
+    </Layout>
+  );
 };

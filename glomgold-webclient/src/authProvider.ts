@@ -7,32 +7,32 @@ const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
   const axiosCli = axios.create();
 
   axiosCli.interceptors.request.use(
-      (config) => {
-          const tokenKey = storage.getToken();
-          if (tokenKey) {
-              if (!config?.headers?.Authorization) {
-                  config.headers.Authorization = `Bearer ${tokenKey}`;
-              } else {
-                  config.headers.Authorization = "";
-              }
-          }
-          return config;
-      },
-      (error) => {
-          return Promise.reject(error);
+    (config) => {
+      const tokenKey = storage.getToken();
+      if (tokenKey) {
+        if (!config?.headers?.Authorization) {
+          config.headers.Authorization = `Bearer ${tokenKey}`;
+        } else {
+          config.headers.Authorization = "";
+        }
       }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
   );
 
   axiosCli.interceptors.response.use(
-      (response) => {
-          return response;
-      },
-      (error) => {
-          if (401 === error.response.status) {
-              storage.clearUser();
-          }
-          return Promise.reject(error);
+    (response) => {
+      return response;
+    },
+    (error) => {
+      if (401 === error.response.status) {
+        storage.clearUser();
       }
+      return Promise.reject(error);
+    }
   );
 
   return axiosCli;
@@ -46,20 +46,20 @@ export const authProvider: AuthBindings = {
   login: async ({ username, password }) => {
     const { data, status } = await axios.post("/login", { username, password });
     if (status === 200) {
-        storage.setUser(data.access_token);
-        const redirectPath = data.roles.includes("ROLE_ADMIN") ? "/admin" : "/panel";
-        return {
-          success: true,
-          redirectTo: redirectPath,
-        };
+      storage.setUser(data.access_token);
+      const redirectPath = data.roles.includes("ROLE_ADMIN") ? "/admin" : "/panel";
+      return {
+        success: true,
+        redirectTo: redirectPath,
+      };
     } else {
-        return {
-          success: false,
-          error: {
-            name: "LoginError",
-            message: "Invalid username or password",
-          },
-        };
+      return {
+        success: false,
+        error: {
+          name: "LoginError",
+          message: "Invalid username or password",
+        },
+      };
     }
   },
   logout: async () => {
