@@ -5,7 +5,7 @@ plugins {
 }
 
 allprojects {
-    group = "com.github.pintowar"
+    group = "io.github.pintowar.glomgold"
 }
 
 tasks {
@@ -48,10 +48,10 @@ sonarqube {
 }
 
 release {
-    tagTemplate = "v\$version"
+    tagTemplate.set("v\$version")
 
-    git {
-        requireBranch = "master"
+    with(git) {
+        requireBranch.set("master")
     }
 }
 

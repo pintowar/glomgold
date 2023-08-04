@@ -13,6 +13,7 @@ repositories {
 dependencies {
     implementation(libs.gradleplugin.kotlin)
     implementation(libs.gradleplugin.kotlin.allopen)
+    implementation(libs.gradleplugin.ksp.gradle)
 
     implementation(libs.gradleplugin.micronaut)
     implementation(libs.gradleplugin.micronaut.aot)

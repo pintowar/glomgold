@@ -1,10 +1,6 @@
-import net.researchgate.release.GitAdapter.GitConfig
-import net.researchgate.release.ReleaseExtension
 import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.io.FileReader
-
-fun ReleaseExtension.git(configure: GitConfig.() -> Unit) = (getProperty("git") as GitConfig).configure()
 
 private fun valueResolver(value: String): String {
     val pattern = "\\$\\{(.+?)\\}".toRegex()

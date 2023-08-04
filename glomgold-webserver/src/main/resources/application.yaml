@@ -44,6 +44,8 @@ jackson:
   serializationInclusion: NON_NULL
   serialization:
     writeDatesAsTimestamps: false
+  deserialization:
+    useBigDecimalForFloats: true
 
 endpoints:
   all:
