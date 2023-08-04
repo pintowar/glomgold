@@ -11,7 +11,7 @@ const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
       const tokenKey = storage.getToken();
       if (tokenKey) {
         if (!config?.headers?.Authorization) {
-          config.headers.Authorization = `Bearer ${tokenKey}`;
+          config.headers = { Authorization: `Bearer ${tokenKey}` };
         } else {
           config.headers.Authorization = "";
         }

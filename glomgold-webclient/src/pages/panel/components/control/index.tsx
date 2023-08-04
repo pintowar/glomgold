@@ -15,7 +15,6 @@ import {
   Typography,
   Popconfirm,
   Modal,
-  theme,
 } from "antd";
 import { BaseSelectRef } from "rc-select";
 import Highlighter from "react-highlight-words";
@@ -453,29 +452,27 @@ interface MonthStatsCardProps {
 
 export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, locale, currency }) => {
   const { mode } = useContext(ColorModeContext);
-  const { useToken } = theme;
-  const { token } = useToken();
+  const themeMode: "dark" | "light" = mode === "dark" ? "dark" : "light";
 
   const currencyFormat = (value: number) => value.toLocaleString(locale, { style: "currency", currency });
 
-  const barChartConfig = {
-    options: {
-      chart: { id: "basic-bar", background: token.colorBgContainer },
-      plotOptions: { bar: { horizontal: true } },
-      dataLabels: { enabled: false, formatter: currencyFormat },
-      colors: ["#77B6EA"],
-      theme: { mode },
-      tooltip: { y: { formatter: currencyFormat } },
-      xaxis: {
-        categories: tableData.map((it) => it.description),
-      },
+  const barChartOptions = {
+    chart: { id: "basic-bar", background: "transparent" },
+    plotOptions: { bar: { horizontal: true } },
+    dataLabels: { enabled: false, formatter: currencyFormat },
+    colors: ["#77B6EA"],
+    theme: { mode: themeMode },
+    tooltip: { y: { formatter: currencyFormat } },
+    xaxis: {
+      categories: tableData.map((it) => it.description),
     },
-    series: [{ name: "value", data: tableData.map((it) => it.value) }],
   };
+
+  const series = [{ name: "value", data: tableData.map((it) => it.value) }];
 
   return (
     <Card title="Month Stats" bordered={false}>
-      <Chart options={barChartConfig.options} series={barChartConfig.series} type="bar" width="100%" />
+      <Chart options={barChartOptions} series={series} type="bar" width="100%" />
     </Card>
   );
 };

@@ -14,7 +14,7 @@
     "@refinedev/simple-rest": "^4.0.0",
     "antd": "^5.0.5",
     "apexcharts": "^3.41.1",
-    "axios": "^1.4.0",
+    "axios": "^0.26.1",
     "d2l-intl": "^2.1.0",
     "react": "^18.0.0",
     "react-apexcharts": "^1.4.1",
