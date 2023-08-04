@@ -18,7 +18,6 @@ dependencies {
     implementation(libs.gradleplugin.micronaut)
     implementation(libs.gradleplugin.micronaut.aot)
     implementation(libs.gradleplugin.shadow)
-    implementation(libs.gradleplugin.kotest)
     implementation(libs.gradleplugin.git.properties)
     implementation(libs.gradleplugin.liquibase)
     implementation(libs.gradleplugin.yaml)

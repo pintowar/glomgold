@@ -1,5 +1,5 @@
 [versions]
-kotlin = "1.9.0"
+kotlin = "1.8.22"
 kotlin-coroutines = "1.7.2"
 ksp = "1.9.0-1.0.11"
 micronaut-gradle = "4.0.2"
@@ -15,10 +15,9 @@ gradleplugin-micronaut = { module = "io.micronaut.gradle:micronaut-gradle-plugin
 gradleplugin-micronaut-aot = { module = "io.micronaut.gradle:micronaut-aot-plugin", version.ref = "micronaut-gradle" }
 gradleplugin-shadow = { module = "com.github.johnrengelman:shadow", version = "8.1.1" }
 gradleplugin-ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
-gradleplugin-kotest = { module = "io.kotest:kotest-gradle-plugin", version.ref = "kotest-gradle" }
 gradleplugin-git-properties = { module = "com.gorylenko.gradle-git-properties:gradle-git-properties", version.ref = "git-gradle" }
 gradleplugin-liquibase = { module = "org.liquibase:liquibase-gradle-plugin", version.ref = "liquibase-gradle" }
-gradleplugin-yaml = { module = "org.yaml:snakeyaml", version = "1.30" }
+gradleplugin-yaml = { module = "org.yaml:snakeyaml", version = "2.0" }
 gradleplugin-node = { module = "com.github.node-gradle:gradle-node-plugin", version = "5.0.0" }
 gradleplugin-release = { module = "net.researchgate:gradle-release", version = "3.0.2" }
 gradleplugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version = "10.2.1" }

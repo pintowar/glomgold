@@ -9,7 +9,6 @@ plugins {
     id("com.github.johnrengelman.shadow")
     id("io.micronaut.application")
     id("io.micronaut.aot")
-    id("io.kotest")
     id("com.gorylenko.gradle-git-properties")
     id("idea")
     id("glomgold.kotlin-liquibase")
@@ -21,10 +20,6 @@ plugins {
 description = "Glomgold Web Server"
 
 repositories {
-//    mavenLocal()
-//    maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-//        mavenContent { snapshotsOnly() }
-//    }
     mavenCentral()
 }
 
@@ -147,7 +142,7 @@ tasks {
     }
 
     register("coverageReport") {
-        dependsOn("kotest", "jacocoTestReport")
+        dependsOn("test", "jacocoTestReport")
         doLast {
             logger.quiet("Finishing Coverage Report!!")
         }
