@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { Row, Col, notification } from "antd";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 
 import "./panel.css";
 import { IItem } from "../../interfaces";

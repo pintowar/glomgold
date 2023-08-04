@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { Row, Col, Card, Space, DatePicker, Tabs } from "antd";
 
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 
 import { ItemChart, PeriodChart, AnnualTable } from "./components/report";
 import { IPanelAnnualReport } from "../../interfaces";
