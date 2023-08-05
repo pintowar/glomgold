@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Seting up Git
         run: git config user.email "${{ github.actor }}@users.noreply.github.com" && git config user.name "Github Actions"
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
@@ -29,11 +29,10 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle-test-
 
       - name: Setup GraalVM CE
-        uses: DeLaGuardo/setup-graalvm@master
+        uses: graalvm/setup-graalvm@v1
         with:
-          graalvm: '22.3.3'
-          java: 'java17'
-          arch: 'amd64'
+          version: '22.3.3'
+          java-version: '17'
       - name: Install Native Image
         run: gu install native-image
 
@@ -54,7 +53,7 @@ jobs:
     needs: gradle_build
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
