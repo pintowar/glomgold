@@ -1,40 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 
-import { Row, Col, Card, Space, DatePicker, Tabs } from "antd";
+import { Row, Col, Card, Space, DatePicker, Tabs, Skeleton } from "antd";
 
 import dayjs from "dayjs";
 
 import { ItemChart, PeriodChart, SummaryTable } from "../../../components/panel/report";
 import { IPanelAnnualReport } from "../../../interfaces";
-import { useGetIdentity } from "@refinedev/core";
+import { useCustom, useGetIdentity } from "@refinedev/core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY } from "../../../constants";
-import { axiosInstance } from "../../../authProvider";
 
 export const ReportPanel: React.FC = () => {
   const { data: identity } = useGetIdentity<{ locale: string; currency: string }>();
   const locale = identity?.locale || DEFAULT_LOCALE;
   const currency = identity?.currency || DEFAULT_CURRENCY;
-
   const periodFormat = "YYYY";
-  const location = useLocation();
-  const navigate = useNavigate();
-  const period = new URLSearchParams(location.search).get("period") || dayjs().format(periodFormat);
+  const periodParam = "period";
 
-  const [currentPeriod, setCurrentPeriod] = useState(dayjs(period, periodFormat));
-  const [dataTable, setDataTable] = useState<IPanelAnnualReport>({
-    columns: [],
-    rowIndex: [],
-    data: [],
-    rowSummary: [],
-    rowTrend: [],
-    colSummary: [],
-    colAverage: [],
-    total: 0,
+  const [searchParams, setSearchParams] = useSearchParams();
+  const period = searchParams.get(periodParam) || dayjs().format(periodFormat);
+  const currentPeriod = useMemo(() => dayjs(period, periodFormat), [period, periodFormat]);
+
+  const { data: dataTable, isLoading } = useCustom<IPanelAnnualReport>({
+    url: `/api/panel/report`,
+    method: "get",
+    config: { query: { year: currentPeriod.year() } },
   });
 
   const onChangePeriod = (date: dayjs.Dayjs | null) => {
-    if (date) setCurrentPeriod(date);
+    date && setSearchParams({ [periodParam]: date.format(periodFormat) });
   };
 
   const tabsItems = [
@@ -46,12 +40,12 @@ export const ReportPanel: React.FC = () => {
           year={currentPeriod.format(periodFormat)}
           locale={locale}
           currency={currency}
-          columns={dataTable.columns}
-          rowIndex={dataTable.rowIndex}
-          data={dataTable.data}
-          rowSummary={dataTable.rowSummary}
-          colSummary={dataTable.colSummary}
-          total={dataTable.total}
+          columns={dataTable?.data.columns || []}
+          rowIndex={dataTable?.data.rowIndex || []}
+          data={dataTable?.data.data || []}
+          rowSummary={dataTable?.data.rowSummary || []}
+          colSummary={dataTable?.data.colSummary || []}
+          total={dataTable?.data.total || 0}
         />
       ),
     },
@@ -61,29 +55,22 @@ export const ReportPanel: React.FC = () => {
       children: (
         <Space direction="vertical" size={12} style={{ width: "100%" }}>
           <PeriodChart
-            cols={dataTable.columns}
-            data={dataTable.rowSummary}
-            trend={dataTable.rowTrend}
+            cols={dataTable?.data.columns || []}
+            data={dataTable?.data.rowSummary || []}
+            trend={dataTable?.data.rowTrend || []}
             locale={locale}
             currency={currency}
           />
-          <ItemChart cols={dataTable.rowIndex} data={dataTable.colAverage} locale={locale} currency={currency} />
+          <ItemChart
+            cols={dataTable?.data.rowIndex || []}
+            data={dataTable?.data.colAverage || []}
+            locale={locale}
+            currency={currency}
+          />
         </Space>
       ),
     },
   ];
-
-  useEffect(() => {
-    const populateData = async () => {
-      const { status, data } = await axiosInstance.get(`/api/panel/report?year=${currentPeriod.year()}`);
-      if (status === 200) {
-        setDataTable({ ...data });
-        navigate(`/panel/report?period=${currentPeriod.format(periodFormat)}`);
-      } else throw Error();
-    };
-
-    populateData();
-  }, [currentPeriod, navigate]);
 
   return (
     <>
@@ -101,7 +88,7 @@ export const ReportPanel: React.FC = () => {
           <Col span={24}>
             <Card bordered={false}>
               <Space direction="vertical" size={12} style={{ width: "100%" }}>
-                <Tabs type="card" items={tabsItems} />
+                {!isLoading ? <Tabs type="card" items={tabsItems} /> : <Skeleton active />}
               </Space>
             </Card>
           </Col>
