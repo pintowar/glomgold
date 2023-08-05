@@ -5,11 +5,11 @@ import { Row, Col, Card, Space, DatePicker, Tabs } from "antd";
 
 import dayjs from "dayjs";
 
-import { ItemChart, PeriodChart, AnnualTable } from "./components/report";
-import { IPanelAnnualReport } from "../../interfaces";
+import { ItemChart, PeriodChart, AnnualTable } from "../components/report";
+import { IPanelAnnualReport } from "../../../interfaces";
 import { useGetIdentity } from "@refinedev/core";
-import { DEFAULT_LOCALE, DEFAULT_CURRENCY } from "../../constants";
-import { axiosInstance } from "../../authProvider";
+import { DEFAULT_LOCALE, DEFAULT_CURRENCY } from "../../../constants";
+import { axiosInstance } from "../../../authProvider";
 
 export const ReportPanel: React.FC = () => {
   const { data: identity } = useGetIdentity<{ locale: string; currency: string }>();

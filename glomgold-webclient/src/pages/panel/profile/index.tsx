@@ -2,7 +2,7 @@ import React from "react";
 
 import { Row, Col, Card, Form, Input, Button, notification } from "antd";
 
-import { axiosInstance } from "../../authProvider";
+import { axiosInstance } from "../../../authProvider";
 import { useApiUrl, useLogout } from "@refinedev/core";
 
 interface PasswordForm {
@@ -16,7 +16,6 @@ export const ProfilePanel: React.FC = () => {
   const [form] = Form.useForm<PasswordForm>();
 
   const onFinish = async (values: PasswordForm) => {
-    console.log("chegando!!");
     try {
       const { status } = await axiosInstance.post(`${apiUrl}/panel/profile/password`, values);
       if (status === 200) {

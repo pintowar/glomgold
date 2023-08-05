@@ -4,8 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Row, Col, notification } from "antd";
 import dayjs from "dayjs";
 
-import "./panel.css";
-import { IItem } from "../../interfaces";
+import { IItem } from "../../../interfaces";
 
 import {
   PeriodSummaryCard,
@@ -13,10 +12,10 @@ import {
   MonthItemsCard,
   MonthStatsCard,
   PanelItem,
-} from "./components/control";
+} from "../components/control";
 import { useGetIdentity } from "@refinedev/core";
-import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../constants";
-import { axiosInstance } from "../../authProvider";
+import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../../constants";
+import { axiosInstance } from "../../../authProvider";
 
 interface ControlPanelData {
   items: IItem[];
