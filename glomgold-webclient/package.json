@@ -52,7 +52,7 @@
     "preview": "refine start",
     "refine": "refine",
     "start": "vite",
-    "test": "cypress run",
+    "test": "cypress run --config baseUrl=http://127.0.0.1:3000",
     "cy:open": "cypress open",
     "e2e": "start-test http://127.0.0.1:3000",
     "lint:fix": "eslint ./src --ext .jsx,.js,.ts,.tsx --quiet --fix --ignore-path ./.gitignore",
