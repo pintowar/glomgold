@@ -1,28 +1,29 @@
 import React from "react";
-import { useApiUrl } from "@refinedev/core";
-import { axiosInstance } from "../../authProvider";
-import { Button, Card, Form, Input, notification, Select } from "antd";
+import { useApiUrl, useCustomMutation } from "@refinedev/core";
+import { Button, Card, Form, Input, Select } from "antd";
 import { useSelect } from "@refinedev/antd";
 import { IUser } from "../../interfaces";
 
 export const ChangePasswordCard: React.FC = () => {
   const apiUrl = useApiUrl();
+  const { mutate } = useCustomMutation<{ password: string }>();
 
   const onFinish = async (values: PasswordForm) => {
-    const { status } = await axiosInstance.patch(`${apiUrl}/users/${values.userId}/password`, {
-      password: values.password,
-    });
-    if (status === 200) {
-      notification["success"]({
+    mutate({
+      url: `${apiUrl}/users/${values.userId}/password`,
+      method: "patch",
+      values,
+      successNotification: () => ({
         message: "Successfuly Operation",
         description: "Password changed for selected user.",
-      });
-    } else {
-      notification["error"]({
+        type: "success",
+      }),
+      errorNotification: () => ({
         message: "Operation Error",
         description: "Could not change password for selected user.",
-      });
-    }
+        type: "error",
+      }),
+    });
   };
 
   interface PasswordForm {

@@ -1,9 +1,8 @@
 import React from "react";
 
-import { Row, Col, Card, Form, Input, Button, notification } from "antd";
+import { Row, Col, Card, Form, Input, Button } from "antd";
 
-import { axiosInstance } from "../../../authProvider";
-import { useApiUrl, useLogout } from "@refinedev/core";
+import { useApiUrl, useCustomMutation, useLogout } from "@refinedev/core";
 
 interface PasswordForm {
   actualPassword: string;
@@ -14,25 +13,29 @@ export const ProfilePanel: React.FC = () => {
   const apiUrl = useApiUrl();
   const { mutate: logout } = useLogout();
   const [form] = Form.useForm<PasswordForm>();
+  const { mutate } = useCustomMutation<PasswordForm>();
 
-  const onFinish = async (values: PasswordForm) => {
-    try {
-      const { status } = await axiosInstance.post(`${apiUrl}/panel/profile/password`, values);
-      if (status === 200) {
-        notification["success"]({
+  const onFinish = async (form: PasswordForm) => {
+    mutate(
+      {
+        url: `${apiUrl}/panel/profile/password`,
+        method: "post",
+        values: { passwords: form },
+        successNotification: () => ({
           message: "Successfuly Operation",
           description: "Password changed.",
-        });
-        logout();
-      } else {
-        throw new Error(`Invalid status ${status}`);
+          type: "success",
+        }),
+        errorNotification: () => ({
+          message: "Operation Error",
+          description: "Could not change password.",
+          type: "error",
+        }),
+      },
+      {
+        onSuccess: () => logout(),
       }
-    } catch (err) {
-      notification["error"]({
-        message: "Operation Error",
-        description: "Could not change password.",
-      });
-    }
+    );
   };
 
   return (
