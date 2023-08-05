@@ -54,7 +54,7 @@
     "start": "vite",
     "test": "cypress run",
     "cy:open": "cypress open",
-    "e2e": "start-test 3000",
+    "e2e": "start-test http://127.0.0.1:3000",
     "lint:fix": "eslint ./src --ext .jsx,.js,.ts,.tsx --quiet --fix --ignore-path ./.gitignore",
     "lint:format": "prettier  --loglevel warn --write \"./**/*.{js,jsx,ts,tsx,css,md,json}\""
   },
