@@ -5,7 +5,7 @@ import { Row, Col, Card, Space, DatePicker, Tabs } from "antd";
 
 import dayjs from "dayjs";
 
-import { ItemChart, PeriodChart, AnnualTable } from "../components/report";
+import { ItemChart, PeriodChart, SummaryTable } from "../components/report";
 import { IPanelAnnualReport } from "../../../interfaces";
 import { useGetIdentity } from "@refinedev/core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY } from "../../../constants";
@@ -42,7 +42,7 @@ export const ReportPanel: React.FC = () => {
       key: "1",
       label: "Table",
       children: (
-        <AnnualTable
+        <SummaryTable
           year={currentPeriod.format(periodFormat)}
           locale={locale}
           currency={currency}

@@ -21,7 +21,7 @@ import Highlighter from "react-highlight-words";
 
 import "./item-card.css";
 
-interface PanelItem {
+export interface PanelItem {
   key: number;
   description: string;
   value: number;
