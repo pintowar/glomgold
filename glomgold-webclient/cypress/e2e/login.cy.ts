@@ -7,7 +7,7 @@ describe("Login Tests", () => {
     });
 
     it("Common User Login", () => {
-      cy.intercept("POST", "/login", { fixture: "login/common.user.json" });
+      cy.intercept("POST", "/api/login", { fixture: "login/common.user.json" });
       cy.intercept("GET", "/api/panel*", { fixture: "panel/control.json" });
 
       const { username, password } = user;
@@ -29,9 +29,9 @@ describe("Login Tests", () => {
     });
 
     it("Admin User Login", () => {
-      cy.intercept("POST", "/login", { fixture: "login/admin.user.json" });
+      cy.intercept("POST", "/api/login", { fixture: "login/admin.user.json" });
       cy.intercept("GET", "/api/users*", { fixture: "admin/users.json" });
-      cy.intercept("GET", "/management/info*", { fixture: "admin/info.json" });
+      cy.intercept("GET", "/api/management/info*", { fixture: "admin/info.json" });
 
       const { username, password } = user;
 
@@ -57,7 +57,7 @@ describe("Login Tests", () => {
     });
 
     it("Common User Login", () => {
-      cy.intercept("POST", "/login", { statusCode: 401 });
+      cy.intercept("POST", "/api/login", { statusCode: 401 });
 
       const { username, password } = user;
 

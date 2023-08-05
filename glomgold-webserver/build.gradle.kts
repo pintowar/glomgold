@@ -1,4 +1,3 @@
-
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
@@ -10,7 +9,6 @@ plugins {
     id("io.micronaut.application")
     id("io.micronaut.aot")
     id("com.gorylenko.gradle-git-properties")
-    id("idea")
     id("glomgold.kotlin-liquibase")
     id("org.jlleitschuh.gradle.ktlint")
     id("org.sonarqube")

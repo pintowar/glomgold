@@ -11,6 +11,11 @@ micronaut:
         paths: "classpath:public"
   security:
     authentication: bearer
+    endpoints:
+      login:
+        path: /api/login
+      logout:
+        path: /api/logout
     token:
       jwt:
         signatures:
@@ -28,14 +33,14 @@ micronaut:
       - pattern: /api/items/**
         access:
           - ROLE_ADMIN
-      - pattern: /management/health
+      - pattern: /api/management/health
         access: isAnonymous()
-      - pattern: /management/**
+      - pattern: /api/management/**
         access:
           - ROLE_ADMIN
-      - pattern: /login
+      - pattern: /api/login
         access: isAnonymous()
-      - pattern: /logout
+      - pattern: /api/logout
         access: isAnonymous()
       - pattern: /**
         access: isAnonymous()
@@ -49,7 +54,7 @@ jackson:
 
 endpoints:
   all:
-    path: "/management"
+    path: "/api/management"
     enabled: true
     sensitive: true
 

@@ -9,7 +9,7 @@ import { axiosInstance } from "../authProvider";
 
 const ManagementInfoCard: React.FC = () => {
   const { data } = useCustom({
-    url: `/management/info`,
+    url: `/api/management/info`,
     method: "get",
   });
 

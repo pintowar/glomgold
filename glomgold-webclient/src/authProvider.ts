@@ -44,7 +44,7 @@ export const axiosInstance: AxiosInstance = generateAxiosInstance(storage);
 
 export const authProvider: AuthBindings = {
   login: async ({ username, password }) => {
-    const { data, status } = await axios.post("/login", { username, password });
+    const { data, status } = await axios.post("/api/login", { username, password });
     if (status === 200) {
       storage.setUser(data.access_token);
       const redirectPath = data.roles.includes("ROLE_ADMIN") ? "/admin" : "/panel";

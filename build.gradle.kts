@@ -1,5 +1,6 @@
 plugins {
     base
+    id("idea")
     id("net.researchgate.release")
     id("org.sonarqube")
 }
