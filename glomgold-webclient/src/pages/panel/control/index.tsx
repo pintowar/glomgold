@@ -1,5 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCustom, useGetIdentity } from "@refinedev/core";
 
 import { Row, Col, notification } from "antd";
 import dayjs from "dayjs";
@@ -13,7 +15,7 @@ import {
   MonthStatsCard,
   PanelItem,
 } from "../../../components/panel/control";
-import { useGetIdentity } from "@refinedev/core";
+
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../../constants";
 import { axiosInstance } from "../../../authProvider";
 
@@ -25,10 +27,12 @@ interface ControlPanelData {
 }
 
 export const ControlPanel: React.FC = () => {
+  const queryClient = useQueryClient();
   const { data: identity } = useGetIdentity<{ locale: string; currency: string; symbol: string }>();
   const locale = identity?.locale || DEFAULT_LOCALE;
   const currency = identity?.currency || DEFAULT_CURRENCY;
   const symbol = identity?.symbol || DEFAULT_SYMBOL;
+  const controlPanelKey = "control-panel-key";
   const periodFormat = "YYYY-MM";
   const periodParam = "period";
   const descParam = "desc";
@@ -44,23 +48,14 @@ export const ControlPanel: React.FC = () => {
     value && setSearchParams({ [periodParam]: value.format(periodFormat) });
   };
 
-  const [panelData, setPanelData] = useState<ControlPanelData>({
-    items: [],
-    stats: [],
-    total: 0,
-    diff: 0,
-  });
-
-  useEffect(() => {
-    const populateData = async () => {
-      const { status, data } = await axiosInstance.get(`/api/panel?period=${formattedPeriod}`);
-      if (status === 200) {
-        setPanelData(data);
-      } else throw Error();
-    };
-
-    populateData();
-  }, [formattedPeriod, desc]);
+    const { data: panelData, isLoading } = useCustom<ControlPanelData>({
+        url: "/api/panel",
+        method: "get",
+        config: { query: { period: formattedPeriod } },
+        queryOptions: {
+            queryKey: [controlPanelKey, formattedPeriod],
+        },
+    });
 
   const onAddItem = async (description: string, value: number) => {
     const { status, data } = await axiosInstance.post("/api/panel/add-item", {
@@ -69,7 +64,7 @@ export const ControlPanel: React.FC = () => {
       period: formattedPeriod,
     });
     if (status === 200) {
-      setPanelData(data);
+        await queryClient.invalidateQueries([controlPanelKey, formattedPeriod])
     } else throw Error();
   };
 
@@ -80,14 +75,14 @@ export const ControlPanel: React.FC = () => {
       period: formattedPeriod,
     });
     if (status === 200) {
-      setPanelData(data);
+        await queryClient.invalidateQueries([controlPanelKey, formattedPeriod])
     } else throw Error();
   };
 
   const onDeleteItem = async (itemId: number) => {
     const { status, data } = await axiosInstance.delete(`/api/panel/remove-item/${itemId}`);
     if (status === 200) {
-      setPanelData(data);
+        await queryClient.invalidateQueries([controlPanelKey, formattedPeriod])
     } else throw Error();
   };
 
@@ -96,7 +91,7 @@ export const ControlPanel: React.FC = () => {
       `/api/panel/remove-items/${formattedPeriod}?ids=${itemIds.join(",")}`
     );
     if (status === 200) {
-      setPanelData(data);
+        await queryClient.invalidateQueries([controlPanelKey, formattedPeriod])
     } else throw Error();
   };
 
@@ -123,7 +118,7 @@ export const ControlPanel: React.FC = () => {
     }
   };
 
-  const tableData = panelData.items.map(({ id, description, value }) => ({ key: id, description, value }));
+  const tableData = (panelData?.data?.items || []).map(({ id, description, value }) => ({ key: id, description, value }));
 
   return (
     <>
@@ -133,7 +128,7 @@ export const ControlPanel: React.FC = () => {
             <PeriodNavigationCard value={currentPeriod} onValueChange={onCurrentPeriodChange} format={periodFormat} />
           </Col>
           <Col span={12}>
-            <PeriodSummaryCard total={panelData.total} difference={panelData.diff} locale={locale} symbol={symbol} />
+            <PeriodSummaryCard total={panelData?.data.total || 0} difference={panelData?.data.diff || 0} locale={locale} symbol={symbol} />
           </Col>
         </Row>
       </div>
@@ -156,7 +151,7 @@ export const ControlPanel: React.FC = () => {
             />
           </Col>
           <Col span={12}>
-            <MonthStatsCard tableData={panelData.stats} locale={locale} currency={currency} />
+            <MonthStatsCard tableData={panelData?.data.stats || []} locale={locale} currency={currency} />
           </Col>
         </Row>
       </div>
