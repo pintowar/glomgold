@@ -20,47 +20,46 @@ import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, SearchOutli
 import Highlighter from "react-highlight-words";
 
 import "./item-card.css";
+import { useCustom, useCustomMutation } from "@refinedev/core";
 
-export interface PanelItem {
+interface PanelItem {
   key: number;
   description: string;
   value: number;
 }
 
+interface ItemBody {
+  period: string;
+  description: string;
+  value: number;
+}
+
 interface MonthItemsCardProps {
+  formattedPeriod: string;
   tableData: PanelItem[];
   locale: string;
   currency: string;
   symbol: string;
   initialSearch: string;
-  autoCompleteOptions: { value: string }[];
-  onAddItem: (description: string, value: number) => Promise<void>;
-  onEditItem: (id: number, description: string, value: number) => Promise<void>;
-  onDeleteItem: (itemId: number) => Promise<void>;
-  onMonthItemCopy: (items: PanelItem[]) => Promise<void>;
-  onBatchDelete: (itemIds: number[]) => Promise<void>;
-  onSearch: (searchText: string) => Promise<void>;
+  invalidateQuery: (period: string) => Promise<void>;
 }
 
 export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
+  formattedPeriod,
   initialSearch,
-  autoCompleteOptions,
   tableData,
   locale,
   currency,
   symbol,
-  onAddItem,
-  onEditItem,
-  onDeleteItem,
-  onMonthItemCopy,
-  onBatchDelete,
-  onSearch,
+  invalidateQuery,
 }) => {
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
   const descInputRef = useRef<BaseSelectRef>(null);
 
   // start selected rows
+  const [autoCompleteOptions, setAutoCompleteOptions] = useState<{ value: string }[]>([]);
+
   const [selectedRows, setSelectedRows] = useState({
     keys: [] as React.Key[],
     rows: [] as PanelItem[],
@@ -200,52 +199,133 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   // end of filter components
   const addItemOnEnter = async (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      addItem();
+      await addItem();
     }
   };
 
+  const { mutate: onAddItem } = useCustomMutation<ItemBody>();
+
   const addItem = async () => {
     try {
-      const { description, value } = await addForm.validateFields();
-      await onAddItem(description, value);
-      addForm.resetFields();
-      descInputRef.current?.focus();
+      const row = (await addForm.validateFields()) as PanelItem;
+      onAddItem(
+        {
+          url: "/api/panel/add-item",
+          method: "post",
+          values: {
+            description: row.description,
+            value: row.value,
+            period: formattedPeriod,
+          },
+        },
+        {
+          onSuccess: async () => {
+            addForm.resetFields();
+            descInputRef.current?.focus();
+            await invalidateQuery(formattedPeriod);
+          },
+        }
+      );
     } catch (errInfo) {
       console.error("Validate Failed:", errInfo);
     }
   };
+
+  const { mutate: onEditItem } = useCustomMutation<ItemBody>();
 
   const editItem = async (key: number) => {
     try {
       const row = (await editForm.validateFields()) as PanelItem;
-      await onEditItem(key, row.description, row.value);
+      onEditItem(
+        {
+          url: `/api/panel/edit-item/${key}`,
+          method: "patch",
+          values: {
+            description: row.description,
+            value: row.value,
+            period: formattedPeriod,
+          },
+        },
+        {
+          onSuccess: async () => await invalidateQuery(formattedPeriod),
+          onSettled: () => setEditingKey(""),
+        }
+      );
     } catch (errInfo) {
       console.error("Validate Failed:", errInfo);
-    } finally {
       setEditingKey("");
     }
   };
 
-  const deleteItem = async (item: PanelItem) => {
-    await onDeleteItem(item.key);
-    addForm.resetFields();
+  const { mutate: onDeleteItem } = useCustomMutation();
+
+  const deleteItem = (item: PanelItem) => {
+    onDeleteItem(
+      {
+        url: `/api/panel/remove-item/${item.key}`,
+        method: "delete",
+        values: {},
+      },
+      {
+        onSuccess: async () => {
+          await invalidateQuery(formattedPeriod);
+          addForm.resetFields();
+        },
+      }
+    );
   };
 
-  const copyNextMonth = async () => {
-    await onMonthItemCopy(selectedRows.rows);
+  const { mutate: onMonthItemCopy } = useCustomMutation<ItemBody[]>();
+  const copyNextMonth = () => {
+    onMonthItemCopy({
+      url: "/api/panel/copy-items",
+      method: "post",
+      values: selectedRows.rows.map((it) => ({
+        period: formattedPeriod,
+        description: it.description,
+        value: it.value,
+      })),
+        successNotification: () => ({
+            message: "Successfuly Operation",
+            description: "Items were successfuly replicated to the next month",
+            type: "success",
+        }),
+    });
   };
 
   const confirmDeleteSelected = () => {
     Modal.confirm({
       title: "Sure to delete all selected?",
-      async onOk() {
+      onOk() {
         deleteSelected();
       },
     });
   };
 
-  const deleteSelected = async () => {
-    await onBatchDelete(selectedRows.rows.map((r) => r.key));
+  const { mutate: onBatchDelete } = useCustomMutation();
+  const deleteSelected = () => {
+    const itemIds = selectedRows.rows.map((r) => r.key).join(",");
+    onBatchDelete(
+      {
+        url: `/api/panel/remove-items/${formattedPeriod}?ids=${itemIds}`,
+        method: "delete",
+        values: {},
+      },
+      {
+        onSuccess: async () => invalidateQuery(formattedPeriod),
+      }
+    );
+  };
+
+  const [searchText, setSearchText] = useState("");
+
+  const { data: itemSearchData } = useCustom<string[]>({
+    url: "/api/panel/item-complete",
+    method: "get",
+    config: { query: { description: searchText } },
+  });
+  const onSearch = () => {
+    setAutoCompleteOptions((itemSearchData?.data || []).map((r) => ({ value: r })));
   };
 
   const columns = [
@@ -321,6 +401,8 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           <Form.Item name="description" rules={[{ required: true }]}>
             <AutoComplete
               ref={descInputRef}
+              value={searchText}
+              onChange={setSearchText}
               options={autoCompleteOptions}
               onSearch={onSearch}
               placeholder="Description"

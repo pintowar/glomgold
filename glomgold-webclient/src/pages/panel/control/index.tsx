@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCustom, useGetIdentity } from "@refinedev/core";
 
-import { Row, Col, notification } from "antd";
+import { Row, Col } from "antd";
 import dayjs from "dayjs";
 
 import { IItem } from "../../../interfaces";
@@ -13,11 +13,9 @@ import {
   PeriodNavigationCard,
   MonthItemsCard,
   MonthStatsCard,
-  PanelItem,
 } from "../../../components/panel/control";
 
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../../constants";
-import { axiosInstance } from "../../../authProvider";
 
 interface ControlPanelData {
   items: IItem[];
@@ -41,84 +39,28 @@ export const ControlPanel: React.FC = () => {
   const period = searchParams.get(periodParam) || dayjs().format(periodFormat);
   const desc = searchParams.get(descParam) || "";
 
-  const [autoCompleteOptions, setAutoCompleteOptions] = useState<{ value: string }[]>([]);
   const currentPeriod = useMemo(() => dayjs(period, periodFormat), [period, periodFormat]);
   const formattedPeriod = useMemo(() => currentPeriod.format(periodFormat), [currentPeriod]);
   const onCurrentPeriodChange = (value: dayjs.Dayjs | null) => {
     value && setSearchParams({ [periodParam]: value.format(periodFormat) });
   };
 
-    const { data: panelData, isLoading } = useCustom<ControlPanelData>({
-        url: "/api/panel",
-        method: "get",
-        config: { query: { period: formattedPeriod } },
-        queryOptions: {
-            queryKey: [controlPanelKey, formattedPeriod],
-        },
-    });
+  const { data: panelData, isLoading } = useCustom<ControlPanelData>({
+    url: "/api/panel",
+    method: "get",
+    config: { query: { period: formattedPeriod } },
+    queryOptions: {
+      queryKey: [controlPanelKey, formattedPeriod],
+    },
+  });
 
-  const onAddItem = async (description: string, value: number) => {
-    const { status, data } = await axiosInstance.post("/api/panel/add-item", {
-      description,
-      value,
-      period: formattedPeriod,
-    });
-    if (status === 200) {
-        await queryClient.invalidateQueries([controlPanelKey, formattedPeriod])
-    } else throw Error();
-  };
+  const invalidateQuery = async (period: string) => await queryClient.invalidateQueries([controlPanelKey, period]);
 
-  const onEditItem = async (id: number, description: string, value: number) => {
-    const { status, data } = await axiosInstance.patch(`/api/panel/edit-item/${id}`, {
-      description,
-      value,
-      period: formattedPeriod,
-    });
-    if (status === 200) {
-        await queryClient.invalidateQueries([controlPanelKey, formattedPeriod])
-    } else throw Error();
-  };
-
-  const onDeleteItem = async (itemId: number) => {
-    const { status, data } = await axiosInstance.delete(`/api/panel/remove-item/${itemId}`);
-    if (status === 200) {
-        await queryClient.invalidateQueries([controlPanelKey, formattedPeriod])
-    } else throw Error();
-  };
-
-  const onBatchDelete = async (itemIds: number[]) => {
-    const { status, data } = await axiosInstance.delete(
-      `/api/panel/remove-items/${formattedPeriod}?ids=${itemIds.join(",")}`
-    );
-    if (status === 200) {
-        await queryClient.invalidateQueries([controlPanelKey, formattedPeriod])
-    } else throw Error();
-  };
-
-  const onMonthItemCopy = async (items: PanelItem[]) => {
-    const itemsWithPeriod = items.map((it) => ({ ...it, period: formattedPeriod }));
-
-    const { status } = await axiosInstance.post(`/api/panel/copy-items`, itemsWithPeriod);
-    if (status !== 200) {
-      throw Error();
-    } else {
-      notification["success"]({
-        message: "Successfuly Operation",
-        description: "Items were successfuly replicated to the next month",
-      });
-    }
-  };
-
-  const onSearch = async (searchText: string) => {
-    const { status, data } = await axiosInstance.get<string[]>(`/api/panel/item-complete?description=${searchText}`);
-    if (status !== 200) {
-      throw Error();
-    } else {
-      setAutoCompleteOptions(data.map((r) => ({ value: r })));
-    }
-  };
-
-  const tableData = (panelData?.data?.items || []).map(({ id, description, value }) => ({ key: id, description, value }));
+  const tableData = (panelData?.data?.items || []).map(({ id, description, value }) => ({
+    key: id,
+    description,
+    value,
+  }));
 
   return (
     <>
@@ -128,7 +70,12 @@ export const ControlPanel: React.FC = () => {
             <PeriodNavigationCard value={currentPeriod} onValueChange={onCurrentPeriodChange} format={periodFormat} />
           </Col>
           <Col span={12}>
-            <PeriodSummaryCard total={panelData?.data.total || 0} difference={panelData?.data.diff || 0} locale={locale} symbol={symbol} />
+            <PeriodSummaryCard
+              total={panelData?.data.total || 0}
+              difference={panelData?.data.diff || 0}
+              locale={locale}
+              symbol={symbol}
+            />
           </Col>
         </Row>
       </div>
@@ -136,18 +83,13 @@ export const ControlPanel: React.FC = () => {
         <Row gutter={[24, 24]}>
           <Col span={12}>
             <MonthItemsCard
-              autoCompleteOptions={autoCompleteOptions}
+              formattedPeriod={formattedPeriod}
               initialSearch={desc}
               tableData={tableData}
               locale={locale}
               currency={currency}
               symbol={symbol}
-              onSearch={onSearch}
-              onAddItem={onAddItem}
-              onDeleteItem={onDeleteItem}
-              onEditItem={onEditItem}
-              onMonthItemCopy={onMonthItemCopy}
-              onBatchDelete={onBatchDelete}
+              invalidateQuery={invalidateQuery}
             />
           </Col>
           <Col span={12}>
