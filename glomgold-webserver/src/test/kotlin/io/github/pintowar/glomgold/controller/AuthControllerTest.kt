@@ -70,7 +70,7 @@ class JwtAuthenticationTest(
 @Client("/")
 interface AuthClient {
 
-    @Post("/login")
+    @Post("/api/login")
     suspend fun login(@Body credentials: UsernamePasswordCredentials): BearerAccessRefreshToken
 
     @Get("/api/auth/me")
