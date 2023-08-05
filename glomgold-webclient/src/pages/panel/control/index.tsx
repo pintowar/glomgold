@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 import { Row, Col, notification } from "antd";
 import dayjs from "dayjs";
@@ -29,15 +29,21 @@ export const ControlPanel: React.FC = () => {
   const locale = identity?.locale || DEFAULT_LOCALE;
   const currency = identity?.currency || DEFAULT_CURRENCY;
   const symbol = identity?.symbol || DEFAULT_SYMBOL;
-
   const periodFormat = "YYYY-MM";
-  const location = useLocation();
-  const navigate = useNavigate();
-  const period = new URLSearchParams(location.search).get("period") || dayjs().format(periodFormat);
-  const desc = new URLSearchParams(location.search).get("desc") || "";
+  const periodParam = "period";
+  const descParam = "desc";
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const period = searchParams.get(periodParam) || dayjs().format(periodFormat);
+  const desc = searchParams.get(descParam) || "";
 
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<{ value: string }[]>([]);
-  const [currentPeriod, setCurrentPeriod] = useState(dayjs(period, periodFormat));
+  const currentPeriod = useMemo(() => dayjs(period, periodFormat), [period, periodFormat]);
+  const formattedPeriod = useMemo(() => currentPeriod.format(periodFormat), [currentPeriod]);
+  const onCurrentPeriodChange = (value: dayjs.Dayjs | null) => {
+    value && setSearchParams({ [periodParam]: value.format(periodFormat) });
+  };
+
   const [panelData, setPanelData] = useState<ControlPanelData>({
     items: [],
     stats: [],
@@ -45,20 +51,16 @@ export const ControlPanel: React.FC = () => {
     diff: 0,
   });
 
-  const formattedPeriod = useMemo(() => currentPeriod.format(periodFormat), [currentPeriod]);
-
   useEffect(() => {
     const populateData = async () => {
       const { status, data } = await axiosInstance.get(`/api/panel?period=${formattedPeriod}`);
       if (status === 200) {
         setPanelData(data);
-        const descParam = desc ? `&desc=${desc}` : "";
-        navigate(`/panel?period=${formattedPeriod}${descParam}`);
       } else throw Error();
     };
 
     populateData();
-  }, [formattedPeriod, desc, navigate]);
+  }, [formattedPeriod, desc]);
 
   const onAddItem = async (description: string, value: number) => {
     const { status, data } = await axiosInstance.post("/api/panel/add-item", {
@@ -128,7 +130,7 @@ export const ControlPanel: React.FC = () => {
       <div className="card-row">
         <Row gutter={[24, 24]}>
           <Col span={12}>
-            <PeriodNavigationCard value={currentPeriod} onValueChange={setCurrentPeriod} format={periodFormat} />
+            <PeriodNavigationCard value={currentPeriod} onValueChange={onCurrentPeriodChange} format={periodFormat} />
           </Col>
           <Col span={12}>
             <PeriodSummaryCard total={panelData.total} difference={panelData.diff} locale={locale} symbol={symbol} />
