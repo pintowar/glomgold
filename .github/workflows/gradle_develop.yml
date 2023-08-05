@@ -44,4 +44,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           gradle-version: wrapper
-          arguments: clean coverageReport sonarqube
+          arguments: clean coverageReport sonar

@@ -40,11 +40,11 @@ sonarqube {
         property("sonar.projectKey", "pintowar_glomgold")
         property("sonar.projectVersion", project.version.toString())
         property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.login", sonarToken)
+        property("sonar.token", sonarToken)
         property("sonar.verbose", true)
         property("sonar.github.repository", "pintowar/glomgold")
         property("sonar.coverage.jacoco.xmlReportPaths", "$jacocoReportPath/jacocoTestReport.xml")
-        property("sonar.typescript.lcov.reportPaths", "$lcovReportPath/lcov.info")
+        property("sonar.javascript.lcov.reportPaths", "$lcovReportPath/lcov.info")
     }
 }
 

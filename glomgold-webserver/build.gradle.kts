@@ -18,6 +18,7 @@ plugins {
 description = "Glomgold Web Server"
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
