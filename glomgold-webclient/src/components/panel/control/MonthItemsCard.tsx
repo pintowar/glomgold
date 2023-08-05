@@ -203,12 +203,22 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     }
   };
 
-  const { mutate: onAddItem } = useCustomMutation<ItemBody>();
+  const [searchText, setSearchText] = useState("");
+
+  const { data: itemSearchData } = useCustom<string[]>({
+    url: "/api/panel/item-complete",
+    method: "get",
+    config: { query: { description: searchText } },
+  });
+
+  const { mutate: onCreateUpdateItem } = useCustomMutation<ItemBody>();
+  const { mutate: onMonthItemCopy } = useCustomMutation<ItemBody[]>();
+  const { mutate: onDeleteItem } = useCustomMutation();
 
   const addItem = async () => {
     try {
       const row = (await addForm.validateFields()) as PanelItem;
-      onAddItem(
+      onCreateUpdateItem(
         {
           url: "/api/panel/add-item",
           method: "post",
@@ -231,12 +241,10 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     }
   };
 
-  const { mutate: onEditItem } = useCustomMutation<ItemBody>();
-
   const editItem = async (key: number) => {
     try {
       const row = (await editForm.validateFields()) as PanelItem;
-      onEditItem(
+      onCreateUpdateItem(
         {
           url: `/api/panel/edit-item/${key}`,
           method: "patch",
@@ -257,8 +265,6 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     }
   };
 
-  const { mutate: onDeleteItem } = useCustomMutation();
-
   const deleteItem = (item: PanelItem) => {
     onDeleteItem(
       {
@@ -275,7 +281,6 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     );
   };
 
-  const { mutate: onMonthItemCopy } = useCustomMutation<ItemBody[]>();
   const copyNextMonth = () => {
     onMonthItemCopy({
       url: "/api/panel/copy-items",
@@ -285,11 +290,11 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         description: it.description,
         value: it.value,
       })),
-        successNotification: () => ({
-            message: "Successfuly Operation",
-            description: "Items were successfuly replicated to the next month",
-            type: "success",
-        }),
+      successNotification: () => ({
+        message: "Successfuly Operation",
+        description: "Items were successfuly replicated to the next month",
+        type: "success",
+      }),
     });
   };
 
@@ -302,10 +307,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     });
   };
 
-  const { mutate: onBatchDelete } = useCustomMutation();
   const deleteSelected = () => {
     const itemIds = selectedRows.rows.map((r) => r.key).join(",");
-    onBatchDelete(
+    onDeleteItem(
       {
         url: `/api/panel/remove-items/${formattedPeriod}?ids=${itemIds}`,
         method: "delete",
@@ -317,13 +321,6 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     );
   };
 
-  const [searchText, setSearchText] = useState("");
-
-  const { data: itemSearchData } = useCustom<string[]>({
-    url: "/api/panel/item-complete",
-    method: "get",
-    config: { query: { description: searchText } },
-  });
   const onSearch = () => {
     setAutoCompleteOptions((itemSearchData?.data || []).map((r) => ({ value: r })));
   };

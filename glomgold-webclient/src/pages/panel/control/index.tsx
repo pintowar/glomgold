@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCustom, useGetIdentity } from "@refinedev/core";
 
-import { Row, Col } from "antd";
+import { Row, Col, Spin } from "antd";
 import dayjs from "dayjs";
 
 import { IItem } from "../../../interfaces";
@@ -63,7 +63,7 @@ export const ControlPanel: React.FC = () => {
   }));
 
   return (
-    <>
+    <Spin spinning={isLoading}>
       <div className="card-row">
         <Row gutter={[24, 24]}>
           <Col span={12}>
@@ -97,6 +97,6 @@ export const ControlPanel: React.FC = () => {
           </Col>
         </Row>
       </div>
-    </>
+    </Spin>
   );
 };
