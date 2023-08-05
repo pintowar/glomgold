@@ -12,7 +12,7 @@ import {
   MonthItemsCard,
   MonthStatsCard,
   PanelItem,
-} from "../components/control";
+} from "../../../components/panel/control";
 import { useGetIdentity } from "@refinedev/core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../../constants";
 import { axiosInstance } from "../../../authProvider";

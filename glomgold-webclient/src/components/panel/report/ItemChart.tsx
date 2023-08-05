@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { ColorModeContext } from "../../../../contexts/color-mode";
+import { ColorModeContext } from "../../../contexts/color-mode";
 import { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts";
 

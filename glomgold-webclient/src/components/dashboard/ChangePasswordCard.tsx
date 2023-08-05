@@ -1,37 +1,11 @@
-import React, { useMemo } from "react";
-
-import { useApiUrl, useCustom } from "@refinedev/core";
+import React from "react";
+import { useApiUrl } from "@refinedev/core";
+import { axiosInstance } from "../../authProvider";
+import { Button, Card, Form, Input, notification, Select } from "antd";
 import { useSelect } from "@refinedev/antd";
-import { Form, Input, Button, Select, Row, Col, Card, Space, notification } from "antd";
-import { IUser } from "../interfaces";
+import { IUser } from "../../interfaces";
 
-import { axiosInstance } from "../authProvider";
-
-const ManagementInfoCard: React.FC = () => {
-  const { data } = useCustom({
-    url: `/api/management/info`,
-    method: "get",
-  });
-
-  const appInfo = useMemo(() => {
-    const branch = data?.data?.git?.branch;
-    const version = data?.data?.git?.build?.version;
-    return { branch, version };
-  }, [data]);
-
-  return (
-    <Card title="Management Info" style={{ height: "300px", borderRadius: "15px" }} headStyle={{ textAlign: "center" }}>
-      <Space align="center" direction="horizontal">
-        <ul>
-          <li>Branch: {appInfo.branch}</li>
-          <li>Version: {appInfo.version}</li>
-        </ul>
-      </Space>
-    </Card>
-  );
-};
-
-const ChangePasswordCard: React.FC = () => {
+export const ChangePasswordCard: React.FC = () => {
   const apiUrl = useApiUrl();
 
   const onFinish = async (values: PasswordForm) => {
@@ -80,18 +54,5 @@ const ChangePasswordCard: React.FC = () => {
         </Form.Item>
       </Form>
     </Card>
-  );
-};
-
-export const DashboardPage: React.FC = () => {
-  return (
-    <Row gutter={20}>
-      <Col span={6}>
-        <ManagementInfoCard />
-      </Col>
-      <Col span={6}>
-        <ChangePasswordCard />
-      </Col>
-    </Row>
   );
 };

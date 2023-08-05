@@ -17,9 +17,9 @@ import { axiosInstance, authProvider } from "./authProvider";
 import { Header } from "./components/header";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 
-import { ItemList, ItemCreate, ItemEdit, ItemShow } from "./pages/items";
-import { UserList, UserCreate, UserEdit, UserShow } from "./pages/users";
-import { DashboardPage } from "./pages/dashboard";
+import { ItemList, ItemCreate, ItemEdit, ItemShow } from "./pages/admin/items";
+import { UserList, UserCreate, UserEdit, UserShow } from "./pages/admin/users";
+import { DashboardPage } from "./pages/admin/dashboard";
 
 import { Login } from "./pages/login";
 

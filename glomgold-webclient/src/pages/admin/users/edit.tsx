@@ -4,7 +4,7 @@ import { IResourceComponentsProps, useApiUrl, useCustom } from "@refinedev/core"
 import { Edit, useForm } from "@refinedev/antd";
 import { Form, Input, Checkbox, Select } from "antd";
 
-import { IUser } from "../../interfaces";
+import { IUser } from "../../../interfaces";
 
 export const UserEdit: React.FC<IResourceComponentsProps> = () => {
   const apiUrl = useApiUrl();

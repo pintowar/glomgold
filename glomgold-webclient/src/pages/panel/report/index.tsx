@@ -5,7 +5,7 @@ import { Row, Col, Card, Space, DatePicker, Tabs } from "antd";
 
 import dayjs from "dayjs";
 
-import { ItemChart, PeriodChart, SummaryTable } from "../components/report";
+import { ItemChart, PeriodChart, SummaryTable } from "../../../components/panel/report";
 import { IPanelAnnualReport } from "../../../interfaces";
 import { useGetIdentity } from "@refinedev/core";
 import { DEFAULT_LOCALE, DEFAULT_CURRENCY } from "../../../constants";

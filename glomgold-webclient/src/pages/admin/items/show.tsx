@@ -5,7 +5,7 @@ import { useShow, IResourceComponentsProps, useOne } from "@refinedev/core";
 import { Show } from "@refinedev/antd";
 import { Typography } from "antd";
 
-import { IItem, IUser } from "../../interfaces";
+import { IItem, IUser } from "../../../interfaces";
 
 const { Title, Text } = Typography;
 

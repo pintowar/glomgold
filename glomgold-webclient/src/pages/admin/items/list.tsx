@@ -16,7 +16,7 @@ import { Table, Space, Select, Row, Col, Form, Input, Button } from "antd";
 
 import { SearchOutlined } from "@ant-design/icons";
 
-import { IItem, IUser } from "../../interfaces";
+import { IItem, IUser } from "../../../interfaces";
 
 export const ItemList: React.FC<IResourceComponentsProps> = () => {
   const importProps = useImport<IItem>();

@@ -1,6 +1,6 @@
-import { IItem } from "../../../../interfaces";
+import { IItem } from "../../../interfaces";
 import React, { useContext } from "react";
-import { ColorModeContext } from "../../../../contexts/color-mode";
+import { ColorModeContext } from "../../../contexts/color-mode";
 import { Card } from "antd";
 import Chart from "react-apexcharts";
 

@@ -6,7 +6,7 @@ import { List, EditButton, DeleteButton, useTable, BooleanField } from "@refined
 import { Table, Space } from "antd";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 
-import { IUser } from "../../interfaces";
+import { IUser } from "../../../interfaces";
 
 export const UserList: React.FC<IResourceComponentsProps> = () => {
   const { tableProps } = useTable<IUser>({

@@ -4,7 +4,7 @@ import { IResourceComponentsProps } from "@refinedev/core";
 import { Edit, useForm, useSelect } from "@refinedev/antd";
 import { Form, Input, Select } from "antd";
 
-import { IItem, IUser } from "../../interfaces";
+import { IItem, IUser } from "../../../interfaces";
 
 export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
   const { formProps, saveButtonProps, queryResult } = useForm<IItem>({
