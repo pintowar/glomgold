@@ -1,16 +1,14 @@
-
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
     kotlin("plugin.allopen")
+    id("com.google.devtools.ksp")
+    id("com.github.johnrengelman.shadow")
     id("io.micronaut.application")
     id("io.micronaut.aot")
-    id("com.github.johnrengelman.shadow")
-    id("io.kotest")
     id("com.gorylenko.gradle-git-properties")
-    id("idea")
     id("glomgold.kotlin-liquibase")
     id("org.jlleitschuh.gradle.ktlint")
     id("org.sonarqube")
@@ -20,6 +18,7 @@ plugins {
 description = "Glomgold Web Server"
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -38,13 +37,13 @@ java {
 }
 
 dependencies {
-    kapt(libs.bundles.micronaut.kapt)
+    ksp(libs.bundles.micronaut.ksp)
 
     implementation(libs.bundles.kotlin)
     implementation(libs.bundles.kotlin.coroutines)
     implementation(libs.bundles.micronaut)
-    implementation(libs.jbcrypt)
     implementation(libs.kotlin.stats)
+    implementation(libs.jbcrypt)
 
     runtimeOnly(libs.logback.classic)
     runtimeOnly(libs.bundles.postgresql)
@@ -53,6 +52,8 @@ dependencies {
     compileOnly(libs.graalvm.svm)
     testImplementation(libs.bundles.testcontainers)
     testImplementation(libs.bundles.ktest)
+
+    aotPlugins(libs.bundles.micronaut.aot)
 
     // Should be declared in glomgold.kotlin-liquibase, but is not working
     liquibaseRuntime(libs.bundles.liquibase)
@@ -65,7 +66,7 @@ gitProperties {
 }
 
 application {
-    mainClass.set("com.github.pintowar.ApplicationKt")
+    mainClass.set("io.github.pintowar.glomgold.ApplicationKt")
     applicationDefaultJvmArgs = defaultJvmArgs
 }
 
@@ -87,13 +88,13 @@ tasks.jacocoTestReport {
 tasks {
 
     compileKotlin {
-        kotlinOptions {
-            jvmTarget = "17"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     compileTestKotlin {
-        kotlinOptions {
-            jvmTarget = "17"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
@@ -140,7 +141,7 @@ tasks {
     }
 
     register("coverageReport") {
-        dependsOn("kotest", "jacocoTestReport")
+        dependsOn("test", "jacocoTestReport")
         doLast {
             logger.quiet("Finishing Coverage Report!!")
         }
@@ -164,18 +165,22 @@ graalvmNative {
 
 micronaut {
     runtime("netty")
-    testRuntime("kotest")
+    testRuntime("kotest5")
     processing {
         incremental(true)
-        annotations("com.github.pintowar.*")
+        annotations("io.github.pintowar.glomgold.*")
     }
     aot {
-        optimizeServiceLoading.set(true)
-        // convertYamlToJava.set(true)
+    // Please review carefully the optimizations enabled below
+    // Check https://micronaut-projects.github.io/micronaut-aot/latest/guide/ for more details
+        optimizeServiceLoading.set(false)
+        convertYamlToJava.set(false)
         precomputeOperations.set(true)
         cacheEnvironment.set(true)
         optimizeClassLoading.set(true)
         deduceEnvironment.set(true)
+        optimizeNetty.set(true)
+        configurationProperties.put("micronaut.security.jwks.enabled","false")
     }
 }
 

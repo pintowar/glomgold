@@ -1,8 +1,8 @@
 package io.kotest.provided
 
-import com.github.pintowar.controller.AuthClient
-import com.github.pintowar.model.Item
-import com.github.pintowar.model.User
+import io.github.pintowar.glomgold.controller.AuthClient
+import io.github.pintowar.glomgold.model.Item
+import io.github.pintowar.glomgold.model.User
 import io.github.serpro69.kfaker.faker
 import io.micronaut.security.authentication.UsernamePasswordCredentials
 import java.math.RoundingMode
@@ -31,21 +31,21 @@ fun fakeUsers(): Map<String, User> {
             locale = Locale.US,
             timezone = ZoneId.of("UTC"),
             admin = true
-        ).apply { setPassword("admin") },
+        ).apply { applyPassword("admin") },
         User(
             username = "scrooge",
             name = "Scrooge McDuck",
             email = "scrooge@glomgold.com",
             locale = Locale.US,
             timezone = ZoneId.of("UTC"),
-        ).apply { setPassword("scrooge") },
+        ).apply { applyPassword("scrooge") },
         User(
             username = "donald",
             name = "Donald Duck",
             email = "donald@glomgold.com",
             locale = Locale("pt", "BR"),
             timezone = ZoneId.of("America/Fortaleza")
-        ).apply { setPassword("donald") }
+        ).apply { applyPassword("donald") }
     ).associateBy { it.username }
 }
 

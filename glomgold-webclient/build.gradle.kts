@@ -10,7 +10,7 @@ description = "Glomgold Web Client"
 project.buildDir = file("dist")
 
 node {
-    version.set("16.15.1")
+    version.set("18.17.0")
     download.set(true)
 }
 
@@ -55,6 +55,6 @@ sonarqube {
         val lcovReportPath = "${projectDir.absolutePath}/coverage/"
         property("sonar.sources", "src")
         property("sonar.tests", "cypress")
-        property("sonar.typescript.lcov.reportPaths", "$lcovReportPath/lcov.info")
+        property("sonar.javascript.lcov.reportPaths", "$lcovReportPath/lcov.info")
     }
 }

@@ -1,9 +1,9 @@
 [versions]
-kotlin = "1.7.10"
-kotlin-coroutines = "1.6.4"
-micronaut-gradle = "3.5.3"
-kotest-gradle = "0.3.9"
-git-gradle = "2.4.0"
+kotlin = "1.8.22"
+kotlin-coroutines = "1.7.2"
+ksp = "1.9.0-1.0.11"
+micronaut-gradle = "4.0.2"
+git-gradle = "2.4.1"
 liquibase-gradle = "2.1.1"
 
 [libraries]
@@ -12,15 +12,15 @@ gradleplugin-kotlin-allopen = { module = "org.jetbrains.kotlin:kotlin-allopen", 
 #gradleplugin-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "kotlin" }
 gradleplugin-micronaut = { module = "io.micronaut.gradle:micronaut-gradle-plugin", version.ref = "micronaut-gradle" }
 gradleplugin-micronaut-aot = { module = "io.micronaut.gradle:micronaut-aot-plugin", version.ref = "micronaut-gradle" }
-gradleplugin-shadow = { module = "gradle.plugin.com.github.johnrengelman:shadow", version = "7.1.2" }
-gradleplugin-kotest = { module = "io.kotest:kotest-gradle-plugin", version.ref = "kotest-gradle" }
+gradleplugin-shadow = { module = "com.github.johnrengelman:shadow", version = "8.1.1" }
+gradleplugin-ksp-gradle = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
 gradleplugin-git-properties = { module = "com.gorylenko.gradle-git-properties:gradle-git-properties", version.ref = "git-gradle" }
 gradleplugin-liquibase = { module = "org.liquibase:liquibase-gradle-plugin", version.ref = "liquibase-gradle" }
-gradleplugin-yaml = { module = "org.yaml:snakeyaml", version = "1.30" }
-gradleplugin-node = { module = "com.github.node-gradle:gradle-node-plugin", version = "3.1.1" }
-gradleplugin-release = { module = "net.researchgate:gradle-release", version = "2.8.1" }
+gradleplugin-yaml = { module = "org.yaml:snakeyaml", version = "2.0" }
+gradleplugin-node = { module = "com.github.node-gradle:gradle-node-plugin", version = "5.0.0" }
+gradleplugin-release = { module = "net.researchgate:gradle-release", version = "3.0.2" }
 gradleplugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version = "10.2.1" }
-gradleplugin-sonarqube = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version = "3.3" }
+gradleplugin-sonarqube = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version = "4.3.0.3225" }
 
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
@@ -32,12 +32,16 @@ kotlin-logging = { module = "io.github.microutils:kotlin-logging-jvm", version =
 micronaut-http-validation = { module = "io.micronaut:micronaut-http-validation" }
 micronaut-data-processor = { module = "io.micronaut.data:micronaut-data-processor" }
 micronaut-security-annotations = { module = "io.micronaut.security:micronaut-security-annotations" }
+micronaut-validation-processor = { module = "io.micronaut.validation:micronaut-validation-processor" }
+micronaut-micrometer-annotation = { module = "io.micronaut.micrometer:micronaut-micrometer-annotation" }
+
+micronaut-security-aot = { module = "io.micronaut.security:micronaut-security-aot" }
 
 micronaut-http-client = { module = "io.micronaut:micronaut-http-client" }
 micronaut-jackson = { module = "io.micronaut:micronaut-jackson-databind" }
 micronaut-management = { module = "io.micronaut:micronaut-management" }
 micronaut-runtime = { module = "io.micronaut:micronaut-runtime" }
-micronaut-validation = { module = "io.micronaut:micronaut-validation" }
+micronaut-validation = { module = "io.micronaut.validation:micronaut-validation" }
 micronaut-data-r2dbc = { module = "io.micronaut.data:micronaut-data-r2dbc" }
 micronaut-jdbc-hikari = { module = "io.micronaut.sql:micronaut-jdbc-hikari" }
 micronaut-kotlin-runtime = { module = "io.micronaut.kotlin:micronaut-kotlin-runtime" }
@@ -45,7 +49,8 @@ micronaut-liquibase = { module = "io.micronaut.liquibase:micronaut-liquibase" }
 micronaut-micrometer-core = { module = "io.micronaut.micrometer:micronaut-micrometer-core" }
 micronaut-security-jwt = { module = "io.micronaut.security:micronaut-security-jwt" }
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api" }
-jakarta-persistence-api = { module = "jakarta.persistence:jakarta.persistence-api", version = "3.0.0" }
+jakarta-persistence-api = { module = "jakarta.persistence:jakarta.persistence-api" }
+jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api" }
 
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
 logback-classic = { module = "ch.qos.logback:logback-classic" }
@@ -69,14 +74,19 @@ liquibase-hibernate = { module = "org.liquibase.ext:liquibase-hibernate5", versi
 
 test-faker = { module = "io.github.serpro69:kotlin-faker", version = "1.10.0" }
 test-mockk = { module = "io.mockk:mockk", version = "1.12.3" }
-test-kotest-dataset = { module = "io.kotest:kotest-framework-datatest", version = "4.6.4" }
+test-kotest-dataset = { module = "io.kotest:kotest-framework-datatest", version = "5.6.2" }
 
 [bundles]
-micronaut-kapt = ["micronaut-http-validation", "micronaut-data-processor", "micronaut-security-annotations"]
+micronaut-aot = ["micronaut-security-aot"]
+micronaut-ksp = [
+    "micronaut-http-validation", "micronaut-data-processor", "micronaut-security-annotations",
+    "micronaut-validation-processor", "micronaut-micrometer-annotation"
+]
 micronaut = [
     "micronaut-http-client", "micronaut-jackson", "micronaut-management", "micronaut-runtime", "micronaut-validation",
     "micronaut-kotlin-runtime", "micronaut-data-r2dbc", "micronaut-jdbc-hikari", "micronaut-liquibase",
-    "micronaut-micrometer-core", "jakarta-annotation-api", "jakarta-persistence-api", "micronaut-security-jwt"
+    "micronaut-micrometer-core", "jakarta-annotation-api", "jakarta-persistence-api", "jakarta-validation-api",
+    "micronaut-security-jwt"
 ]
 kotlin = ["kotlin-reflect", "kotlin-stdlib", "kotlin-logging"]
 kotlin-coroutines = ["kotlin-coroutines-core", "kotlin-coroutines-reactive", "kotlin-coroutines-reactor"]

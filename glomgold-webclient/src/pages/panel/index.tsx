@@ -1,3 +1,3 @@
-export * from "./control";
-export * from "./report";
-export * from "./profile";
+export { ControlPanel } from "./control";
+export { ReportPanel } from "./report";
+export { ProfilePanel } from "./profile";
