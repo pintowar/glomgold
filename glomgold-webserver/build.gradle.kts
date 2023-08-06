@@ -25,8 +25,11 @@ repositories {
 val defaultJavaLang = JavaLanguageVersion.of(17)
 val defaultJavaVendor = JvmVendorSpec.matching("GraalVM Community")
 val defaultJvmArgs = listOf(
-    "-Dmicronaut.environments=dev", "-Duser.timezone=UTC", "-Duser.language=en",
-    "-Duser.region=US", "-Djava.security.egd=file:/dev/./urandom"
+    "-Dmicronaut.environments=dev",
+    "-Duser.timezone=UTC",
+    "-Duser.language=en",
+    "-Duser.region=US",
+    "-Djava.security.egd=file:/dev/./urandom"
 )
 
 java {
@@ -171,8 +174,8 @@ micronaut {
         annotations("io.github.pintowar.glomgold.*")
     }
     aot {
-    // Please review carefully the optimizations enabled below
-    // Check https://micronaut-projects.github.io/micronaut-aot/latest/guide/ for more details
+        // Please review carefully the optimizations enabled below
+        // Check https://micronaut-projects.github.io/micronaut-aot/latest/guide/ for more details
         optimizeServiceLoading.set(false)
         convertYamlToJava.set(false)
         precomputeOperations.set(true)
@@ -180,7 +183,7 @@ micronaut {
         optimizeClassLoading.set(true)
         deduceEnvironment.set(true)
         optimizeNetty.set(true)
-        configurationProperties.put("micronaut.security.jwks.enabled","false")
+        configurationProperties.put("micronaut.security.jwks.enabled", "false")
     }
 }
 

@@ -11,9 +11,8 @@ import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 import java.time.YearMonth
 
-
 @Indexes(
-    Index(name = "item_period_user", columns = ["period", "user_id"]),
+    Index(name = "item_period_user", columns = ["period", "user_id"])
 )
 @MappedEntity(value = "items", namingStrategy = UnderScoreSeparatedLowerCase::class)
 data class Item(

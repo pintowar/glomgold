@@ -5,7 +5,6 @@ import io.github.pintowar.glomgold.dto.RefinePaginateQuery
 import io.github.pintowar.glomgold.dto.toCommand
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
-import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.datatest.withData
 import io.kotest.matchers.collections.shouldHaveSize
@@ -27,7 +26,7 @@ import kotlinx.coroutines.runBlocking
 import java.math.BigDecimal
 import java.time.YearMonth
 
-//@ExperimentalKotest
+// @ExperimentalKotest
 @MicronautTest(transactional = false)
 class ItemControllerTest(
     private val userRepo: UserRepository,

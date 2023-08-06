@@ -16,7 +16,7 @@ export const ItemShow: React.FC<IResourceComponentsProps> = () => {
 
   const { data: userData, isLoading: userIsLoading } = useOne<IUser>({
     resource: "users",
-    id: record?.userId || "",
+    id: record?.userId ?? "",
     queryOptions: {
       enabled: !!record,
     },

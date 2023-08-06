@@ -12,13 +12,13 @@ import { DEFAULT_LOCALE, DEFAULT_CURRENCY } from "../../../constants";
 
 export const ReportPanel: React.FC = () => {
   const { data: identity } = useGetIdentity<{ locale: string; currency: string }>();
-  const locale = identity?.locale || DEFAULT_LOCALE;
-  const currency = identity?.currency || DEFAULT_CURRENCY;
+  const locale = identity?.locale ?? DEFAULT_LOCALE;
+  const currency = identity?.currency ?? DEFAULT_CURRENCY;
   const periodFormat = "YYYY";
   const periodParam = "period";
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const period = searchParams.get(periodParam) || dayjs().format(periodFormat);
+  const period = searchParams.get(periodParam) ?? dayjs().format(periodFormat);
   const currentPeriod = useMemo(() => dayjs(period, periodFormat), [period, periodFormat]);
 
   const { data: dataTable, isLoading } = useCustom<IPanelAnnualReport>({
@@ -40,12 +40,12 @@ export const ReportPanel: React.FC = () => {
           year={currentPeriod.format(periodFormat)}
           locale={locale}
           currency={currency}
-          columns={dataTable?.data.columns || []}
-          rowIndex={dataTable?.data.rowIndex || []}
-          data={dataTable?.data.data || []}
-          rowSummary={dataTable?.data.rowSummary || []}
-          colSummary={dataTable?.data.colSummary || []}
-          total={dataTable?.data.total || 0}
+          columns={dataTable?.data.columns ?? []}
+          rowIndex={dataTable?.data.rowIndex ?? []}
+          data={dataTable?.data.data ?? []}
+          rowSummary={dataTable?.data.rowSummary ?? []}
+          colSummary={dataTable?.data.colSummary ?? []}
+          total={dataTable?.data.total ?? 0}
         />
       ),
     },
@@ -55,15 +55,15 @@ export const ReportPanel: React.FC = () => {
       children: (
         <Space direction="vertical" size={12} style={{ width: "100%" }}>
           <PeriodChart
-            cols={dataTable?.data.columns || []}
-            data={dataTable?.data.rowSummary || []}
-            trend={dataTable?.data.rowTrend || []}
+            cols={dataTable?.data.columns ?? []}
+            data={dataTable?.data.rowSummary ?? []}
+            trend={dataTable?.data.rowTrend ?? []}
             locale={locale}
             currency={currency}
           />
           <ItemChart
-            cols={dataTable?.data.rowIndex || []}
-            data={dataTable?.data.colAverage || []}
+            cols={dataTable?.data.rowIndex ?? []}
+            data={dataTable?.data.colAverage ?? []}
             locale={locale}
             currency={currency}
           />

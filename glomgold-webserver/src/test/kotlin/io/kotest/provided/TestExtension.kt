@@ -37,7 +37,7 @@ fun fakeUsers(): Map<String, User> {
             name = "Scrooge McDuck",
             email = "scrooge@glomgold.com",
             locale = Locale.US,
-            timezone = ZoneId.of("UTC"),
+            timezone = ZoneId.of("UTC")
         ).apply { applyPassword("scrooge") },
         User(
             username = "donald",

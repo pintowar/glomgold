@@ -10,9 +10,9 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.micronaut.data.event.PersistenceEventException
 import io.micronaut.test.extensions.kotest5.annotation.MicronautTest
+import jakarta.validation.ConstraintViolationException
 import java.math.BigDecimal
 import java.time.YearMonth
-import jakarta.validation.ConstraintViolationException
 
 @MicronautTest(transactional = false)
 class UserRepositoryTest(

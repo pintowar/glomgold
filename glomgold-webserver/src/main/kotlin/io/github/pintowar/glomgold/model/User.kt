@@ -6,14 +6,14 @@ import io.micronaut.data.annotation.MappedEntity
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
 import io.micronaut.data.model.naming.NamingStrategies.UnderScoreSeparatedLowerCase
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import mu.KLogging
 import org.mindrot.jbcrypt.BCrypt
 import java.security.SecureRandom
 import java.time.ZoneId
 import java.util.*
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
 
 @Indexes(
     Index(name = "user_username", columns = ["username"], unique = true),
@@ -29,7 +29,8 @@ data class User(
     var admin: Boolean = false,
     @field:NotNull var locale: Locale = Locale.getDefault(),
     @field:TypeDef(type = DataType.STRING)
-    @field:NotNull var timezone: ZoneId = ZoneId.systemDefault(),
+    @field:NotNull
+    var timezone: ZoneId = ZoneId.systemDefault()
 ) : Entity() {
 
     companion object : KLogging() {
@@ -37,8 +38,9 @@ data class User(
     }
 
     fun applyPassword(passwd: String) {
-        if (passwd != this.passwordHash)
+        if (passwd != this.passwordHash) {
             this.passwordHash = generatePasswordHash(passwd)
+        }
     }
 
     fun checkPassword(passwd: String): Boolean {

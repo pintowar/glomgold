@@ -72,15 +72,15 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({
       summary={() => (
         <Table.Summary fixed>
           <Table.Summary.Row>
-            <Table.Summary.Cell key={0} index={0}>
+            <Table.Summary.Cell key={"summary-total"} index={0}>
               <strong>Total</strong>
             </Table.Summary.Cell>
             {rowSummary.map((it, idx) => (
-              <Table.Summary.Cell key={idx + 1} index={idx}>
+              <Table.Summary.Cell key={`summary-${idx + 1}`} index={idx}>
                 {currencyFormat(it)}
               </Table.Summary.Cell>
             ))}
-            <Table.Summary.Cell key={rowSummary.length + 1} index={rowSummary.length + 1}>
+            <Table.Summary.Cell key={`summary-${rowSummary.length + 1}`} index={rowSummary.length + 1}>
               <strong>{currencyFormat(total)}</strong>
             </Table.Summary.Cell>
           </Table.Summary.Row>

@@ -28,7 +28,7 @@ export const PeriodChart: React.FC<PeriodChartProps> = ({ cols, data, trend, loc
     } as ApexOptions,
     series: [
       { name: "value", data: data.map((it) => (it !== 0 ? it : null)) },
-      { name: "trend", data: (trend || []).map((it) => (it !== 0 ? it : null)) },
+      { name: "trend", data: (trend ?? []).map((it) => (it !== 0 ? it : null)) },
     ],
   };
 

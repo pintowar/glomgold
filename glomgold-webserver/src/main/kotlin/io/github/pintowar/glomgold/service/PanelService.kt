@@ -50,9 +50,11 @@ class PanelService(private val itemRepository: ItemRepository) {
     suspend fun panelInfo(userId: Long, period: YearMonth): PanelInfo {
         val periodSummary = itemRepository.periodSummary(period, userId)
         val lastPeriodSummary = itemRepository.periodSummary(period.minusMonths(1), userId)
-        val diffSummary = if (periodSummary != null && lastPeriodSummary != null)
+        val diffSummary = if (periodSummary != null && lastPeriodSummary != null) {
             ((periodSummary.divide(lastPeriodSummary, MathContext(4, RoundingMode.HALF_UP))) - BigDecimal.ONE)
-        else BigDecimal.ZERO
+        } else {
+            BigDecimal.ZERO
+        }
 
         return PanelInfo(
             period,
@@ -65,14 +67,20 @@ class PanelService(private val itemRepository: ItemRepository) {
 
     fun nullableSum(a: BigDecimal?, b: BigDecimal?) = if (a == null) b else if (b == null) a else a + b
 
-    fun calcTrend(values: List<BigDecimal?>) = if (values.count { it != null } > 2)
-        simpleRegression(values) else mean(values)
+    fun calcTrend(values: List<BigDecimal?>) = if (values.count { it != null } > 2) {
+        simpleRegression(values)
+    } else {
+        mean(values)
+    }
 
     fun mean(values: List<BigDecimal?>) = values.filterNotNull()
         .let { valid ->
-            if (valid.isEmpty()) values.indices.map { BigDecimal.ZERO }
-            else valid.average().setScale(2, RoundingMode.HALF_DOWN)
-                .let { avg -> values.indices.map { avg } }
+            if (valid.isEmpty()) {
+                values.indices.map { BigDecimal.ZERO }
+            } else {
+                valid.average().setScale(2, RoundingMode.HALF_DOWN)
+                    .let { avg -> values.indices.map { avg } }
+            }
         }
 
     fun simpleRegression(values: List<BigDecimal?>) = values.withIndex()

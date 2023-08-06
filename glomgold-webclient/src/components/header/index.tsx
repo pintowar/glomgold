@@ -55,7 +55,13 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({ sticky }) =>
   }
 
   function menuKeyFromUrl(pathname: string): string {
-    return pathname.includes("report") ? "menu-report" : pathname.includes("profile") ? "menu-profile" : "menu-panel";
+    if (pathname.includes("report")) {
+      return "menu-report"
+    } else if (pathname.includes("profile")) {
+      return "menu-profile";
+    } else {
+      return "menu-panel";
+    }
   }
 
   return (
@@ -106,7 +112,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({ sticky }) =>
             <Dropdown menu={{ items: dropdownItems }}>
               <Space style={{ color: "white" }}>
                 <Text strong style={{ color: "white" }}>
-                  {user?.name || "Logged user"}
+                  {user?.name ?? "Logged user"}
                 </Text>
                 <DownOutlined />
               </Space>

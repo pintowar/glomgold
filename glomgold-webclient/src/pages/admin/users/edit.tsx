@@ -18,7 +18,7 @@ export const UserEdit: React.FC<IResourceComponentsProps> = () => {
   });
 
   const localeOptions = useMemo(() => {
-    return (locales?.data || []).map((it: string) => ({ label: it, value: it }));
+    return (locales?.data ?? []).map((it: string) => ({ label: it, value: it }));
   }, [locales]);
 
   const { data: timezones } = useCustom({
@@ -27,7 +27,7 @@ export const UserEdit: React.FC<IResourceComponentsProps> = () => {
   });
 
   const timezonesOptions = useMemo(() => {
-    return (timezones?.data || []).map((it: string) => ({ label: it, value: it }));
+    return (timezones?.data ?? []).map((it: string) => ({ label: it, value: it }));
   }, [timezones]);
 
   return (

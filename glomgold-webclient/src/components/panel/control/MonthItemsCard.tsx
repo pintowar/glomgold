@@ -322,7 +322,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   };
 
   const onSearch = () => {
-    setAutoCompleteOptions((itemSearchData?.data || []).map((r) => ({ value: r })));
+    setAutoCompleteOptions((itemSearchData?.data ?? []).map((r) => ({ value: r })));
   };
 
   const columns = [

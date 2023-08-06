@@ -46,11 +46,11 @@ export class LocalStorage {
   }
 
   public getToken(): string {
-    return localStorage.getItem(TOKEN_KEY) || "";
+    return localStorage.getItem(TOKEN_KEY) ?? "";
   }
 
   public getUser(): StorageUser {
-    return JSON.parse(localStorage.getItem(USER_KEY) || "{}");
+    return JSON.parse(localStorage.getItem(USER_KEY) ?? "{}");
   }
 
   public isLoggedIn(): boolean {

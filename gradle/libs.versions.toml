@@ -19,7 +19,7 @@ gradleplugin-liquibase = { module = "org.liquibase:liquibase-gradle-plugin", ver
 gradleplugin-yaml = { module = "org.yaml:snakeyaml", version = "2.0" }
 gradleplugin-node = { module = "com.github.node-gradle:gradle-node-plugin", version = "5.0.0" }
 gradleplugin-release = { module = "net.researchgate:gradle-release", version = "3.0.2" }
-gradleplugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version = "10.2.1" }
+gradleplugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version = "11.5.0" }
 gradleplugin-sonarqube = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version = "4.3.0.3225" }
 
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }

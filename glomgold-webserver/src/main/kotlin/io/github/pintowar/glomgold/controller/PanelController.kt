@@ -34,21 +34,25 @@ class PanelController(
     }
 
     @Post("/profile/password")
-    suspend fun profilePassword(auth: Authentication, passwords: ChangePassword): HttpResponse<Void> {
+    suspend fun profilePassword(auth: Authentication, passwords: ChangePassword): HttpResponse<Unit> {
         return userRepository.findById(authId(auth)).let { user ->
             if (user?.checkPassword(passwords.actualPassword) == true) {
                 userRepository.update(user.apply { applyPassword(passwords.newPassword) })
                 HttpResponse.ok()
-            } else HttpResponse.notModified()
+            } else {
+                HttpResponse.notModified()
+            }
         }
     }
 
     @Get("/item-complete{?description}")
     suspend fun itemComplete(auth: Authentication, @QueryValue description: String?): List<String> {
         val desc = if (description != null) "$description%" else ""
-        return if (desc.isNotEmpty())
+        return if (desc.isNotEmpty()) {
             itemRepository.findDistinctDescriptionByUserIdAndDescriptionIlike(authId(auth), desc)
-        else emptyList()
+        } else {
+            emptyList()
+        }
     }
 
     @Post("/add-item")
@@ -74,8 +78,9 @@ class PanelController(
     @Delete("/remove-items/{period}{?ids}")
     suspend fun removeItems(auth: Authentication, @PathVariable period: YearMonth, @QueryValue ids: List<Long>?) =
         itemRepository.findByIdInAndPeriodAndUserId(ids ?: emptyList(), period, authId(auth)).toList().let { items ->
-            if (items.isEmpty()) HttpResponse.notFound()
-            else {
+            if (items.isEmpty()) {
+                HttpResponse.notFound()
+            } else {
                 itemRepository.deleteAll(items)
                 HttpResponse.ok(panelService.panelInfo(authId(auth), period))
             }

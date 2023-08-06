@@ -45,7 +45,7 @@ function App() {
                 const roles = LocalStorage.getInstance().getUserRoles();
 
                 const isAdmin = roles.includes("ROLE_ADMIN");
-                const isAdminResource = ["dashboard", "users", "items"].includes(resource || "");
+                const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
                 const cond = !(!isAdmin && isAdminResource);
                 return { can: cond };
               },

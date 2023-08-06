@@ -9,13 +9,13 @@ import io.micronaut.data.model.Pageable
 import io.micronaut.data.model.Sort
 import io.micronaut.http.HttpRequest
 import io.micronaut.http.annotation.QueryValue
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
 
 @Introspected
 data class ItemSummary(
@@ -50,7 +50,7 @@ data class PanelInfo(
     val items: List<Item>,
     val stats: List<ItemSummary>,
     val total: BigDecimal,
-    val diff: BigDecimal,
+    val diff: BigDecimal
 )
 
 @Introspected
@@ -62,7 +62,7 @@ data class PanelAnnualReport(
     val rowTrend: List<BigDecimal>,
     val colSummary: List<BigDecimal?>,
     val colAverage: List<BigDecimal?>,
-    val total: BigDecimal,
+    val total: BigDecimal
 )
 
 @Introspected
@@ -71,7 +71,7 @@ data class RefinePaginateQuery(
     @field:QueryValue("_start", defaultValue = "0") val start: Int,
     @field:QueryValue("_end", defaultValue = "25") val end: Int,
     @field:QueryValue("_sort", defaultValue = "id") val sort: String,
-    @field:QueryValue("_order", defaultValue = "ASC") val order: String,
+    @field:QueryValue("_order", defaultValue = "ASC") val order: String
 ) {
     fun paginate(): Pageable {
         val asc = "asc" == order.trim().lowercase()
@@ -103,7 +103,13 @@ data class ItemCommand(
 }
 
 fun Item.toCommand() = ItemCommand(
-    this.id, this.version, this.description, this.value.toDouble(), this.period.year, this.period.monthValue, this.userId
+    this.id,
+    this.version,
+    this.description,
+    this.value.toDouble(),
+    this.period.year,
+    this.period.monthValue,
+    this.userId
 )
 
 @Introspected

@@ -60,7 +60,7 @@ class SeedInitializer(
         User(
             username = "scrooge",
             name = "Scrooge McDuck",
-            email = "scrooge@glomgold.com",
+            email = "scrooge@glomgold.com"
         ).apply { applyPassword("123123") },
         User(
             username = "donald",
@@ -84,7 +84,7 @@ class SeedInitializer(
             Pair("Nightlife", 700),
             Pair("Security", 800),
             Pair("Presents", 300),
-            Pair("Other services", 800),
+            Pair("Other services", 800)
         )
         return (0..3).flatMap { extraMonth ->
             items.filter { random.nextDouble() >= 0.3 }.map { (desc, value) ->

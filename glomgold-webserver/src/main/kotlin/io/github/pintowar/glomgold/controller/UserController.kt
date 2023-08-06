@@ -21,7 +21,7 @@ class UserController(private val userRepository: UserRepository) :
     fun timezones(): HttpResponse<List<String>> = HttpResponse.ok(ZoneId.getAvailableZoneIds().sorted())
 
     @Patch("/{id}/password")
-    suspend fun password(@PathVariable id: Long, @Body dto: Map<String, String>): HttpResponse<Void> {
+    suspend fun password(@PathVariable id: Long, @Body dto: Map<String, String>): HttpResponse<Unit> {
         return userRepository.findById(id)?.let { user ->
             userRepository
                 .update(user.apply { applyPassword(dto.getValue("password")) })

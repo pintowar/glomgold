@@ -3,7 +3,6 @@ package io.github.pintowar.glomgold.conf
 import io.micronaut.context.annotation.Factory
 import io.micronaut.core.convert.TypeConverter
 import jakarta.inject.Singleton
-import java.math.BigDecimal
 import java.time.Instant
 import java.time.YearMonth
 import java.time.ZoneId
@@ -58,5 +57,4 @@ class TypeConverters {
             Optional.of(YearMonth.parse(obj))
         }
     }
-
 }
