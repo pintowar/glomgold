@@ -229,10 +229,10 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           },
         },
         {
-          onSuccess: async () => {
+          onSuccess: () => {
             addForm.resetFields();
             descInputRef.current?.focus();
-            await invalidateQuery(formattedPeriod);
+            invalidateQuery(formattedPeriod);
           },
         }
       );
@@ -255,7 +255,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           },
         },
         {
-          onSuccess: async () => await invalidateQuery(formattedPeriod),
+          onSuccess: () => invalidateQuery(formattedPeriod),
           onSettled: () => setEditingKey(""),
         }
       );
@@ -273,9 +273,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         values: {},
       },
       {
-        onSuccess: async () => {
-          await invalidateQuery(formattedPeriod);
-          addForm.resetFields();
+        onSuccess: () => {
+          invalidateQuery(formattedPeriod)
+          .then(() => addForm.resetFields());
         },
       }
     );
@@ -316,7 +316,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         values: {},
       },
       {
-        onSuccess: async () => invalidateQuery(formattedPeriod),
+        onSuccess: () => invalidateQuery(formattedPeriod),
       }
     );
   };
