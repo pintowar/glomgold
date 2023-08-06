@@ -38,7 +38,7 @@ class SeedInitializer(
             runBlocking {
                 val allItems = genUsers()
                     .filter { userRepo.findByUsername(it.username) == null }
-                    .filter { !(isProd && !withSample) || it.admin } // if (isProd && !withSample) it.admin else true
+                    .filter { !(isProd && !withSample) || it.admin }
                     .map { userRepo.save(it) }
                     .filterNot { it.admin }
                     .flatMap { user ->
