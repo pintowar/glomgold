@@ -255,7 +255,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           },
         },
         {
-          onSuccess: () => invalidateQuery(formattedPeriod),
+          onSuccess: () => {
+            invalidateQuery(formattedPeriod);
+          },
           onSettled: () => setEditingKey(""),
         }
       );
@@ -274,8 +276,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       },
       {
         onSuccess: () => {
-          invalidateQuery(formattedPeriod)
-          .then(() => addForm.resetFields());
+          invalidateQuery(formattedPeriod).then(() => addForm.resetFields());
         },
       }
     );
@@ -316,7 +317,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         values: {},
       },
       {
-        onSuccess: () => invalidateQuery(formattedPeriod),
+        onSuccess: () => {
+          invalidateQuery(formattedPeriod);
+        },
       }
     );
   };

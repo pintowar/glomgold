@@ -56,7 +56,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({ sticky }) =>
 
   function menuKeyFromUrl(pathname: string): string {
     if (pathname.includes("report")) {
-      return "menu-report"
+      return "menu-report";
     } else if (pathname.includes("profile")) {
       return "menu-profile";
     } else {
