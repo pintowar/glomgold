@@ -203,6 +203,7 @@ sonarqube {
         val jacocoReportPath = "${buildDir.absolutePath}/reports/jacoco/test"
         property("sonar.sources", "src/main/kotlin")
         property("sonar.tests", "src/test/kotlin")
+        property("sonar.exclusions", "src/**/Application.kt,src/**/SeedInitializer.kt")
         property("sonar.coverage.jacoco.xmlReportPaths", "$jacocoReportPath/jacocoTestReport.xml")
     }
 }

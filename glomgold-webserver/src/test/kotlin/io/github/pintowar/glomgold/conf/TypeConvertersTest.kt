@@ -40,4 +40,30 @@ class TypeConvertersTest : StringSpec({
             res shouldBe YearMonth.of(year, month)
         }
     }
+
+    "periodStringTypeConverter" {
+        val converter = conversor.periodStringTypeConverter()
+
+        forAll(
+            row(2022, 2, "2022-02"),
+            row(2020, 5, "2020-05"),
+            row(2021, 1, "2021-01")
+        ) { year, month, expected ->
+            val res = converter.convert(YearMonth.of(year, month), String::class.java).get()
+            res shouldBe expected
+        }
+    }
+
+    "stringPeriodTypeConverter" {
+        val converter = conversor.stringPeriodTypeConverter()
+
+        forAll(
+            row("2022-02", 2022, 2),
+            row("2020-05", 2020, 5),
+            row("2021-01", 2021, 1)
+        ) { expected, year, month ->
+            val res = converter.convert(expected, YearMonth::class.java).get()
+            res shouldBe YearMonth.of(year, month)
+        }
+    }
 })

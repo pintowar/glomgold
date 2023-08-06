@@ -26,7 +26,6 @@ import kotlinx.coroutines.runBlocking
 import java.math.BigDecimal
 import java.time.YearMonth
 
-// @ExperimentalKotest
 @MicronautTest(transactional = false)
 class ItemControllerTest(
     private val userRepo: UserRepository,
@@ -40,12 +39,6 @@ class ItemControllerTest(
     beforeSpec {
         userRepo.deleteAll()
         userRepo.save(fakeUsers().getValue(testUsername))
-    }
-
-    beforeEach {
-        runBlocking {
-            itemRepo.deleteAll()
-        }
     }
 
     describe("paginate 25 items") {
