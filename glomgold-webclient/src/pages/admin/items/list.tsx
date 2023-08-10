@@ -12,9 +12,9 @@ import {
   useTable,
   useSelect,
 } from "@refinedev/antd";
-import { Table, Space, Select, Row, Col, Form, Input, Button } from "antd";
+import { Table, Space, Select, Row, Col, Form, Input, Button, Tooltip, } from "antd";
 
-import { SearchOutlined } from "@ant-design/icons";
+import { DollarOutlined, SearchOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 
 import { IItem, IUser } from "../../../interfaces";
 
@@ -81,6 +81,15 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
         >
           <Table {...tableProps} rowKey="id">
             <Table.Column dataIndex="id" title="ID" />
+            <Table.Column 
+              dataIndex="itemType" 
+              title="Type"
+              render={(value) => (
+                <Tooltip placement="left" title={value}>
+                  {value == "EXPENSE" ? <ShoppingCartOutlined/> : <DollarOutlined/>}
+                </Tooltip>
+              )}
+            />
             <Table.Column dataIndex="description" title="Description" />
             <Table.Column dataIndex="value" title="Value" />
             <Table.Column dataIndex="year" title="Year" />
