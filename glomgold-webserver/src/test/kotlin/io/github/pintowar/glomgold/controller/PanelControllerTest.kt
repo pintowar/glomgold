@@ -4,6 +4,7 @@ import io.github.pintowar.glomgold.dto.ItemBody
 import io.github.pintowar.glomgold.dto.PanelAnnualReport
 import io.github.pintowar.glomgold.dto.PanelInfo
 import io.github.pintowar.glomgold.model.Item
+import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
@@ -87,21 +88,22 @@ class PanelControllerTest(
         afterEach { itemRepo.deleteAll() }
 
         it("adding item") {
-            val addedItem = ItemBody(actualPeriod, "Some Item", BigDecimal("9.99"))
+            val addedItem = ItemBody(actualPeriod, "Some Item", BigDecimal("9.99"), ItemType.EXPENSE)
             val result = panelClient.addItem(token, addedItem)
 
             result.body.get().period shouldBe actualPeriod
             result.body.get().items.first().also {
                 it.description shouldBe addedItem.description
                 it.value shouldBe addedItem.value
+                it.itemType shouldBe ItemType.EXPENSE
                 it.period shouldBe addedItem.period
                 it.userId shouldBe userId
             }
         }
 
         it("edit item") {
-            val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), actualPeriod, userId))
-            val editedItem = ItemBody(actualPeriod, "Other description", BigDecimal("19.99"))
+            val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId))
+            val editedItem = ItemBody(actualPeriod, "Other description", BigDecimal("19.99"), ItemType.EXPENSE)
             val result = panelClient.editItem(token, item.id!!, editedItem)
 
             result.body.get().period shouldBe actualPeriod
@@ -114,22 +116,22 @@ class PanelControllerTest(
         }
 
         it("invalid edit item") {
-            val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), actualPeriod, userId))
-            val editedItem = ItemBody(actualPeriod, "Other description", BigDecimal("19.99"))
+            val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId))
+            val editedItem = ItemBody(actualPeriod, "Other description", BigDecimal("19.99"), ItemType.EXPENSE)
             val result = panelClient.editItem(token, item.id!! + 1, editedItem) // non existent id
 
             result.status shouldBe HttpStatus.NOT_FOUND
         }
 
         it("remove item") {
-            val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), actualPeriod, userId))
+            val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId))
             val result = panelClient.removeItem(token, item.id!!)
 
             result.body.get().items shouldBe emptyList()
         }
 
         it("invalid remove item") {
-            val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), actualPeriod, userId))
+            val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId))
             val result = panelClient.removeItem(token, item.id!! + 1) // non existent id
 
             result.status shouldBe HttpStatus.NOT_FOUND
@@ -149,7 +151,9 @@ class PanelControllerTest(
             }
             itemRepo.saveAll(nextItems).collect()
 
-            val result = panelClient.copyItems(token, actualItems.map { ItemBody(it.period, it.description, it.value) })
+            val result = panelClient.copyItems(token, actualItems.map {
+                ItemBody(it.period, it.description, it.value, ItemType.EXPENSE)
+            })
 
             result.body.get().size shouldBe (totalItems - totalItemsNextMonth)
             result.body.get().count { it.value < BigDecimal(400) } shouldBe 0

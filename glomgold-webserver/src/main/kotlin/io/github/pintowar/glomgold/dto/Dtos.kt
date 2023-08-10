@@ -1,6 +1,7 @@
 package io.github.pintowar.glomgold.dto
 
 import io.github.pintowar.glomgold.model.Item
+import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.data.annotation.TypeDef
@@ -21,6 +22,7 @@ import java.util.*
 data class ItemSummary(
     @field:TypeDef(type = DataType.TIMESTAMP) val period: YearMonth,
     val description: String,
+    val itemType: ItemType,
     val value: BigDecimal
 )
 
@@ -34,11 +36,13 @@ data class ChangePassword(
 data class ItemBody(
     val period: YearMonth,
     val description: String,
-    val value: BigDecimal
+    val value: BigDecimal,
+    val itemType: ItemType,
 ) {
     fun toItem(userId: Long) = Item(
         description,
         value,
+        itemType,
         period,
         userId
     )
@@ -90,12 +94,13 @@ data class ItemCommand(
     val version: Int? = null,
     @field:NotBlank val description: String,
     @field:NotNull val value: Double,
+    @field:NotNull val itemType: ItemType,
     @field:NotNull val year: Int,
     @field:NotNull val month: Int,
     @field:NotNull val userId: Long
 ) {
 
-    fun toItem() = Item(description, BigDecimal.valueOf(value), YearMonth.of(year, month), userId)
+    fun toItem() = Item(description, BigDecimal.valueOf(value), itemType, YearMonth.of(year, month), userId)
         .apply {
             id = this@ItemCommand.id
             version = this@ItemCommand.version
@@ -107,6 +112,7 @@ fun Item.toCommand() = ItemCommand(
     this.version,
     this.description,
     this.value.toDouble(),
+    this.itemType,
     this.period.year,
     this.period.monthValue,
     this.userId

@@ -2,6 +2,7 @@ package io.github.pintowar.glomgold.repo
 
 import io.github.pintowar.glomgold.dto.ItemSummary
 import io.github.pintowar.glomgold.model.Item
+import io.github.pintowar.glomgold.model.ItemType
 import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.Query
 import io.micronaut.data.annotation.Version
@@ -24,22 +25,25 @@ interface ItemRepository : EntityRepository<Item, Long> {
 
     @Query(
         """
-        SELECT i.period, i.description, sum(i.value) as value
+        SELECT 
+            i.period, i.description, i.item_type, 
+            sum(case when i.item_type = 'EXPENSE' THEN -i.value ELSE i.value END) as value
         FROM items i
         WHERE i.period = :period AND i.user_id = :userId
-        GROUP BY i.period, i.description
-        ORDER BY i.description
+        GROUP BY i.period, i.description, i.item_type
+        ORDER BY i.item_type, i.description
         """
     )
     fun monthSummary(period: YearMonth, userId: Long): Flow<ItemSummary>
 
     @Query(
         """
-        SELECT i.period, i.description, sum(i.value) as value
+        SELECT 
+            i.period, i.description, i.item_type, sum(i.value) as value
         FROM items i
         WHERE extract(year from i.period) = :year AND i.user_id = :userId
-        GROUP BY i.period, i.description
-        ORDER BY i.period, i.description
+        GROUP BY i.period, i.description, i.item_type
+        ORDER BY i.period, i.item_type, i.description
         """
     )
     fun yearSummary(year: Int, userId: Long): Flow<ItemSummary>
@@ -55,5 +59,7 @@ interface ItemRepository : EntityRepository<Item, Long> {
 
     suspend fun findDistinctDescriptionByUserIdAndDescriptionIlike(userId: Long, description: String): List<String>
 
-    suspend fun update(@Id id: Long, @Version version: Int, description: String, value: BigDecimal): Long
+    suspend fun update(
+        @Id id: Long, @Version version: Int, description: String, value: BigDecimal, itemType: ItemType
+    ): Long
 }

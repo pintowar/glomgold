@@ -10,6 +10,18 @@ interface MonthStatsCardProps {
   currency: string;
 }
 
+const groupItemsByType = (items: IItem[]) => {
+  const types = ["EXPENSE", "INCOME"];
+  const grouped = new Map<string, (number | null)[]>();
+  types.forEach((type) =>
+    grouped.set(
+      type,
+      items.map((i) => (i.itemType === type ? i.value : null))
+    )
+  );
+  return grouped;
+};
+
 export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, locale, currency }) => {
   const { mode } = useContext(ColorModeContext);
   const themeMode: "dark" | "light" = mode === "dark" ? "dark" : "light";
@@ -17,10 +29,10 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
   const currencyFormat = (value: number) => value.toLocaleString(locale, { style: "currency", currency });
 
   const barChartOptions = {
-    chart: { id: "basic-bar", background: "transparent" },
+    chart: { id: "basic-bar", background: "transparent", stacked: true, animations: { enabled: false } },
     plotOptions: { bar: { horizontal: true } },
     dataLabels: { enabled: false, formatter: currencyFormat },
-    colors: ["#77B6EA"],
+    colors: ["#FF4560", "#77B6EA"],
     theme: { mode: themeMode },
     tooltip: { y: { formatter: currencyFormat } },
     xaxis: {
@@ -28,7 +40,10 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
     },
   };
 
-  const series = [{ name: "value", data: tableData.map((it) => it.value) }];
+  const groupedTable = groupItemsByType(tableData);
+  const series = Array.from(groupedTable.keys()).map((key) => ({ name: key, data: groupedTable.get(key) || [] }));
+
+  // const series = [{ name: "value", data: tableData.map((it) => it.value) }];
 
   return (
     <Card title="Month Stats" bordered={false}>

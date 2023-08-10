@@ -16,6 +16,7 @@ export interface IItem {
   version: number;
   description: string;
   value: number;
+  itemType: "EXPENSE" | "INCOME";
   currency: string;
   year: number;
   month: number;

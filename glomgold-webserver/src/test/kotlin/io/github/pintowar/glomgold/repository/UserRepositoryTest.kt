@@ -1,6 +1,7 @@
 package io.github.pintowar.glomgold.repository
 
 import io.github.pintowar.glomgold.model.Item
+import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
@@ -64,6 +65,7 @@ class UserRepositoryTest(
             val item = Item(
                 description = "Water",
                 value = BigDecimal(10),
+                ItemType.EXPENSE,
                 period = YearMonth.now(),
                 userId = user.id!!
             )

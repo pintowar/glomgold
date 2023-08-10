@@ -1,6 +1,7 @@
 package io.github.pintowar.glomgold.conf
 
 import io.github.pintowar.glomgold.model.Item
+import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
@@ -72,7 +73,7 @@ class SeedInitializer(
     )
 
     private fun genItems(user: User): List<Item> {
-        val items = listOf(
+        val expenses = listOf(
             Pair("Furniture", 10),
             Pair("Gym", 100),
             Pair("Condominium", 4000),
@@ -86,9 +87,18 @@ class SeedInitializer(
             Pair("Presents", 300),
             Pair("Other services", 800)
         )
+        val incomes = listOf(
+            Pair("Salary", 8000),
+            Pair("Investments", 2000),
+            Pair("Rent", 1000),
+        )
         return (0..3).flatMap { extraMonth ->
-            items.filter { random.nextDouble() >= 0.3 }.map { (desc, value) ->
-                Item(desc, BigDecimal(value), YearMonth.now().plusMonths(extraMonth.toLong()), user.id!!)
+            expenses.filter { random.nextDouble() >= 0.3 }.map { (desc, value) ->
+                val period = YearMonth.now().plusMonths(extraMonth.toLong())
+                Item(desc, BigDecimal(value), ItemType.EXPENSE, period, user.id!!)
+            } + incomes.filter { random.nextDouble() >= 0.05 }.map { (desc, value) ->
+                val period = YearMonth.now().plusMonths(extraMonth.toLong())
+                Item(desc, BigDecimal(value), ItemType.INCOME, period, user.id!!)
             }
         }
     }

@@ -56,9 +56,10 @@ export const ControlPanel: React.FC = () => {
 
   const invalidateQuery = async (period: string) => await queryClient.invalidateQueries([controlPanelKey, period]);
 
-  const tableData = (panelData?.data?.items ?? []).map(({ id, description, value }) => ({
+  const tableData = (panelData?.data?.items ?? []).map(({ id, description, value, itemType }) => ({
     key: id,
     description,
+    itemType,
     value,
   }));
 

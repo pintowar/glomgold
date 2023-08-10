@@ -64,7 +64,7 @@ class PanelController(
     @Patch("/edit-item/{id}")
     suspend fun editItem(auth: Authentication, @PathVariable id: Long, @Body item: ItemBody): HttpResponse<PanelInfo> =
         itemRepository.findByIdAndUserId(id, authId(auth))?.let { foundItem ->
-            itemRepository.update(id, foundItem.version!!, item.description, item.value)
+            itemRepository.update(id, foundItem.version!!, item.description, item.value, item.itemType)
             HttpResponse.ok(panelService.panelInfo(authId(auth), foundItem.period))
         } ?: HttpResponse.notFound()
 
