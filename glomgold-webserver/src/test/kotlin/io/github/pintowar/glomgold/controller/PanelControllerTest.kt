@@ -1,8 +1,6 @@
 package io.github.pintowar.glomgold.controller
 
-import io.github.pintowar.glomgold.dto.ItemBody
-import io.github.pintowar.glomgold.dto.PanelAnnualReport
-import io.github.pintowar.glomgold.dto.PanelInfo
+import io.github.pintowar.glomgold.dto.*
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
@@ -55,6 +53,7 @@ class PanelControllerTest(
             item.apply {
                 value = BigDecimal(if (idx % 2 == 0) 500 else 300)
                 period = actualPeriod
+                itemType = if (idx % 2 == 0) ItemType.EXPENSE else ItemType.INCOME
             }
         }.let { items -> itemRepo.saveAll(items + items).collect() }
 
@@ -64,8 +63,8 @@ class PanelControllerTest(
             result.body.get().items.size shouldBe 0
             result.body.get().stats.size shouldBe 0
             result.body.get().period shouldBe YearMonth.of(2020, 1)
-            result.body.get().total shouldBe BigDecimal.ZERO
-            result.body.get().diff shouldBe BigDecimal.ZERO
+            result.body.get().total shouldBe BalanceSummary()
+            result.body.get().diff shouldBe BalancePercent()
         }
 
         it("show panel") {
@@ -74,8 +73,8 @@ class PanelControllerTest(
             result.body.get().items.size shouldBe totalItems
             result.body.get().stats.size shouldBe (totalItems / 2)
             result.body.get().period shouldBe actualPeriod
-            result.body.get().total shouldBe BigDecimal(4200)
-            result.body.get().diff shouldBe BigDecimal.ZERO
+            result.body.get().total shouldBe BalanceSummary(BigDecimal(3000), BigDecimal(1200))
+            result.body.get().diff shouldBe BalancePercent()
         }
     }
 

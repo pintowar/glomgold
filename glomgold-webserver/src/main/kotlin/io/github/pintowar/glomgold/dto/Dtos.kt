@@ -22,15 +22,15 @@ import java.util.*
 
 @Introspected
 data class BalancePercent(
-    val expense: BigDecimal,
-    val income: BigDecimal,
-    val balance: BigDecimal
+    val expense: BigDecimal = BigDecimal.ZERO,
+    val income: BigDecimal = BigDecimal.ZERO,
+    val balance: BigDecimal = BigDecimal.ZERO
 )
 
 @Introspected
 data class BalanceSummary(
-    val expense: BigDecimal?,
-    val income: BigDecimal?
+    val expense: BigDecimal? = null,
+    val income: BigDecimal? = null
 ) {
 
     val balance: BigDecimal?
