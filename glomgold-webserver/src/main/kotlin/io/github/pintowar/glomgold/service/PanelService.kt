@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.toList
 import org.nield.kotlinstatistics.average
 import org.nield.kotlinstatistics.simpleRegression
 import java.math.BigDecimal
-import java.math.MathContext
 import java.math.RoundingMode
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -50,18 +49,14 @@ class PanelService(private val itemRepository: ItemRepository) {
     suspend fun panelInfo(userId: Long, period: YearMonth): PanelInfo {
         val periodSummary = itemRepository.periodSummary(period, userId)
         val lastPeriodSummary = itemRepository.periodSummary(period.minusMonths(1), userId)
-        val diffSummary = if (periodSummary != null && lastPeriodSummary != null) {
-            ((periodSummary.divide(lastPeriodSummary, MathContext(4, RoundingMode.HALF_UP))) - BigDecimal.ONE)
-        } else {
-            BigDecimal.ZERO
-        }
+        val diffPercent = periodSummary.percentDiff(lastPeriodSummary)
 
         return PanelInfo(
             period,
             itemRepository.listByPeriodAndUserIdOrderByCreatedAtAndDescription(period, userId).toList(),
             itemRepository.monthSummary(period, userId).toList(),
-            (periodSummary ?: BigDecimal.ZERO),
-            diffSummary
+            periodSummary,
+            diffPercent
         )
     }
 

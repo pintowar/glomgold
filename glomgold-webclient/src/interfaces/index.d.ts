@@ -45,3 +45,9 @@ export interface IPanelAnnualReport {
   colAverage: number[];
   total: number;
 }
+
+export interface ISummary {
+  expense: number;
+  income: number;
+  balance: number;
+}

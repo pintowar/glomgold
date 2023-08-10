@@ -1,5 +1,6 @@
 package io.github.pintowar.glomgold.repo
 
+import io.github.pintowar.glomgold.dto.BalanceSummary
 import io.github.pintowar.glomgold.dto.ItemSummary
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
@@ -50,12 +51,14 @@ interface ItemRepository : EntityRepository<Item, Long> {
 
     @Query(
         """
-        SELECT sum(i.value) as value
+        SELECT 
+            sum(case when i.item_type = 'EXPENSE' THEN i.value ELSE 0 END) as expense,
+            sum(case when i.item_type = 'INCOME' THEN i.value ELSE 0 END) as income
         FROM items i
         WHERE i.period = :period AND i.user_id = :userId
         """
     )
-    suspend fun periodSummary(period: YearMonth, userId: Long): BigDecimal?
+    suspend fun periodSummary(period: YearMonth, userId: Long): BalanceSummary
 
     suspend fun findDistinctDescriptionByUserIdAndDescriptionIlike(userId: Long, description: String): List<String>
 

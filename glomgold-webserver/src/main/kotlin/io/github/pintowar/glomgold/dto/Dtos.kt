@@ -14,9 +14,41 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
+
+@Introspected
+data class BalancePercent(
+    val expense: BigDecimal,
+    val income: BigDecimal,
+    val balance: BigDecimal
+)
+
+@Introspected
+data class BalanceSummary(
+    val expense: BigDecimal?,
+    val income: BigDecimal?
+) {
+
+    val balance: BigDecimal?
+        get() = expense?.let { income?.minus(it) }
+
+    fun percentDiff(last: BalanceSummary) = BalancePercent(
+        percentDiff(expense, last.expense),
+        percentDiff(income, last.income),
+        percentDiff(balance, last.balance)
+    )
+
+    private fun percentDiff(actual: BigDecimal?, last: BigDecimal?) = if (actual != null && last != null) {
+        ((actual.divide(last, MathContext(4, RoundingMode.HALF_UP))) - BigDecimal.ONE)
+    } else {
+        BigDecimal.ZERO
+    }
+
+}
 
 @Introspected
 data class ItemSummary(
@@ -53,8 +85,8 @@ data class PanelInfo(
     val period: YearMonth,
     val items: List<Item>,
     val stats: List<ItemSummary>,
-    val total: BigDecimal,
-    val diff: BigDecimal
+    val total: BalanceSummary,
+    val diff: BalancePercent
 )
 
 @Introspected
