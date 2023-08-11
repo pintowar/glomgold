@@ -3,6 +3,7 @@ import React, { useContext } from "react";
 import { ColorModeContext } from "../../../contexts/color-mode";
 import { Card } from "antd";
 import Chart from "react-apexcharts";
+import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 
 interface MonthStatsCardProps {
   tableData: IItem[];
@@ -32,7 +33,7 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
     chart: { id: "basic-bar", background: "transparent", stacked: true, animations: { enabled: false } },
     plotOptions: { bar: { horizontal: true } },
     dataLabels: { enabled: false, formatter: currencyFormat },
-    colors: ["#FF4560", "#77B6EA"],
+    colors: [EXPENSE_COLOR, INCOME_COLOR],
     theme: { mode: themeMode },
     tooltip: { y: { formatter: currencyFormat } },
     xaxis: {
@@ -42,8 +43,6 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
 
   const groupedTable = groupItemsByType(tableData);
   const series = Array.from(groupedTable.keys()).map((key) => ({ name: key, data: groupedTable.get(key) || [] }));
-
-  // const series = [{ name: "value", data: tableData.map((it) => it.value) }];
 
   return (
     <Card title="Month Stats" bordered={false}>

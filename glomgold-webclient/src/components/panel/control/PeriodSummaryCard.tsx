@@ -2,6 +2,7 @@ import React from "react";
 import { Card, Space, Statistic, Tabs } from "antd";
 import { FallOutlined, RiseOutlined, WalletOutlined } from "@ant-design/icons";
 import { ISummary } from "../../../interfaces";
+import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 
 interface PeriodSummaryTabProps {
   desc: string;
@@ -19,7 +20,6 @@ const PeriodSummaryTab: React.FC<PeriodSummaryTabProps> = ({ desc, total, differ
         title={`Monthly ${desc}`}
         value={(total ?? 0).toLocaleString(locale, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
         valueStyle={{ color: "#77B6EA" }}
-        // "#FF4560", "#77B6EA"
         prefix={<WalletOutlined />}
         suffix={symbol}
         
@@ -30,7 +30,7 @@ const PeriodSummaryTab: React.FC<PeriodSummaryTabProps> = ({ desc, total, differ
           maximumFractionDigits: 2,
           minimumFractionDigits: 2,
         })}
-        valueStyle={{ color: difference >= 0 ? "#77B6EA" : "#FF4560" }}
+        valueStyle={{ color: difference >= 0 ? INCOME_COLOR : EXPENSE_COLOR }}
         prefix={difference >= 0 ? <RiseOutlined /> : <FallOutlined />}
         suffix="%"
       />

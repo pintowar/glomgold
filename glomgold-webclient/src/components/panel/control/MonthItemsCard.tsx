@@ -302,6 +302,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       values: selectedRows.rows.map((it) => ({
         period: formattedPeriod,
         description: it.description,
+        itemType: it.itemType,
         value: it.value,
       })),
       successNotification: () => ({
@@ -521,7 +522,6 @@ const genEditableCell = (
     title,
     inputType,
     children,
-    record,
     ...restProps
   }) => {
     const inputNode =
