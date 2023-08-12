@@ -173,6 +173,7 @@ class PanelControllerTest(
             item.apply {
                 value = BigDecimal(if (idx % 2 == 0) 500 else 300)
                 period = actualPeriod.plusMonths(if (idx % 2 == 0) 0 else 1)
+                itemType = ItemType.INCOME
             }
         }.let { items -> itemRepo.saveAll(items + items).collect() }
 
