@@ -11,16 +11,22 @@ interface MonthStatsCardProps {
   currency: string;
 }
 
-const groupItemsByType = (items: IItem[]) => {
-  const types = ["EXPENSE", "INCOME"];
-  const grouped = new Map<string, (number | null)[]>();
-  types.forEach((type) =>
-    grouped.set(
-      type,
-      items.map((i) => (i.itemType === type ? i.value : null))
-    )
-  );
+const groupItemsByDescription = (items: IItem[]) => {
+  const grouped = new Map<string, IItem[]>();
+  items.forEach((item) => grouped.set(item.description, (grouped.get(item.description) || []).concat(item)));
   return grouped;
+};
+
+const groupItemsByType = (items: Map<string, IItem[]>) => {
+  const descriptions = Array.from(items.keys());
+  const types = ["EXPENSE", "INCOME"];
+
+  return types.map((type) => ({
+    name: type,
+    data: descriptions.flatMap((desc) =>
+      (items.get(desc) || []).filter((i) => i.itemType === type).reduce((acc, i) => acc + i.value, 0)
+    ),
+  }));
 };
 
 export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, locale, currency }) => {
@@ -28,6 +34,8 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
   const themeMode: "dark" | "light" = mode === "dark" ? "dark" : "light";
 
   const currencyFormat = (value: number) => value.toLocaleString(locale, { style: "currency", currency });
+
+  const nameGrouped = groupItemsByDescription(tableData);
 
   const barChartOptions = {
     chart: { id: "basic-bar", background: "transparent", stacked: true, animations: { enabled: false } },
@@ -37,12 +45,11 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
     theme: { mode: themeMode },
     tooltip: { y: { formatter: currencyFormat } },
     xaxis: {
-      categories: tableData.map((it) => it.description),
+      categories: Array.from(nameGrouped.keys()),
     },
   };
 
-  const groupedTable = groupItemsByType(tableData);
-  const series = Array.from(groupedTable.keys()).map((key) => ({ name: key, data: groupedTable.get(key) || [] }));
+  const series = groupItemsByType(nameGrouped);
 
   return (
     <Card title="Month Stats" bordered={false}>
