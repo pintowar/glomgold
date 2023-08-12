@@ -40,7 +40,8 @@ interface ItemRepository : EntityRepository<Item, Long> {
     @Query(
         """
         SELECT 
-            i.period, i.description, i.item_type, sum(i.value) as value
+            i.period, i.description, i.item_type, 
+            sum(case when i.item_type = 'EXPENSE' THEN -i.value ELSE i.value END) as value
         FROM items i
         WHERE extract(year from i.period) = :year AND i.user_id = :userId
         GROUP BY i.period, i.description, i.item_type
@@ -48,6 +49,19 @@ interface ItemRepository : EntityRepository<Item, Long> {
         """
     )
     fun yearSummary(year: Int, userId: Long): Flow<ItemSummary>
+
+    @Query(
+        """
+        SELECT 
+            i.period, i.description, i.item_type, 
+            sum(case when i.item_type = 'EXPENSE' THEN -i.value ELSE i.value END) as value
+        FROM items i
+        WHERE extract(year from i.period) = :year AND i.item_type = :itemType AND i.user_id = :userId
+        GROUP BY i.period, i.description, i.item_type
+        ORDER BY i.period, i.item_type, i.description
+        """
+    )
+    fun yearSummary(year: Int, itemType: String, userId: Long): Flow<ItemSummary>
 
     @Query(
         """

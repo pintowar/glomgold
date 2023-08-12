@@ -29,7 +29,7 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
         <Form.Item label="Version" name="version" hidden={true}>
           <Input />
         </Form.Item>
-        <Form.Item 
+        <Form.Item
           label="Type"
           name="itemType"
           rules={[

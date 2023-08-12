@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Table } from "antd";
+import { Table, Typography } from "antd";
+import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 
 interface SummaryTableProps {
   year: string;
@@ -27,12 +28,19 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({
 }) => {
   const currencyFormatFactory = (month?: number, desc?: string) => {
     const currencyFormat = (value?: number) => {
-      const valueFormat = value ? value.toLocaleString(locale, { style: "currency", currency: currency }) : "";
+      const valueFormat = value
+        ? Math.abs(value).toLocaleString(locale, { style: "currency", currency: currency })
+        : "";
+      const color = (value || 0) > 0 ? INCOME_COLOR : EXPENSE_COLOR;
       if (month && desc) {
         const formattedMonth = `${month}`.padStart(2, "0");
-        return <Link to={`/panel?period=${year}-${formattedMonth}&desc=${desc}`}>{valueFormat}</Link>;
+        return (
+          <Link style={{ color }} to={`/panel?period=${year}-${formattedMonth}&desc=${desc}`}>
+            {valueFormat}
+          </Link>
+        );
       } else {
-        return <>{valueFormat}</>;
+        return <Typography style={{ color }}>{valueFormat}</Typography>;
       }
     };
     return currencyFormat;

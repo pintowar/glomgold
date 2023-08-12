@@ -27,10 +27,11 @@ class PanelController(
     suspend fun panel(auth: Authentication, @QueryValue period: YearMonth?) =
         panelService.panelInfo(authId(auth), period ?: YearMonth.now())
 
-    @Get("/report{?year}")
-    suspend fun report(auth: Authentication, @QueryValue year: Int?): PanelAnnualReport {
+    @Get("/report{?year,type}")
+    suspend fun report(auth: Authentication, @QueryValue year: Int?, @QueryValue type: String?): PanelAnnualReport {
         val currentYear = year ?: YearMonth.now().year
-        return panelService.annualReport(authId(auth), currentYear)
+        val currentType = if (type in listOf("EXPENSE", "INCOME")) type else ""
+        return panelService.annualReport(authId(auth), currentYear, currentType ?: "")
     }
 
     @Post("/profile/password")

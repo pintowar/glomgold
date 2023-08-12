@@ -12,7 +12,6 @@ interface PeriodSummaryTabProps {
   symbol: string;
 }
 
-
 const PeriodSummaryTab: React.FC<PeriodSummaryTabProps> = ({ desc, total, difference, locale, symbol }) => {
   return (
     <Space direction="horizontal" size={32}>
@@ -22,7 +21,6 @@ const PeriodSummaryTab: React.FC<PeriodSummaryTabProps> = ({ desc, total, differ
         valueStyle={{ color: "#77B6EA" }}
         prefix={<WalletOutlined />}
         suffix={symbol}
-        
       />
       <Statistic
         title="Monthly Percent Diff"
@@ -35,8 +33,8 @@ const PeriodSummaryTab: React.FC<PeriodSummaryTabProps> = ({ desc, total, differ
         suffix="%"
       />
     </Space>
-  )
-}
+  );
+};
 
 interface PeriodSummaryCardProps {
   total: ISummary;
@@ -55,26 +53,43 @@ export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({ total, dif
             label: "Balance",
             key: "balance",
             children: (
-              <PeriodSummaryTab desc="Balance" total={total.balance} difference={difference.balance} locale={locale} symbol={symbol} />
+              <PeriodSummaryTab
+                desc="Balance"
+                total={total.balance}
+                difference={difference.balance}
+                locale={locale}
+                symbol={symbol}
+              />
             ),
           },
           {
             label: "Expense",
             key: "expense",
             children: (
-              <PeriodSummaryTab desc="Expense" total={total.expense} difference={difference.expense} locale={locale} symbol={symbol} />
+              <PeriodSummaryTab
+                desc="Expense"
+                total={total.expense}
+                difference={difference.expense}
+                locale={locale}
+                symbol={symbol}
+              />
             ),
           },
           {
             label: "Income",
             key: "income",
             children: (
-              <PeriodSummaryTab desc="Income" total={total.income} difference={difference.income} locale={locale} symbol={symbol} />
+              <PeriodSummaryTab
+                desc="Income"
+                total={total.income}
+                difference={difference.income}
+                locale={locale}
+                symbol={symbol}
+              />
             ),
           },
         ]}
       />
-      
     </Card>
   );
 };

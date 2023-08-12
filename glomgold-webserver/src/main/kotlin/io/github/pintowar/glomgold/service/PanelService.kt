@@ -17,8 +17,10 @@ class PanelService(private val itemRepository: ItemRepository) {
 
     private val formatter = DateTimeFormatter.ofPattern("MMM")
 
-    suspend fun annualReport(userId: Long, year: Int): PanelAnnualReport {
-        val summary = itemRepository.yearSummary(year, userId).toList()
+    suspend fun annualReport(userId: Long, year: Int, itemType: String): PanelAnnualReport {
+        val summary = (if (itemType.trim().isEmpty()) itemRepository.yearSummary(year, userId)
+        else itemRepository.yearSummary(year, itemType, userId)).toList()
+
         val table = summary
             .groupingBy { it.period to it.description }
             .fold(BigDecimal.ZERO) { acc, it -> acc + it.value }
