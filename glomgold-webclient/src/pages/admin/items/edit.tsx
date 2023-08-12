@@ -3,6 +3,7 @@ import { IResourceComponentsProps } from "@refinedev/core";
 
 import { Edit, useForm, useSelect } from "@refinedev/antd";
 import { Form, Input, Select } from "antd";
+import { DollarOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 
 import { IItem, IUser } from "../../../interfaces";
 
@@ -27,6 +28,24 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
         </Form.Item>
         <Form.Item label="Version" name="version" hidden={true}>
           <Input />
+        </Form.Item>
+        <Form.Item
+          label="Type"
+          name="itemType"
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+        >
+          <Select>
+            <Select.Option value="EXPENSE">
+              <ShoppingCartOutlined />
+            </Select.Option>
+            <Select.Option value="INCOME">
+              <DollarOutlined />
+            </Select.Option>
+          </Select>
         </Form.Item>
         <Form.Item
           label="Description"

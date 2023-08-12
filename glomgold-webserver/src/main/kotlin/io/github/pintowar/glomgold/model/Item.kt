@@ -18,6 +18,7 @@ import java.time.YearMonth
 data class Item(
     @field:NotBlank var description: String,
     var value: BigDecimal,
+    var itemType: ItemType,
     @field:TypeDef(type = DataType.TIMESTAMP) var period: YearMonth,
     @field:NotNull var userId: Long
 ) : Entity()

@@ -1,6 +1,7 @@
 package io.github.pintowar.glomgold.dto
 
 import io.github.pintowar.glomgold.model.Item
+import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.data.annotation.TypeDef
@@ -13,14 +14,47 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 
 @Introspected
+data class BalancePercent(
+    val expense: BigDecimal = BigDecimal.ZERO,
+    val income: BigDecimal = BigDecimal.ZERO,
+    val balance: BigDecimal = BigDecimal.ZERO
+)
+
+@Introspected
+data class BalanceSummary(
+    val expense: BigDecimal? = null,
+    val income: BigDecimal? = null
+) {
+
+    val balance: BigDecimal?
+        get() = expense?.let { income?.minus(it) }
+
+    fun percentDiff(last: BalanceSummary) = BalancePercent(
+        percentDiff(expense, last.expense),
+        percentDiff(income, last.income),
+        percentDiff(balance, last.balance)
+    )
+
+    private fun percentDiff(actual: BigDecimal?, last: BigDecimal?) = if (actual != null && last != null) {
+        ((actual.divide(last, MathContext(4, RoundingMode.HALF_UP))) - BigDecimal.ONE)
+    } else {
+        BigDecimal.ZERO
+    }
+
+}
+
+@Introspected
 data class ItemSummary(
     @field:TypeDef(type = DataType.TIMESTAMP) val period: YearMonth,
     val description: String,
+    val itemType: ItemType,
     val value: BigDecimal
 )
 
@@ -34,11 +68,13 @@ data class ChangePassword(
 data class ItemBody(
     val period: YearMonth,
     val description: String,
-    val value: BigDecimal
+    val value: BigDecimal,
+    val itemType: ItemType,
 ) {
     fun toItem(userId: Long) = Item(
         description,
         value,
+        itemType,
         period,
         userId
     )
@@ -49,8 +85,8 @@ data class PanelInfo(
     val period: YearMonth,
     val items: List<Item>,
     val stats: List<ItemSummary>,
-    val total: BigDecimal,
-    val diff: BigDecimal
+    val total: BalanceSummary,
+    val diff: BalancePercent
 )
 
 @Introspected
@@ -90,12 +126,13 @@ data class ItemCommand(
     val version: Int? = null,
     @field:NotBlank val description: String,
     @field:NotNull val value: Double,
+    @field:NotNull val itemType: ItemType,
     @field:NotNull val year: Int,
     @field:NotNull val month: Int,
     @field:NotNull val userId: Long
 ) {
 
-    fun toItem() = Item(description, BigDecimal.valueOf(value), YearMonth.of(year, month), userId)
+    fun toItem() = Item(description, BigDecimal.valueOf(value), itemType, YearMonth.of(year, month), userId)
         .apply {
             id = this@ItemCommand.id
             version = this@ItemCommand.version
@@ -107,6 +144,7 @@ fun Item.toCommand() = ItemCommand(
     this.version,
     this.description,
     this.value.toDouble(),
+    this.itemType,
     this.period.year,
     this.period.monthValue,
     this.userId

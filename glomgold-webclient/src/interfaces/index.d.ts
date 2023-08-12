@@ -16,6 +16,7 @@ export interface IItem {
   version: number;
   description: string;
   value: number;
+  itemType: "EXPENSE" | "INCOME";
   currency: string;
   year: number;
   month: number;
@@ -43,4 +44,10 @@ export interface IPanelAnnualReport {
   colSummary: number[];
   colAverage: number[];
   total: number;
+}
+
+export interface ISummary {
+  expense: number;
+  income: number;
+  balance: number;
 }

@@ -11,7 +11,7 @@ export const PanelLayout: React.FC<React.PropsWithChildren> = ({ children }) => 
     <Layout>
       <Header sticky />
       <Content className="site-layout">{children}</Content>
-      <Footer style={{ textAlign: "center" }}>Glomgold ©2023 Created by pintowar</Footer>
+      <Footer style={{ textAlign: "center" }}>Glomgold ©{new Date().getFullYear()} Created by pintowar</Footer>
     </Layout>
   );
 };

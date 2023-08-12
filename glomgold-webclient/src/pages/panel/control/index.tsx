@@ -6,7 +6,7 @@ import { useCustom, useGetIdentity } from "@refinedev/core";
 import { Row, Col, Spin } from "antd";
 import dayjs from "dayjs";
 
-import { IItem } from "../../../interfaces";
+import { IItem, ISummary } from "../../../interfaces";
 
 import {
   PeriodSummaryCard,
@@ -20,8 +20,8 @@ import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../../const
 interface ControlPanelData {
   items: IItem[];
   stats: IItem[];
-  total: number;
-  diff: number;
+  total: ISummary;
+  diff: ISummary;
 }
 
 export const ControlPanel: React.FC = () => {
@@ -56,9 +56,10 @@ export const ControlPanel: React.FC = () => {
 
   const invalidateQuery = async (period: string) => await queryClient.invalidateQueries([controlPanelKey, period]);
 
-  const tableData = (panelData?.data?.items ?? []).map(({ id, description, value }) => ({
+  const tableData = (panelData?.data?.items ?? []).map(({ id, description, value, itemType }) => ({
     key: id,
     description,
+    itemType,
     value,
   }));
 

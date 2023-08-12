@@ -17,7 +17,7 @@ import { axiosInstance, authProvider } from "./authProvider";
 import { Header } from "./components/header";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 
-import { ItemList, ItemCreate, ItemEdit, ItemShow } from "./pages/admin/items";
+import { ItemList, ItemEdit, ItemShow } from "./pages/admin/items";
 import { UserList, UserCreate, UserEdit, UserShow } from "./pages/admin/users";
 import { DashboardPage } from "./pages/admin/dashboard";
 
@@ -73,7 +73,6 @@ function App() {
               {
                 name: "items",
                 list: "/admin/items",
-                create: "/admin/items/create",
                 edit: "/admin/items/edit/:id",
                 show: "/admin/items/show/:id",
                 meta: {
@@ -121,7 +120,6 @@ function App() {
                 </Route>
                 <Route path="items">
                   <Route index element={<ItemList />} />
-                  <Route path="create" element={<ItemCreate />} />
                   <Route path="edit/:id" element={<ItemEdit />} />
                   <Route path="show/:id" element={<ItemShow />} />
                 </Route>

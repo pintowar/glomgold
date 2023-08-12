@@ -9,14 +9,24 @@ import {
   InputRef,
   Modal,
   Popconfirm,
+  Select,
   Space,
   Table,
+  Tooltip,
   Typography,
 } from "antd";
 import { BaseSelectRef } from "rc-select";
 import d2lIntl from "d2l-intl";
 import { ColumnType } from "antd/lib/table";
-import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+  DollarOutlined,
+  EditOutlined,
+  SearchOutlined,
+  ShoppingCartOutlined,
+} from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 
 import "./item-card.css";
@@ -25,6 +35,7 @@ import { useCustom, useCustomMutation } from "@refinedev/core";
 interface PanelItem {
   key: number;
   description: string;
+  itemType: "EXPENSE" | "INCOME";
   value: number;
 }
 
@@ -96,7 +107,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   const isEditing = (record: PanelItem) => `${record.key}` === editingKey;
 
   const edit = (record: Partial<PanelItem> & { key: React.Key }) => {
-    editForm.setFieldsValue({ description: "", value: "", ...record });
+    editForm.setFieldsValue({ description: "", value: "", itemType: "EXPENSE", ...record });
     setEditingKey(`${record.key}`);
   };
 
@@ -225,6 +236,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           values: {
             description: row.description,
             value: row.value,
+            itemType: row.itemType,
             period: formattedPeriod,
           },
         },
@@ -251,6 +263,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           values: {
             description: row.description,
             value: row.value,
+            itemType: row.itemType,
             period: formattedPeriod,
           },
         },
@@ -289,6 +302,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       values: selectedRows.rows.map((it) => ({
         period: formattedPeriod,
         description: it.description,
+        itemType: it.itemType,
         value: it.value,
       })),
       successNotification: () => ({
@@ -346,6 +360,26 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       ...getColumnSearchProps("description"),
     },
     {
+      key: "itemType",
+      title: "Type",
+      dataIndex: "itemType",
+      width: "10%",
+      onCell: (record: PanelItem) => ({
+        record,
+        inputType: "select",
+        dataIndex: "itemType",
+        title: "Type",
+        editing: isEditing(record),
+      }),
+      sorter: (a: PanelItem, b: PanelItem) => a.itemType.localeCompare(b.itemType),
+      // ...getColumnSearchProps("itemType"),
+      render: (record: string) => (
+        <Tooltip placement="left" title={record}>
+          {record === "EXPENSE" ? <ShoppingCartOutlined /> : <DollarOutlined />}
+        </Tooltip>
+      ),
+    },
+    {
       key: "value",
       title: "Value",
       dataIndex: "value",
@@ -394,10 +428,22 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     },
   ];
 
+  const initialFormValues = { itemType: "EXPENSE", description: "", value: 0 };
+
   return (
     <Card title="Month Items" bordered={false}>
       <Space direction="vertical" size={12} wrap style={{ width: "100%" }}>
-        <Form form={addForm} layout="inline">
+        <Form form={addForm} layout="inline" initialValues={initialFormValues}>
+          <Form.Item name="itemType">
+            <Select>
+              <Select.Option value="EXPENSE">
+                <ShoppingCartOutlined />
+              </Select.Option>
+              <Select.Option value="INCOME">
+                <DollarOutlined />
+              </Select.Option>
+            </Select>
+          </Form.Item>
           <Form.Item name="description" rules={[{ required: true }]}>
             <AutoComplete
               ref={descInputRef}
@@ -416,7 +462,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
               formatter={inputNumberFormatter}
               parser={inputNumberParser}
               placeholder="Value"
-              onKeyPress={addItemOnEnter}
+              onKeyDown={addItemOnEnter}
             />
           </Form.Item>
         </Form>
@@ -460,7 +506,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean;
   dataIndex: string;
   title: string;
-  inputType: "number" | "text";
+  inputType: "number" | "text" | "select";
   record: PanelItem;
   index: number;
   children: React.ReactNode;
@@ -481,9 +527,20 @@ const genEditableCell = (
     const inputNode =
       inputType === "number" ? (
         <InputNumber min={0} formatter={inputNumberFormatter} parser={inputNumberParser} />
+      ) : inputType === "select" ? (
+        <Select>
+          <Select.Option value="EXPENSE">
+            <ShoppingCartOutlined />
+          </Select.Option>
+          <Select.Option value="INCOME">
+            <DollarOutlined />
+          </Select.Option>
+        </Select>
       ) : (
         <Input />
       );
+
+    // const swithProp = inputType === "switch" ? ({valuePropName: }) : ({});
 
     return (
       <td {...restProps}>

@@ -27,10 +27,11 @@ class PanelController(
     suspend fun panel(auth: Authentication, @QueryValue period: YearMonth?) =
         panelService.panelInfo(authId(auth), period ?: YearMonth.now())
 
-    @Get("/report{?year}")
-    suspend fun report(auth: Authentication, @QueryValue year: Int?): PanelAnnualReport {
+    @Get("/report{?year,type}")
+    suspend fun report(auth: Authentication, @QueryValue year: Int?, @QueryValue type: String?): PanelAnnualReport {
         val currentYear = year ?: YearMonth.now().year
-        return panelService.annualReport(authId(auth), currentYear)
+        val currentType = if (type in listOf("EXPENSE", "INCOME")) type else ""
+        return panelService.annualReport(authId(auth), currentYear, currentType ?: "")
     }
 
     @Post("/profile/password")
@@ -64,7 +65,7 @@ class PanelController(
     @Patch("/edit-item/{id}")
     suspend fun editItem(auth: Authentication, @PathVariable id: Long, @Body item: ItemBody): HttpResponse<PanelInfo> =
         itemRepository.findByIdAndUserId(id, authId(auth))?.let { foundItem ->
-            itemRepository.update(id, foundItem.version!!, item.description, item.value)
+            itemRepository.update(id, foundItem.version!!, item.description, item.value, item.itemType)
             HttpResponse.ok(panelService.panelInfo(authId(auth), foundItem.period))
         } ?: HttpResponse.notFound()
 
