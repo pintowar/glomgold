@@ -1,11 +1,17 @@
 import React from "react";
 import { Card, Space, Statistic, Tabs } from "antd";
-import { FallOutlined, RiseOutlined, WalletOutlined } from "@ant-design/icons";
+import {
+  FallOutlined,
+  RiseOutlined,
+  CalculatorOutlined,
+  DollarOutlined,
+  ShoppingCartOutlined,
+} from "@ant-design/icons";
 import { ISummary } from "../../../interfaces";
-import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
+import { BALANCE_COLOR, EXPENSE_COLOR, INCOME_COLOR, DOWN_COLOR, UP_COLOR } from "../../../constants";
 
 interface PeriodSummaryTabProps {
-  desc: string;
+  desc: "Balance" | "Expense" | "Income";
   total: number | null;
   difference: number;
   locale: string;
@@ -13,13 +19,17 @@ interface PeriodSummaryTabProps {
 }
 
 const PeriodSummaryTab: React.FC<PeriodSummaryTabProps> = ({ desc, total, difference, locale, symbol }) => {
+  const color = desc === "Expense" ? EXPENSE_COLOR : desc === "Income" ? INCOME_COLOR : BALANCE_COLOR;
+  const icon =
+    desc === "Expense" ? <ShoppingCartOutlined /> : desc === "Income" ? <DollarOutlined /> : <CalculatorOutlined />;
+
   return (
     <Space direction="horizontal" size={32}>
       <Statistic
         title={`Monthly ${desc}`}
         value={(total ?? 0).toLocaleString(locale, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
-        valueStyle={{ color: "#77B6EA" }}
-        prefix={<WalletOutlined />}
+        valueStyle={{ color }}
+        prefix={icon}
         suffix={symbol}
       />
       <Statistic
@@ -28,7 +38,7 @@ const PeriodSummaryTab: React.FC<PeriodSummaryTabProps> = ({ desc, total, differ
           maximumFractionDigits: 2,
           minimumFractionDigits: 2,
         })}
-        valueStyle={{ color: difference >= 0 ? INCOME_COLOR : EXPENSE_COLOR }}
+        valueStyle={{ color: difference >= 0 ? UP_COLOR : DOWN_COLOR }}
         prefix={difference >= 0 ? <RiseOutlined /> : <FallOutlined />}
         suffix="%"
       />

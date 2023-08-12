@@ -6,4 +6,6 @@ export const DEFAULT_CURRENCY = "USD";
 export const DEFAULT_SYMBOL = "$";
 export const EXPENSE_COLOR = "#F5222D";
 export const INCOME_COLOR = "#1677FF";
-export const BALANCE_COLOR = "#52C41A";
+export const BALANCE_COLOR = "#722ED1";
+export const UP_COLOR = "#52C41A";
+export const DOWN_COLOR = "#FAAD14";
