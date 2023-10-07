@@ -57,38 +57,42 @@ class PanelController(
     }
 
     @Post("/add-item")
-    suspend fun addItem(auth: Authentication, @Body item: ItemBody): HttpResponse<PanelInfo> {
+    suspend fun addItem(auth: Authentication, @Body item: ItemBody): HttpResponse<Unit> {
         itemRepository.save(item.toItem(authId(auth)))
-        return HttpResponse.ok(panelService.panelInfo(authId(auth), item.period))
+        return HttpResponse.ok()
     }
 
     @Patch("/edit-item/{id}")
-    suspend fun editItem(auth: Authentication, @PathVariable id: Long, @Body item: ItemBody): HttpResponse<PanelInfo> =
+    suspend fun editItem(auth: Authentication, @PathVariable id: Long, @Body item: ItemBody): HttpResponse<Unit> =
         itemRepository.findByIdAndUserId(id, authId(auth))?.let { foundItem ->
             itemRepository.update(id, foundItem.version!!, item.description, item.value, item.itemType)
-            HttpResponse.ok(panelService.panelInfo(authId(auth), foundItem.period))
+            HttpResponse.ok()
         } ?: HttpResponse.notFound()
 
     @Delete("/remove-item/{id}")
-    suspend fun removeItem(auth: Authentication, @PathVariable id: Long): HttpResponse<PanelInfo> =
+    suspend fun removeItem(auth: Authentication, @PathVariable id: Long): HttpResponse<Unit> =
         itemRepository.findByIdAndUserId(id, authId(auth))?.let { item ->
             itemRepository.delete(item)
-            HttpResponse.ok(panelService.panelInfo(authId(auth), item.period))
+            HttpResponse.ok()
         } ?: HttpResponse.notFound()
 
     @Delete("/remove-items/{period}{?ids}")
-    suspend fun removeItems(auth: Authentication, @PathVariable period: YearMonth, @QueryValue ids: List<Long>?) =
+    suspend fun removeItems(
+        auth: Authentication,
+        @PathVariable period: YearMonth,
+        @QueryValue ids: List<Long>?
+    ): HttpResponse<Unit> =
         itemRepository.findByIdInAndPeriodAndUserId(ids ?: emptyList(), period, authId(auth)).toList().let { items ->
             if (items.isEmpty()) {
                 HttpResponse.notFound()
             } else {
                 itemRepository.deleteAll(items)
-                HttpResponse.ok(panelService.panelInfo(authId(auth), period))
+                HttpResponse.ok()
             }
         }
 
     @Post("/copy-items")
-    suspend fun copyItems(auth: Authentication, @Body items: List<ItemBody>): HttpResponse<List<Item>> {
+    suspend fun copyItems(auth: Authentication, @Body items: List<ItemBody>): HttpResponse<Unit> {
         val itemsToCopy = items.map { it.toItem(authId(auth)) }.groupBy { it.period }
             .flatMap { (period, periodItems) ->
                 val nextPeriod = period.plusMonths(1)
@@ -96,8 +100,8 @@ class PanelController(
                     .map { it.description }.toSet()
                 periodItems.filter { it.description !in nextItemsDesc }.map { it.copy(period = nextPeriod) }
             }
-        val savedItems = if (itemsToCopy.isNotEmpty()) itemRepository.saveAll(itemsToCopy).toList() else itemsToCopy
-        return HttpResponse.ok(savedItems)
+        if (itemsToCopy.isNotEmpty()) itemRepository.saveAll(itemsToCopy).toList()
+        return HttpResponse.ok()
     }
 
     private fun authId(auth: Authentication): Long = auth.attributes["userId"] as Long

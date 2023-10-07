@@ -220,6 +220,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     url: "/api/panel/item-complete",
     method: "get",
     config: { query: { description: searchText } },
+    queryOptions: {
+      enabled: searchText.length >= 3
+    }
   });
 
   const { mutate: onCreateUpdateItem } = useCustomMutation<ItemBody>();
@@ -431,10 +434,10 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   const initialFormValues = { itemType: "EXPENSE", description: "", value: 0 };
 
   return (
-    <Card title="Month Items" bordered={false}>
+    <Card data-testid={"month-items-card"} title="Month Items" bordered={false}>
       <Space direction="vertical" size={12} wrap style={{ width: "100%" }}>
         <Form form={addForm} layout="inline" initialValues={initialFormValues}>
-          <Form.Item name="itemType">
+          <Form.Item data-testid={"itemType"} name="itemType">
             <Select>
               <Select.Option value="EXPENSE">
                 <ShoppingCartOutlined />
@@ -446,6 +449,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           </Form.Item>
           <Form.Item name="description" rules={[{ required: true }]}>
             <AutoComplete
+              data-testid={"description"}
               ref={descInputRef}
               value={searchText}
               onChange={setSearchText}
@@ -457,6 +461,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           </Form.Item>
           <Form.Item name="value" rules={[{ required: true }]}>
             <InputNumber
+              data-testid={"value"}
               min={0}
               prefix={`${symbol} `}
               formatter={inputNumberFormatter}
@@ -467,13 +472,14 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           </Form.Item>
         </Form>
         <Space direction="horizontal" size={12} wrap style={{ width: "100%" }}>
-          <Button type="primary" onClick={() => addItem()}>
+          <Button data-testid={"add-item"} type="primary" onClick={() => addItem()}>
             Add Item
           </Button>
-          <Button type="primary" disabled={selectedRows.keys.length === 0} onClick={() => copyNextMonth()}>
+          <Button data-testid={"replicate-month"} type="primary" disabled={selectedRows.keys.length === 0} onClick={() => copyNextMonth()}>
             Replicate Next Month
           </Button>
           <Button
+            data-testid={"delete-selected"}
             type="primary"
             danger
             disabled={selectedRows.keys.length === 0}

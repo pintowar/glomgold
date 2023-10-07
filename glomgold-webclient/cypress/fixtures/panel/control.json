@@ -1,144 +1,187 @@
 {
-  "period": "2022-04",
+  "period": "2023-09",
   "items": [
-    {
-      "description": "Condominium",
-      "value": 4000,
-      "period": "2022-04",
-      "userId": 3,
-      "id": 32,
-      "version": 0,
-      "createdAt": "2022-04-01T22:40:55.976902Z",
-      "updatedAt": "2022-04-01T22:40:55.976902Z"
-    },
-    {
-      "description": "Groceries",
-      "value": 4000,
-      "period": "2022-04",
-      "userId": 3,
-      "id": 33,
-      "version": 0,
-      "createdAt": "2022-04-01T22:40:55.991663Z",
-      "updatedAt": "2022-04-01T22:40:55.991663Z"
-    },
-    {
-      "description": "Clothing",
-      "value": 500,
-      "period": "2022-04",
-      "userId": 3,
-      "id": 34,
-      "version": 0,
-      "createdAt": "2022-04-01T22:40:56.002463Z",
-      "updatedAt": "2022-04-01T22:40:56.002463Z"
-    },
-    {
-      "description": "Transport",
-      "value": 500,
-      "period": "2022-04",
-      "userId": 3,
-      "id": 35,
-      "version": 0,
-      "createdAt": "2022-04-01T22:40:56.010237Z",
-      "updatedAt": "2022-04-01T22:40:56.010237Z"
-    },
-    {
-      "description": "Health",
-      "value": 2500,
-      "period": "2022-04",
-      "userId": 3,
-      "id": 36,
-      "version": 0,
-      "createdAt": "2022-04-01T22:40:56.016686Z",
-      "updatedAt": "2022-04-01T22:40:56.016686Z"
-    },
-    {
-      "description": "Nightlife",
-      "value": 700,
-      "period": "2022-04",
-      "userId": 3,
-      "id": 37,
-      "version": 0,
-      "createdAt": "2022-04-01T22:40:56.023591Z",
-      "updatedAt": "2022-04-01T22:40:56.023591Z"
-    },
-    {
-      "description": "Security",
-      "value": 800,
-      "period": "2022-04",
-      "userId": 3,
-      "id": 38,
-      "version": 0,
-      "createdAt": "2022-04-01T22:40:56.027474Z",
-      "updatedAt": "2022-04-01T22:40:56.027474Z"
-    },
-    {
-      "description": "Presents",
-      "value": 300,
-      "period": "2022-04",
-      "userId": 3,
-      "id": 39,
-      "version": 0,
-      "createdAt": "2022-04-01T22:40:56.036441Z",
-      "updatedAt": "2022-04-01T22:40:56.036441Z"
-    },
-    {
-      "description": "Other services",
-      "value": 800,
-      "period": "2022-04",
-      "userId": 3,
-      "id": 40,
-      "version": 0,
-      "createdAt": "2022-04-01T22:40:56.045439Z",
-      "updatedAt": "2022-04-01T22:40:56.045439Z"
-    }
+      {
+          "description": "Gym",
+          "value": 100,
+          "itemType": "EXPENSE",
+          "period": "2023-09",
+          "userId": 3,
+          "id": 57,
+          "version": 0,
+          "createdAt": "2023-08-09T00:38:51.929805Z",
+          "updatedAt": "2023-08-09T00:38:51.929805Z"
+      },
+      {
+          "description": "Condominium",
+          "value": 4000,
+          "itemType": "EXPENSE",
+          "period": "2023-09",
+          "userId": 3,
+          "id": 58,
+          "version": 0,
+          "createdAt": "2023-08-09T00:38:51.930589Z",
+          "updatedAt": "2023-08-09T00:38:51.930589Z"
+      },
+      {
+          "description": "Health",
+          "value": 2500,
+          "itemType": "EXPENSE",
+          "period": "2023-09",
+          "userId": 3,
+          "id": 59,
+          "version": 0,
+          "createdAt": "2023-08-09T00:38:51.931272Z",
+          "updatedAt": "2023-08-09T00:38:51.931272Z"
+      },
+      {
+          "description": "Food",
+          "value": 2000,
+          "itemType": "EXPENSE",
+          "period": "2023-09",
+          "userId": 3,
+          "id": 60,
+          "version": 0,
+          "createdAt": "2023-08-09T00:38:51.932666Z",
+          "updatedAt": "2023-08-09T00:38:51.932666Z"
+      },
+      {
+          "description": "Security",
+          "value": 800,
+          "itemType": "EXPENSE",
+          "period": "2023-09",
+          "userId": 3,
+          "id": 61,
+          "version": 0,
+          "createdAt": "2023-08-09T00:38:51.933325Z",
+          "updatedAt": "2023-08-09T00:38:51.933325Z"
+      },
+      {
+          "description": "Presents",
+          "value": 300,
+          "itemType": "EXPENSE",
+          "period": "2023-09",
+          "userId": 3,
+          "id": 62,
+          "version": 0,
+          "createdAt": "2023-08-09T00:38:51.936780Z",
+          "updatedAt": "2023-08-09T00:38:51.936780Z"
+      },
+      {
+          "description": "Other services",
+          "value": 800,
+          "itemType": "EXPENSE",
+          "period": "2023-09",
+          "userId": 3,
+          "id": 63,
+          "version": 0,
+          "createdAt": "2023-08-09T00:38:51.938016Z",
+          "updatedAt": "2023-08-09T00:38:51.938016Z"
+      },
+      {
+          "description": "Salary",
+          "value": 8000,
+          "itemType": "INCOME",
+          "period": "2023-09",
+          "userId": 3,
+          "id": 64,
+          "version": 0,
+          "createdAt": "2023-08-09T00:38:51.938733Z",
+          "updatedAt": "2023-08-09T00:38:51.938733Z"
+      },
+      {
+          "description": "Investments",
+          "value": 2000,
+          "itemType": "INCOME",
+          "period": "2023-09",
+          "userId": 3,
+          "id": 65,
+          "version": 0,
+          "createdAt": "2023-08-09T00:38:51.939411Z",
+          "updatedAt": "2023-08-09T00:38:51.939411Z"
+      },
+      {
+          "description": "Rent",
+          "value": 1000,
+          "itemType": "INCOME",
+          "period": "2023-09",
+          "userId": 3,
+          "id": 66,
+          "version": 0,
+          "createdAt": "2023-08-09T00:38:51.940098Z",
+          "updatedAt": "2023-08-09T00:38:51.940098Z"
+      }
   ],
   "stats": [
-    {
-      "period": "2022-04",
-      "description": "Clothing",
-      "value": 500
-    },
-    {
-      "period": "2022-04",
-      "description": "Condominium",
-      "value": 4000
-    },
-    {
-      "period": "2022-04",
-      "description": "Groceries",
-      "value": 4000
-    },
-    {
-      "period": "2022-04",
-      "description": "Health",
-      "value": 2500
-    },
-    {
-      "period": "2022-04",
-      "description": "Nightlife",
-      "value": 700
-    },
-    {
-      "period": "2022-04",
-      "description": "Other services",
-      "value": 800
-    },
-    {
-      "period": "2022-04",
-      "description": "Presents",
-      "value": 300
-    },
-    {
-      "period": "2022-04",
-      "description": "Security",
-      "value": 800
-    },
-    {
-      "period": "2022-04",
-      "description": "Transport",
-      "value": 500
-    }
+      {
+          "period": "2023-09",
+          "description": "Condominium",
+          "itemType": "EXPENSE",
+          "value": -4000
+      },
+      {
+          "period": "2023-09",
+          "description": "Food",
+          "itemType": "EXPENSE",
+          "value": -2000
+      },
+      {
+          "period": "2023-09",
+          "description": "Gym",
+          "itemType": "EXPENSE",
+          "value": -100
+      },
+      {
+          "period": "2023-09",
+          "description": "Health",
+          "itemType": "EXPENSE",
+          "value": -2500
+      },
+      {
+          "period": "2023-09",
+          "description": "Other services",
+          "itemType": "EXPENSE",
+          "value": -800
+      },
+      {
+          "period": "2023-09",
+          "description": "Presents",
+          "itemType": "EXPENSE",
+          "value": -300
+      },
+      {
+          "period": "2023-09",
+          "description": "Security",
+          "itemType": "EXPENSE",
+          "value": -800
+      },
+      {
+          "period": "2023-09",
+          "description": "Investments",
+          "itemType": "INCOME",
+          "value": 2000
+      },
+      {
+          "period": "2023-09",
+          "description": "Rent",
+          "itemType": "INCOME",
+          "value": 1000
+      },
+      {
+          "period": "2023-09",
+          "description": "Salary",
+          "itemType": "INCOME",
+          "value": 8000
+      }
   ],
-  "total": 14100,
-  "diff": 0
+  "total": {
+      "expense": 10500,
+      "income": 11000,
+      "balance": 500
+  },
+  "diff": {
+      "expense": 0.327,
+      "income": -0.0833,
+      "balance": -0.8778
+  }
 }

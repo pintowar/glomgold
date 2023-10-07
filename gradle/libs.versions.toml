@@ -1,8 +1,8 @@
 [versions]
 kotlin = "1.8.22"
 kotlin-coroutines = "1.7.2"
-ksp = "1.9.0-1.0.11"
-micronaut-gradle = "4.0.2"
+ksp = "1.8.22-1.0.11"
+micronaut-gradle = "4.0.3"
 git-gradle = "2.4.1"
 liquibase-gradle = "2.1.1"
 

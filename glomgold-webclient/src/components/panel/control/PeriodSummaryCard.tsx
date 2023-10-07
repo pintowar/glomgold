@@ -25,23 +25,27 @@ const PeriodSummaryTab: React.FC<PeriodSummaryTabProps> = ({ desc, total, differ
 
   return (
     <Space direction="horizontal" size={32}>
-      <Statistic
-        title={`Monthly ${desc}`}
-        value={(total ?? 0).toLocaleString(locale, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
-        valueStyle={{ color }}
-        prefix={icon}
-        suffix={symbol}
-      />
-      <Statistic
-        title="Monthly Percent Diff"
-        value={(100 * difference).toLocaleString(locale, {
-          maximumFractionDigits: 2,
-          minimumFractionDigits: 2,
-        })}
-        valueStyle={{ color: difference >= 0 ? UP_COLOR : DOWN_COLOR }}
-        prefix={difference >= 0 ? <RiseOutlined /> : <FallOutlined />}
-        suffix="%"
-      />
+      <div data-testid={"monthly-value"}>
+        <Statistic
+          title={`Monthly ${desc}`}
+          value={(total ?? 0).toLocaleString(locale, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+          valueStyle={{ color }}
+          prefix={icon}
+          suffix={symbol}
+        />
+      </div>
+      <div data-testid={"monthly-diff"}>
+        <Statistic
+          title="Monthly Percent Diff"
+          value={(100 * difference).toLocaleString(locale, {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2,
+          })}
+          valueStyle={{ color: difference >= 0 ? UP_COLOR : DOWN_COLOR }}
+          prefix={difference >= 0 ? <RiseOutlined /> : <FallOutlined />}
+          suffix="%"
+        />
+      </div>
     </Space>
   );
 };
@@ -55,7 +59,7 @@ interface PeriodSummaryCardProps {
 
 export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({ total, difference, locale, symbol }) => {
   return (
-    <Card title="Period Summary" bordered={false}>
+    <Card data-testid={"period-summary-card"} title="Period Summary" bordered={false}>
       <Tabs
         type="line"
         items={[

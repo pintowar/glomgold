@@ -18,10 +18,10 @@ export const PeriodNavigationCard: React.FC<PeriodNavigationCardProps> = ({ valu
   return (
     <Card title={"Period Navigation"} bordered={false}>
       <Space direction="horizontal" size={12}>
-        <Typography.Link onClick={() => onValueChange(value.clone().add(-1, "M"))}>
+        <Typography.Link data-testid={"navigate-left"} onClick={() => onValueChange(value.clone().add(-1, "M"))}>
           <LeftOutlined />
         </Typography.Link>
-        <Typography.Link onClick={() => onValueChange(value.clone().add(1, "M"))}>
+        <Typography.Link data-testid={"navigate-right"} onClick={() => onValueChange(value.clone().add(1, "M"))}>
           <RightOutlined />
         </Typography.Link>
         <DatePicker value={value} format={format} onChange={onChangePeriod} picker="month" allowClear={false} />
