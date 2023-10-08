@@ -1,19 +1,21 @@
 describe("Panel Tests", () => {
   describe("Panel Widgets", () => {
     const user = { username: "donald", password: "123123" };
+    const previous = "2023-08";
+    const period = "2023-09";
 
     beforeEach(() => {
       cy.clearLocalStorage();
 
       cy.intercept("POST", "/api/login", { fixture: "login/common.user.json" });
-      cy.intercept("GET", "/api/panel?&period=2023-09", { fixture: "panel/control.json" }).as("currentPeriod");
-      cy.intercept("GET", "/api/panel?&period=2023-08", { fixture: "panel/control-empty.json" }).as("previousPeriod");
+      cy.intercept("GET", `/api/panel?&period=${period}`, { fixture: "panel/control.json" }).as("currentPeriod");
+      cy.intercept("GET", `/api/panel?&period=${previous}`, { fixture: "panel/control-empty.json" }).as("previousPeriod");
     });
 
     it("Period Navigation", () => {
       const { username, password } = user;
 
-      cy.visit("/#/panel?period=2023-09");
+      cy.visit(`/#/panel?period=${period}`);
 
       cy.get("#username").type(username);
       cy.get("#password").type(password);
@@ -31,7 +33,7 @@ describe("Panel Tests", () => {
     it("Period Summary", () => {
       const { username, password } = user;
 
-      cy.visit("/#/panel?period=2023-09");
+      cy.visit(`/#/panel?period=${period}`);
 
       cy.get("#username").type(username);
       cy.get("#password").type(password);
@@ -80,7 +82,6 @@ describe("Panel Tests", () => {
     });
 
     describe("Month Items", () => {
-      const period = "2023-09";
 
       beforeEach(() => {
         const { username, password } = user;
@@ -101,7 +102,7 @@ describe("Panel Tests", () => {
         cy.intercept("GET", `/api/panel/item-complete?&description=${encodeURI(itemDesc)}`, {
           fixture: "panel/item-complete.json",
         }).as("itemComplete");
-        cy.intercept("POST", "/api/panel/add-item").as("addItem");
+        cy.intercept("POST", "/api/panel/add-item", { statusCode: 200 }).as("addItem");
 
         cy.get("[data-testid='month-items-card']").within(() => {
           cy.get("[data-testid='description']").type(itemDesc);
@@ -118,9 +119,8 @@ describe("Panel Tests", () => {
         });
       });
 
-      it("Edit/Delete Item", () => {
-        cy.intercept("PATCH", "/api/panel/edit-item/57").as("editItem");
-        cy.intercept("DELETE", "/api/panel/remove-item/57").as("deleteItem");
+      it("Edit Item", () => {
+        cy.intercept("PATCH", "/api/panel/edit-item/57", { statusCode: 200 }).as("editItem");
 
         cy.get("[data-testid='month-items-card']").within(() => {
           cy.get(".anticon-edit:first").click();
@@ -128,19 +128,30 @@ describe("Panel Tests", () => {
           cy.get("td #description").type("{selectall}{backspace}Workout");
           cy.get("td #value").type("{selectall}{backspace}150");
 
-          cy.get(".anticon-check:first").click();
+          cy.get(".anticon-check:first")
+              .should("exist")
+              .click();
           cy.wait("@editItem");
-
-          cy.get(".anticon-delete:first").click();
+          cy.wait("@currentPeriod");
         });
-
-        cy.get("div.ant-popover-inner button.ant-btn-primary").should("exist").click();
-
-        cy.wait("@deleteItem");
       });
 
+        it("Delete Item", () => {
+            cy.intercept("DELETE", "/api/panel/remove-item/57", { statusCode: 200 }).as("deleteItem");
+
+            cy.get("[data-testid='month-items-card']").within(() => {
+                cy.get(".anticon-delete:first")
+                        .should("exist")
+                        .click({force: true});
+            });
+
+            cy.get("div.ant-popover-inner button.ant-btn-primary").should("exist").click();
+            cy.wait("@deleteItem");
+            cy.wait("@currentPeriod");
+        });
+
       it("Delete Items", () => {
-        cy.intercept("DELETE", `/api/panel/remove-items/${period}?ids=57,58`).as("removeItems");
+        cy.intercept("DELETE", `/api/panel/remove-items/${period}?ids=57,58`, { statusCode: 200 }).as("removeItems");
 
         cy.get("[data-testid='month-items-card']").within(() => {
           cy.get(".ant-checkbox-input:nth(1)").click();
@@ -155,7 +166,7 @@ describe("Panel Tests", () => {
       });
 
       it("Replicate Items", () => {
-        cy.intercept("POST", `/api/panel/copy-items`).as("copyItems");
+        cy.intercept("POST", `/api/panel/copy-items`, { statusCode: 200 }).as("copyItems");
 
         cy.get("[data-testid='month-items-card']").within(() => {
           cy.get(".ant-checkbox-input:nth(1)").click();
