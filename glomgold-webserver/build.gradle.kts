@@ -153,10 +153,21 @@ tasks {
 }
 
 graalvmNative {
-//    toolchainDetection.set(false)
+    toolchainDetection.set(false)
     binaries {
         named("main") {
-            buildArgs("--verbose")
+            verbose.set(true)
+            richOutput.set(false)
+            javaLauncher.set(
+                javaToolchains.launcherFor {
+                    languageVersion.set(defaultJavaLang)
+                    vendor.set(defaultJavaVendor)
+                }
+            )
+        }
+        named("optimized") {
+            verbose.set(true)
+            richOutput.set(false)
             javaLauncher.set(
                 javaToolchains.launcherFor {
                     languageVersion.set(defaultJavaLang)
