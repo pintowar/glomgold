@@ -63,6 +63,8 @@ export const ControlPanel: React.FC = () => {
     value,
   }));
 
+  const defaultSummary = { expense: 0, income: 0, balance: 0 };
+
   return (
     <Spin spinning={isLoading}>
       <div className="card-row">
@@ -72,8 +74,8 @@ export const ControlPanel: React.FC = () => {
           </Col>
           <Col span={12}>
             <PeriodSummaryCard
-              total={panelData?.data.total ?? 0}
-              difference={panelData?.data.diff ?? 0}
+              total={panelData?.data.total ?? defaultSummary}
+              difference={panelData?.data.diff ?? defaultSummary}
               locale={locale}
               symbol={symbol}
             />

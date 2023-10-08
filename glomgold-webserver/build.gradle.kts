@@ -56,6 +56,7 @@ dependencies {
     testImplementation(libs.bundles.testcontainers)
     testImplementation(libs.bundles.ktest)
 
+    aotPlugins(platform(libs.micronaut.platform.aot))
     aotPlugins(libs.bundles.micronaut.aot)
 
     // Should be declared in glomgold.kotlin-liquibase, but is not working
@@ -132,8 +133,8 @@ tasks {
             dependsOn("$webCli:build")
 
             doLast {
-                val origin = project(webCli).buildDir.absolutePath
-                val dest = "${project.buildDir.absolutePath}/resources/main/public"
+                val origin = project(webCli).layout.buildDirectory
+                val dest = layout.buildDirectory.dir("resources/main/public")
                 copy {
                     from(origin)
                     into(dest)
@@ -167,6 +168,7 @@ graalvmNative {
 }
 
 micronaut {
+    version(libs.versions.micronaut.get())
     runtime("netty")
     testRuntime("kotest5")
     processing {
@@ -200,10 +202,10 @@ ktlint {
 
 sonarqube {
     properties {
-        val jacocoReportPath = "${buildDir.absolutePath}/reports/jacoco/test"
+        val jacocoReportPath = layout.buildDirectory.dir("/reports/jacoco/test/jacocoTestReport.xml")
         property("sonar.sources", "src/main/kotlin")
         property("sonar.tests", "src/test/kotlin")
         property("sonar.exclusions", "src/**/Application.kt,src/**/SeedInitializer.kt")
-        property("sonar.coverage.jacoco.xmlReportPaths", "$jacocoReportPath/jacocoTestReport.xml")
+        property("sonar.coverage.jacoco.xmlReportPaths", jacocoReportPath.get().toString())
     }
 }

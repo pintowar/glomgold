@@ -3,8 +3,6 @@ package io.github.pintowar.glomgold.controller
 import io.github.pintowar.glomgold.dto.ChangePassword
 import io.github.pintowar.glomgold.dto.ItemBody
 import io.github.pintowar.glomgold.dto.PanelAnnualReport
-import io.github.pintowar.glomgold.dto.PanelInfo
-import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.github.pintowar.glomgold.service.PanelService

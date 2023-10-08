@@ -90,7 +90,7 @@ class SeedInitializer(
         val incomes = listOf(
             Pair("Salary", 8000),
             Pair("Investments", 2000),
-            Pair("Rent", 1000),
+            Pair("Rent", 1000)
         )
         return (0..3).flatMap { extraMonth ->
             expenses.filter { random.nextDouble() >= 0.3 }.map { (desc, value) ->

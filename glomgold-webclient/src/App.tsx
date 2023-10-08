@@ -1,3 +1,4 @@
+import { DevtoolsProvider, DevtoolsPanel } from "@refinedev/devtools";
 import { Authenticated, CanAccess, Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 
@@ -35,129 +36,132 @@ function App() {
     <HashRouter>
       <RefineKbarProvider>
         <ColorModeContextProvider>
-          <Refine
-            dataProvider={dataProvider(API_URL, axiosInstance)}
-            notificationProvider={notificationProvider}
-            routerProvider={routerBindings}
-            authProvider={authProvider}
-            accessControlProvider={{
-              can: async ({ resource }) => {
-                const roles = LocalStorage.getInstance().getUserRoles();
+          <DevtoolsProvider>
+            <Refine
+              dataProvider={dataProvider(API_URL, axiosInstance)}
+              notificationProvider={notificationProvider}
+              routerProvider={routerBindings}
+              authProvider={authProvider}
+              accessControlProvider={{
+                can: async ({ resource }) => {
+                  const roles = LocalStorage.getInstance().getUserRoles();
 
-                const isAdmin = roles.includes("ROLE_ADMIN");
-                const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
-                const cond = !(!isAdmin && isAdminResource);
-                return { can: cond };
-              },
-            }}
-            resources={[
-              {
-                name: "dashboard",
-                list: "/admin/dashboard",
-                meta: {
-                  label: "Dashboard",
-                  icon: <DashboardOutlined />,
+                  const isAdmin = roles.includes("ROLE_ADMIN");
+                  const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
+                  const cond = !(!isAdmin && isAdminResource);
+                  return { can: cond };
                 },
-              },
-              {
-                name: "users",
-                list: "/admin/users",
-                create: "/admin/users/create",
-                edit: "/admin/users/edit/:id",
-                show: "/admin/users/show/:id",
-                meta: {
-                  icon: <UsergroupAddOutlined />,
-                  canDelete: true,
+              }}
+              resources={[
+                {
+                  name: "dashboard",
+                  list: "/admin/dashboard",
+                  meta: {
+                    label: "Dashboard",
+                    icon: <DashboardOutlined />,
+                  },
                 },
-              },
-              {
-                name: "items",
-                list: "/admin/items",
-                edit: "/admin/items/edit/:id",
-                show: "/admin/items/show/:id",
-                meta: {
-                  icon: <ShopOutlined />,
-                  canDelete: true,
+                {
+                  name: "users",
+                  list: "/admin/users",
+                  create: "/admin/users/create",
+                  edit: "/admin/users/edit/:id",
+                  show: "/admin/users/show/:id",
+                  meta: {
+                    icon: <UsergroupAddOutlined />,
+                    canDelete: true,
+                  },
                 },
-              },
-            ]}
-            options={{
-              syncWithLocation: true,
-              warnWhenUnsavedChanges: true,
-            }}
-          >
-            <Routes>
-              <Route index element={<Navigate to={"/login"} />} />
-              <Route
-                path="/admin"
-                element={
-                  <Authenticated fallback={<CatchAllNavigate to="/login" />}>
-                    <CanAccess fallback={<CatchAllNavigate to="/panel" />}>
-                      <ThemedLayoutV2
-                        Header={() => <Header sticky />}
-                        Title={(props) => (
-                          <ThemedTitleV2
-                            {...props}
-                            text="Glomgold"
-                            icon={<img src={logoCollapsed} height={"25px"} />}
-                          />
-                        )}
-                        Sider={(props) => <ThemedSiderV2 {...props} fixed />}
-                      >
-                        <Outlet />
-                      </ThemedLayoutV2>
-                    </CanAccess>
-                  </Authenticated>
-                }
-              >
-                <Route index element={<NavigateToResource resource="dashboard" />} />
-                <Route path="dashboard" element={<DashboardPage />} />
-                <Route path="users">
-                  <Route index element={<UserList />} />
-                  <Route path="create" element={<UserCreate />} />
-                  <Route path="edit/:id" element={<UserEdit />} />
-                  <Route path="show/:id" element={<UserShow />} />
+                {
+                  name: "items",
+                  list: "/admin/items",
+                  edit: "/admin/items/edit/:id",
+                  show: "/admin/items/show/:id",
+                  meta: {
+                    icon: <ShopOutlined />,
+                    canDelete: true,
+                  },
+                },
+              ]}
+              options={{
+                syncWithLocation: true,
+                warnWhenUnsavedChanges: true,
+              }}
+            >
+              <Routes>
+                <Route index element={<Navigate to={"/login"} />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <Authenticated fallback={<CatchAllNavigate to="/login" />}>
+                      <CanAccess fallback={<CatchAllNavigate to="/panel" />}>
+                        <ThemedLayoutV2
+                          Header={() => <Header sticky />}
+                          Title={(props) => (
+                            <ThemedTitleV2
+                              {...props}
+                              text="Glomgold"
+                              icon={<img src={logoCollapsed} height={"25px"} />}
+                            />
+                          )}
+                          Sider={(props) => <ThemedSiderV2 {...props} fixed />}
+                        >
+                          <Outlet />
+                        </ThemedLayoutV2>
+                      </CanAccess>
+                    </Authenticated>
+                  }
+                >
+                  <Route index element={<NavigateToResource resource="dashboard" />} />
+                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="users">
+                    <Route index element={<UserList />} />
+                    <Route path="create" element={<UserCreate />} />
+                    <Route path="edit/:id" element={<UserEdit />} />
+                    <Route path="show/:id" element={<UserShow />} />
+                  </Route>
+                  <Route path="items">
+                    <Route index element={<ItemList />} />
+                    <Route path="edit/:id" element={<ItemEdit />} />
+                    <Route path="show/:id" element={<ItemShow />} />
+                  </Route>
+                  <Route path="*" element={<ErrorComponent />} />
                 </Route>
-                <Route path="items">
-                  <Route index element={<ItemList />} />
-                  <Route path="edit/:id" element={<ItemEdit />} />
-                  <Route path="show/:id" element={<ItemShow />} />
+                <Route
+                  path="/panel"
+                  element={
+                    <Authenticated fallback={<CatchAllNavigate to="/login" />}>
+                      <CanAccess fallback={<CatchAllNavigate to="/login" />}>
+                        <PanelLayout>
+                          <Outlet />
+                        </PanelLayout>
+                      </CanAccess>
+                    </Authenticated>
+                  }
+                >
+                  <Route index element={<ControlPanel />} />
+                  <Route path="report" element={<ReportPanel />} />
+                  <Route path="profile" element={<ProfilePanel />} />
                 </Route>
-                <Route path="*" element={<ErrorComponent />} />
-              </Route>
-              <Route
-                path="/panel"
-                element={
-                  <Authenticated fallback={<CatchAllNavigate to="/login" />}>
-                    <CanAccess fallback={<CatchAllNavigate to="/login" />}>
-                      <PanelLayout>
-                        <Outlet />
-                      </PanelLayout>
-                    </CanAccess>
-                  </Authenticated>
-                }
-              >
-                <Route index element={<ControlPanel />} />
-                <Route path="report" element={<ReportPanel />} />
-                <Route path="profile" element={<ProfilePanel />} />
-              </Route>
-              <Route
-                element={
-                  <Authenticated fallback={<Outlet />}>
-                    <NavigateToResource />
-                  </Authenticated>
-                }
-              >
-                <Route path="/login" element={<Login />} />
-              </Route>
-            </Routes>
+                <Route
+                  element={
+                    <Authenticated fallback={<Outlet />}>
+                      <NavigateToResource />
+                    </Authenticated>
+                  }
+                >
+                  <Route path="/login" element={<Login />} />
+                </Route>
+              </Routes>
 
-            <RefineKbar />
-            <UnsavedChangesNotifier />
-            <DocumentTitleHandler
-              handler={({ autoGeneratedTitle }) => autoGeneratedTitle.replace("refine", "Glomgold")}
-            />
-          </Refine>
+              <RefineKbar />
+              <UnsavedChangesNotifier />
+              <DocumentTitleHandler
+                handler={({ autoGeneratedTitle }) => autoGeneratedTitle.replace("refine", "Glomgold")}
+              />
+            </Refine>
+            <DevtoolsPanel />
+          </DevtoolsProvider>
         </ColorModeContextProvider>
       </RefineKbarProvider>
     </HashRouter>

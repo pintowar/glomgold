@@ -11,6 +11,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.provided.authHeader
 import io.kotest.provided.fakeItems
 import io.kotest.provided.fakeUsers
+import io.micronaut.data.repository.jpa.criteria.PredicateSpecification
 import io.micronaut.http.HttpHeaders
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
@@ -18,6 +19,7 @@ import io.micronaut.http.annotation.*
 import io.micronaut.http.client.annotation.Client
 import io.micronaut.test.extensions.kotest5.annotation.MicronautTest
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.toList
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -87,31 +89,34 @@ class PanelControllerTest(
         afterEach { itemRepo.deleteAll() }
 
         it("adding item") {
-            val addedItem = ItemBody(actualPeriod, "Some Item", BigDecimal("9.99"), ItemType.EXPENSE)
+            val desc = "Some Item"
+            val addedItem = ItemBody(actualPeriod, desc, BigDecimal("9.99"), ItemType.EXPENSE)
             val result = panelClient.addItem(token, addedItem)
 
-            result.body.get().period shouldBe actualPeriod
-            result.body.get().items.first().also {
-                it.description shouldBe addedItem.description
-                it.value shouldBe addedItem.value
-                it.itemType shouldBe ItemType.EXPENSE
-                it.period shouldBe addedItem.period
-                it.userId shouldBe userId
+            result.status shouldBe HttpStatus.OK
+
+            val item = itemRepo.findOne { root, cb ->
+                cb.equal(root.get<String>("description"), desc)
             }
+
+            item?.period shouldBe actualPeriod
+            item?.value shouldBe BigDecimal("9.99")
         }
 
         it("edit item") {
+            val newDesc = "Other description"
             val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId))
-            val editedItem = ItemBody(actualPeriod, "Other description", BigDecimal("19.99"), ItemType.EXPENSE)
+            val editedItem = ItemBody(actualPeriod, newDesc, BigDecimal("19.99"), ItemType.EXPENSE)
             val result = panelClient.editItem(token, item.id!!, editedItem)
 
-            result.body.get().period shouldBe actualPeriod
-            result.body.get().items.first().also {
-                it.description shouldBe editedItem.description
-                it.value shouldBe editedItem.value
-                it.period shouldBe editedItem.period
-                it.userId shouldBe userId
+            result.status shouldBe HttpStatus.OK
+
+            val foundItem = itemRepo.findOne { root, cb ->
+                cb.equal(root.get<String>("description"), newDesc)
             }
+
+            foundItem?.period shouldBe actualPeriod
+            foundItem?.value shouldBe BigDecimal("19.99")
         }
 
         it("invalid edit item") {
@@ -126,7 +131,9 @@ class PanelControllerTest(
             val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId))
             val result = panelClient.removeItem(token, item.id!!)
 
-            result.body.get().items shouldBe emptyList()
+            result.status shouldBe HttpStatus.OK
+
+            itemRepo.findById(item.id!!) shouldBe null
         }
 
         it("invalid remove item") {
@@ -145,19 +152,27 @@ class PanelControllerTest(
                     period = actualPeriod
                 }
             }
-            val nextItems = actualItems.take(2).map {
+            val nextItems = actualItems.take(totalItemsNextMonth).map {
                 it.copy(value = BigDecimal(300), period = actualPeriod.plusMonths(1))
             }
             itemRepo.saveAll(nextItems).collect()
 
-            val result = panelClient.copyItems(token, actualItems.map {
-                ItemBody(it.period, it.description, it.value, ItemType.EXPENSE)
-            })
+            val result = panelClient.copyItems(
+                token,
+                actualItems.map {
+                    ItemBody(it.period, it.description, it.value, ItemType.EXPENSE)
+                }
+            )
 
-            result.body.get().size shouldBe (totalItems - totalItemsNextMonth)
-            result.body.get().count { it.value < BigDecimal(400) } shouldBe 0
-            result.body.get().all { it.period == actualPeriod.plusMonths(1) } shouldBe true
-            result.body.get().all { it.userId == userId } shouldBe true
+            result.status shouldBe HttpStatus.OK
+
+            val foundItems = itemRepo.findAll { root, cb ->
+                cb.equal(root.get<String>("period"), actualPeriod.plusMonths(1))
+            }.toList()
+
+            foundItems.size shouldBe (totalItems)
+            foundItems.count { it.value < BigDecimal(400) } shouldBe totalItemsNextMonth
+            foundItems.all { it.userId == userId } shouldBe true
         }
     }
 
@@ -224,24 +239,24 @@ interface PanelClient {
     ): HttpResponse<PanelAnnualReport>
 
     @Post("/add-item")
-    suspend fun addItem(@Header(HttpHeaders.AUTHORIZATION) auth: String, @Body item: ItemBody): HttpResponse<PanelInfo>
+    suspend fun addItem(@Header(HttpHeaders.AUTHORIZATION) auth: String, @Body item: ItemBody): HttpResponse<Unit>
 
     @Patch("/edit-item/{id}")
     suspend fun editItem(
         @Header(HttpHeaders.AUTHORIZATION) auth: String,
         @PathVariable id: Long,
         @Body item: ItemBody
-    ): HttpResponse<PanelInfo>
+    ): HttpResponse<Unit>
 
     @Delete("/remove-item/{id}")
     suspend fun removeItem(
         @Header(HttpHeaders.AUTHORIZATION) auth: String,
         @PathVariable id: Long
-    ): HttpResponse<PanelInfo>
+    ): HttpResponse<Unit>
 
     @Post("/copy-items")
     suspend fun copyItems(
         @Header(HttpHeaders.AUTHORIZATION) auth: String,
         @Body items: List<ItemBody>
-    ): HttpResponse<List<Item>>
+    ): HttpResponse<Unit>
 }

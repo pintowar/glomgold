@@ -7,7 +7,7 @@ plugins {
 
 description = "Glomgold Web Client"
 
-project.buildDir = file("dist")
+project.layout.buildDirectory.set(file("dist"))
 
 node {
     version.set("18.17.0")
@@ -37,7 +37,7 @@ tasks {
     }
 
     register<Delete>("clean") {
-        delete(project.buildDir)
+        delete(project.layout.buildDirectory)
         delete("${project.projectDir}/coverage")
         delete("${project.projectDir}/.nyc_output")
     }

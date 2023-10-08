@@ -5,9 +5,9 @@ import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import io.micronaut.security.authentication.AuthenticationRequest
 import io.micronaut.http.HttpRequest
 import io.micronaut.security.authentication.AuthenticationException
+import io.micronaut.security.authentication.AuthenticationRequest
 import io.mockk.*
 import kotlinx.coroutines.reactive.awaitFirst
 

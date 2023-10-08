@@ -77,6 +77,10 @@ interface ItemRepository : EntityRepository<Item, Long> {
     suspend fun findDistinctDescriptionByUserIdAndDescriptionIlike(userId: Long, description: String): List<String>
 
     suspend fun update(
-        @Id id: Long, @Version version: Int, description: String, value: BigDecimal, itemType: ItemType
+        @Id id: Long,
+        @Version version: Int,
+        description: String,
+        value: BigDecimal,
+        itemType: ItemType
     ): Long
 }

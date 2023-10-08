@@ -17,7 +17,7 @@ tasks {
         description = "Build web app"
         doLast {
             copy {
-                from(files("${project(webServ).buildDir}/libs/")) {
+                from(files("${project(webServ).layout.buildDirectory}/libs/")) {
                     include("*-all.jar")
                 }
                 into("$rootDir/build/")
@@ -32,7 +32,7 @@ sonarqube {
     properties {
         val sonarToken = project.findProperty("sonar.token")?.toString() ?: System.getenv("SONAR_TOKEN")
         val (webServ, webCli) = ":glomgold-webserver" to ":glomgold-webclient"
-        val jacocoReportPath = "${project(webServ).buildDir.absolutePath}/reports/jacoco/test"
+        val jacocoReportPath = project(webServ).layout.buildDirectory.dir("/reports/jacoco/test").get().toString()
         val lcovReportPath = "${project(webCli).projectDir.absolutePath}/coverage/"
         property("sonar.sourceEncoding", "UTF-8")
         property("sonar.organization", "pintowar")

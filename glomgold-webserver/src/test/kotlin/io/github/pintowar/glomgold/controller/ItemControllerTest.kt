@@ -22,7 +22,6 @@ import io.micronaut.test.extensions.kotest5.annotation.MicronautTest
 import io.mockk.mockk
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import java.math.BigDecimal
 import java.time.YearMonth
 

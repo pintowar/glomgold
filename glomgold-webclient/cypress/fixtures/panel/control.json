@@ -1,187 +1,187 @@
 {
   "period": "2023-09",
   "items": [
-      {
-          "description": "Gym",
-          "value": 100,
-          "itemType": "EXPENSE",
-          "period": "2023-09",
-          "userId": 3,
-          "id": 57,
-          "version": 0,
-          "createdAt": "2023-08-09T00:38:51.929805Z",
-          "updatedAt": "2023-08-09T00:38:51.929805Z"
-      },
-      {
-          "description": "Condominium",
-          "value": 4000,
-          "itemType": "EXPENSE",
-          "period": "2023-09",
-          "userId": 3,
-          "id": 58,
-          "version": 0,
-          "createdAt": "2023-08-09T00:38:51.930589Z",
-          "updatedAt": "2023-08-09T00:38:51.930589Z"
-      },
-      {
-          "description": "Health",
-          "value": 2500,
-          "itemType": "EXPENSE",
-          "period": "2023-09",
-          "userId": 3,
-          "id": 59,
-          "version": 0,
-          "createdAt": "2023-08-09T00:38:51.931272Z",
-          "updatedAt": "2023-08-09T00:38:51.931272Z"
-      },
-      {
-          "description": "Food",
-          "value": 2000,
-          "itemType": "EXPENSE",
-          "period": "2023-09",
-          "userId": 3,
-          "id": 60,
-          "version": 0,
-          "createdAt": "2023-08-09T00:38:51.932666Z",
-          "updatedAt": "2023-08-09T00:38:51.932666Z"
-      },
-      {
-          "description": "Security",
-          "value": 800,
-          "itemType": "EXPENSE",
-          "period": "2023-09",
-          "userId": 3,
-          "id": 61,
-          "version": 0,
-          "createdAt": "2023-08-09T00:38:51.933325Z",
-          "updatedAt": "2023-08-09T00:38:51.933325Z"
-      },
-      {
-          "description": "Presents",
-          "value": 300,
-          "itemType": "EXPENSE",
-          "period": "2023-09",
-          "userId": 3,
-          "id": 62,
-          "version": 0,
-          "createdAt": "2023-08-09T00:38:51.936780Z",
-          "updatedAt": "2023-08-09T00:38:51.936780Z"
-      },
-      {
-          "description": "Other services",
-          "value": 800,
-          "itemType": "EXPENSE",
-          "period": "2023-09",
-          "userId": 3,
-          "id": 63,
-          "version": 0,
-          "createdAt": "2023-08-09T00:38:51.938016Z",
-          "updatedAt": "2023-08-09T00:38:51.938016Z"
-      },
-      {
-          "description": "Salary",
-          "value": 8000,
-          "itemType": "INCOME",
-          "period": "2023-09",
-          "userId": 3,
-          "id": 64,
-          "version": 0,
-          "createdAt": "2023-08-09T00:38:51.938733Z",
-          "updatedAt": "2023-08-09T00:38:51.938733Z"
-      },
-      {
-          "description": "Investments",
-          "value": 2000,
-          "itemType": "INCOME",
-          "period": "2023-09",
-          "userId": 3,
-          "id": 65,
-          "version": 0,
-          "createdAt": "2023-08-09T00:38:51.939411Z",
-          "updatedAt": "2023-08-09T00:38:51.939411Z"
-      },
-      {
-          "description": "Rent",
-          "value": 1000,
-          "itemType": "INCOME",
-          "period": "2023-09",
-          "userId": 3,
-          "id": 66,
-          "version": 0,
-          "createdAt": "2023-08-09T00:38:51.940098Z",
-          "updatedAt": "2023-08-09T00:38:51.940098Z"
-      }
+    {
+      "description": "Gym",
+      "value": 100,
+      "itemType": "EXPENSE",
+      "period": "2023-09",
+      "userId": 3,
+      "id": 57,
+      "version": 0,
+      "createdAt": "2023-08-09T00:38:51.929805Z",
+      "updatedAt": "2023-08-09T00:38:51.929805Z"
+    },
+    {
+      "description": "Condominium",
+      "value": 4000,
+      "itemType": "EXPENSE",
+      "period": "2023-09",
+      "userId": 3,
+      "id": 58,
+      "version": 0,
+      "createdAt": "2023-08-09T00:38:51.930589Z",
+      "updatedAt": "2023-08-09T00:38:51.930589Z"
+    },
+    {
+      "description": "Health",
+      "value": 2500,
+      "itemType": "EXPENSE",
+      "period": "2023-09",
+      "userId": 3,
+      "id": 59,
+      "version": 0,
+      "createdAt": "2023-08-09T00:38:51.931272Z",
+      "updatedAt": "2023-08-09T00:38:51.931272Z"
+    },
+    {
+      "description": "Food",
+      "value": 2000,
+      "itemType": "EXPENSE",
+      "period": "2023-09",
+      "userId": 3,
+      "id": 60,
+      "version": 0,
+      "createdAt": "2023-08-09T00:38:51.932666Z",
+      "updatedAt": "2023-08-09T00:38:51.932666Z"
+    },
+    {
+      "description": "Security",
+      "value": 800,
+      "itemType": "EXPENSE",
+      "period": "2023-09",
+      "userId": 3,
+      "id": 61,
+      "version": 0,
+      "createdAt": "2023-08-09T00:38:51.933325Z",
+      "updatedAt": "2023-08-09T00:38:51.933325Z"
+    },
+    {
+      "description": "Presents",
+      "value": 300,
+      "itemType": "EXPENSE",
+      "period": "2023-09",
+      "userId": 3,
+      "id": 62,
+      "version": 0,
+      "createdAt": "2023-08-09T00:38:51.936780Z",
+      "updatedAt": "2023-08-09T00:38:51.936780Z"
+    },
+    {
+      "description": "Other services",
+      "value": 800,
+      "itemType": "EXPENSE",
+      "period": "2023-09",
+      "userId": 3,
+      "id": 63,
+      "version": 0,
+      "createdAt": "2023-08-09T00:38:51.938016Z",
+      "updatedAt": "2023-08-09T00:38:51.938016Z"
+    },
+    {
+      "description": "Salary",
+      "value": 8000,
+      "itemType": "INCOME",
+      "period": "2023-09",
+      "userId": 3,
+      "id": 64,
+      "version": 0,
+      "createdAt": "2023-08-09T00:38:51.938733Z",
+      "updatedAt": "2023-08-09T00:38:51.938733Z"
+    },
+    {
+      "description": "Investments",
+      "value": 2000,
+      "itemType": "INCOME",
+      "period": "2023-09",
+      "userId": 3,
+      "id": 65,
+      "version": 0,
+      "createdAt": "2023-08-09T00:38:51.939411Z",
+      "updatedAt": "2023-08-09T00:38:51.939411Z"
+    },
+    {
+      "description": "Rent",
+      "value": 1000,
+      "itemType": "INCOME",
+      "period": "2023-09",
+      "userId": 3,
+      "id": 66,
+      "version": 0,
+      "createdAt": "2023-08-09T00:38:51.940098Z",
+      "updatedAt": "2023-08-09T00:38:51.940098Z"
+    }
   ],
   "stats": [
-      {
-          "period": "2023-09",
-          "description": "Condominium",
-          "itemType": "EXPENSE",
-          "value": -4000
-      },
-      {
-          "period": "2023-09",
-          "description": "Food",
-          "itemType": "EXPENSE",
-          "value": -2000
-      },
-      {
-          "period": "2023-09",
-          "description": "Gym",
-          "itemType": "EXPENSE",
-          "value": -100
-      },
-      {
-          "period": "2023-09",
-          "description": "Health",
-          "itemType": "EXPENSE",
-          "value": -2500
-      },
-      {
-          "period": "2023-09",
-          "description": "Other services",
-          "itemType": "EXPENSE",
-          "value": -800
-      },
-      {
-          "period": "2023-09",
-          "description": "Presents",
-          "itemType": "EXPENSE",
-          "value": -300
-      },
-      {
-          "period": "2023-09",
-          "description": "Security",
-          "itemType": "EXPENSE",
-          "value": -800
-      },
-      {
-          "period": "2023-09",
-          "description": "Investments",
-          "itemType": "INCOME",
-          "value": 2000
-      },
-      {
-          "period": "2023-09",
-          "description": "Rent",
-          "itemType": "INCOME",
-          "value": 1000
-      },
-      {
-          "period": "2023-09",
-          "description": "Salary",
-          "itemType": "INCOME",
-          "value": 8000
-      }
+    {
+      "period": "2023-09",
+      "description": "Condominium",
+      "itemType": "EXPENSE",
+      "value": -4000
+    },
+    {
+      "period": "2023-09",
+      "description": "Food",
+      "itemType": "EXPENSE",
+      "value": -2000
+    },
+    {
+      "period": "2023-09",
+      "description": "Gym",
+      "itemType": "EXPENSE",
+      "value": -100
+    },
+    {
+      "period": "2023-09",
+      "description": "Health",
+      "itemType": "EXPENSE",
+      "value": -2500
+    },
+    {
+      "period": "2023-09",
+      "description": "Other services",
+      "itemType": "EXPENSE",
+      "value": -800
+    },
+    {
+      "period": "2023-09",
+      "description": "Presents",
+      "itemType": "EXPENSE",
+      "value": -300
+    },
+    {
+      "period": "2023-09",
+      "description": "Security",
+      "itemType": "EXPENSE",
+      "value": -800
+    },
+    {
+      "period": "2023-09",
+      "description": "Investments",
+      "itemType": "INCOME",
+      "value": 2000
+    },
+    {
+      "period": "2023-09",
+      "description": "Rent",
+      "itemType": "INCOME",
+      "value": 1000
+    },
+    {
+      "period": "2023-09",
+      "description": "Salary",
+      "itemType": "INCOME",
+      "value": 8000
+    }
   ],
   "total": {
-      "expense": 10500,
-      "income": 11000,
-      "balance": 500
+    "expense": 10500,
+    "income": 11000,
+    "balance": 500
   },
   "diff": {
-      "expense": 0.327,
-      "income": -0.0833,
-      "balance": -0.8778
+    "expense": 0.327,
+    "income": -0.0833,
+    "balance": -0.8778
   }
 }

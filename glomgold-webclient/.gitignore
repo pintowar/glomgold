@@ -25,5 +25,6 @@ dist-ssr
 
 # Cypress
 cypress/videos
+cypress/screenshots
 .nyc_output
 coverage

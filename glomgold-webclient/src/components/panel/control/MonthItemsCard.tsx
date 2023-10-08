@@ -221,8 +221,8 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     method: "get",
     config: { query: { description: searchText } },
     queryOptions: {
-      enabled: searchText.length >= 3
-    }
+      enabled: searchText.length >= 3,
+    },
   });
 
   const { mutate: onCreateUpdateItem } = useCustomMutation<ItemBody>();
@@ -475,7 +475,12 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           <Button data-testid={"add-item"} type="primary" onClick={() => addItem()}>
             Add Item
           </Button>
-          <Button data-testid={"replicate-month"} type="primary" disabled={selectedRows.keys.length === 0} onClick={() => copyNextMonth()}>
+          <Button
+            data-testid={"replicate-month"}
+            type="primary"
+            disabled={selectedRows.keys.length === 0}
+            onClick={() => copyNextMonth()}
+          >
             Replicate Next Month
           </Button>
           <Button

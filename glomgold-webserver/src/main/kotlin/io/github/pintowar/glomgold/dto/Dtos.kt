@@ -47,7 +47,6 @@ data class BalanceSummary(
     } else {
         BigDecimal.ZERO
     }
-
 }
 
 @Introspected
@@ -69,7 +68,7 @@ data class ItemBody(
     val period: YearMonth,
     val description: String,
     val value: BigDecimal,
-    val itemType: ItemType,
+    val itemType: ItemType
 ) {
     fun toItem(userId: Long) = Item(
         description,
