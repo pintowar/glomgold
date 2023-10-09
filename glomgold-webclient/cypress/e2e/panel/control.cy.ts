@@ -12,9 +12,7 @@ describe("Panel Tests", () => {
       cy.intercept("GET", `/api/panel?&period=${previous}`, { fixture: "panel/control-empty.json" }).as(
         "previousPeriod"
       );
-    });
 
-    it("Period Navigation", () => {
       const { username, password } = user;
 
       cy.visit(`/#/panel?period=${period}`);
@@ -24,25 +22,18 @@ describe("Panel Tests", () => {
       cy.get("button.ant-btn").click();
 
       cy.url().should("include", "/#/panel");
+      cy.wait("@currentPeriod");
+    });
 
-      cy.get("[data-testid='navigate-left']").click();
+    it("Period Navigation", () => {
+      cy.get("[data-testid='navigate-left']").should("exist").click();
       cy.wait("@previousPeriod");
 
-      cy.get("[data-testid='navigate-right']").click();
+      cy.get("[data-testid='navigate-right']").should("exist").click();
       cy.wait("@currentPeriod");
     });
 
     it("Period Summary", () => {
-      const { username, password } = user;
-
-      cy.visit(`/#/panel?period=${period}`);
-
-      cy.get("#username").type(username);
-      cy.get("#password").type(password);
-      cy.get("button.ant-btn").click();
-
-      cy.url().should("include", "/#/panel");
-
       cy.get("[data-testid='period-summary-card']").within(() => {
         cy.get("#rc-tabs-1-tab-balance").click();
         cy.get("[data-testid='monthly-value']").then(($items) => {
@@ -84,19 +75,6 @@ describe("Panel Tests", () => {
     });
 
     describe("Month Items", () => {
-      beforeEach(() => {
-        const { username, password } = user;
-
-        cy.visit(`/#/panel?period=${period}`);
-
-        cy.get("#username").type(username);
-        cy.get("#password").type(password);
-        cy.get("button.ant-btn").click();
-
-        cy.url().should("include", "/#/panel");
-        cy.wait("@currentPeriod");
-      });
-
       it("Add Item", () => {
         const itemDesc = "Gym";
         const itemValue = 45;
