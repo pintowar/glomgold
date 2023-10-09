@@ -155,25 +155,17 @@ tasks {
 graalvmNative {
     toolchainDetection.set(false)
     binaries {
-        named("main") {
-            verbose.set(true)
-            richOutput.set(false)
-            javaLauncher.set(
-                javaToolchains.launcherFor {
-                    languageVersion.set(defaultJavaLang)
-                    vendor.set(defaultJavaVendor)
-                }
-            )
-        }
-        named("optimized") {
-            verbose.set(true)
-            richOutput.set(false)
-            javaLauncher.set(
-                javaToolchains.launcherFor {
-                    languageVersion.set(defaultJavaLang)
-                    vendor.set(defaultJavaVendor)
-                }
-            )
+        listOf("main", "optimized", "test").forEach { type ->
+            named(type) {
+                verbose.set(true)
+                richOutput.set(false)
+                javaLauncher.set(
+                    javaToolchains.launcherFor {
+                        languageVersion.set(defaultJavaLang)
+                        vendor.set(defaultJavaVendor)
+                    }
+                )
+            }
         }
     }
 }
