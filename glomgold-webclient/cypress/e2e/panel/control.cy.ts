@@ -9,7 +9,9 @@ describe("Panel Tests", () => {
 
       cy.intercept("POST", "/api/login", { fixture: "login/common.user.json" });
       cy.intercept("GET", `/api/panel?&period=${period}`, { fixture: "panel/control.json" }).as("currentPeriod");
-      cy.intercept("GET", `/api/panel?&period=${previous}`, { fixture: "panel/control-empty.json" }).as("previousPeriod");
+      cy.intercept("GET", `/api/panel?&period=${previous}`, { fixture: "panel/control-empty.json" }).as(
+        "previousPeriod"
+      );
     });
 
     it("Period Navigation", () => {
@@ -82,7 +84,6 @@ describe("Panel Tests", () => {
     });
 
     describe("Month Items", () => {
-
       beforeEach(() => {
         const { username, password } = user;
 
@@ -93,6 +94,7 @@ describe("Panel Tests", () => {
         cy.get("button.ant-btn").click();
 
         cy.url().should("include", "/#/panel");
+        cy.wait("@currentPeriod");
       });
 
       it("Add Item", () => {
@@ -123,32 +125,28 @@ describe("Panel Tests", () => {
         cy.intercept("PATCH", "/api/panel/edit-item/57", { statusCode: 200 }).as("editItem");
 
         cy.get("[data-testid='month-items-card']").within(() => {
-          cy.get(".anticon-edit:first").click();
+          cy.get(".panel-edit:first").click();
 
           cy.get("td #description").type("{selectall}{backspace}Workout");
           cy.get("td #value").type("{selectall}{backspace}150");
 
-          cy.get(".anticon-check:first")
-              .should("exist")
-              .click();
+          cy.get(".panel-confirm:first").should("exist").click();
           cy.wait("@editItem");
           cy.wait("@currentPeriod");
         });
       });
 
-        it("Delete Item", () => {
-            cy.intercept("DELETE", "/api/panel/remove-item/57", { statusCode: 200 }).as("deleteItem");
+      it("Delete Item", () => {
+        cy.intercept("DELETE", "/api/panel/remove-item/57", { statusCode: 200 }).as("deleteItem");
 
-            cy.get("[data-testid='month-items-card']").within(() => {
-                cy.get(".anticon-delete:first")
-                        .should("exist")
-                        .click({force: true});
-            });
-
-            cy.get("div.ant-popover-inner button.ant-btn-primary").should("exist").click();
-            cy.wait("@deleteItem");
-            cy.wait("@currentPeriod");
+        cy.get("[data-testid='month-items-card']").within(() => {
+          cy.get(".panel-delete:first").should("exist").click({ force: true });
         });
+
+        cy.get("div.ant-popover-inner button.ant-btn-primary").should("exist").click();
+        cy.wait("@deleteItem");
+        cy.wait("@currentPeriod");
+      });
 
       it("Delete Items", () => {
         cy.intercept("DELETE", `/api/panel/remove-items/${period}?ids=57,58`, { statusCode: 200 }).as("removeItems");
