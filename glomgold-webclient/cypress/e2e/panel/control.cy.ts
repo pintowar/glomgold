@@ -22,54 +22,57 @@ describe("Panel Tests", () => {
       cy.get("button.ant-btn").click();
 
       cy.url().should("include", "/#/panel");
-      cy.wait("@currentPeriod");
     });
 
     it("Period Navigation", () => {
-      cy.get("[data-testid='navigate-left']").should("exist").click();
-      cy.wait("@previousPeriod");
+      cy.wait("@currentPeriod").then(() => {
+        cy.get("[data-testid='navigate-left']").should("exist").click();
+        cy.wait("@previousPeriod");
 
-      cy.get("[data-testid='navigate-right']").should("exist").click();
-      cy.wait("@currentPeriod");
+        cy.get("[data-testid='navigate-right']").should("exist").click();
+        cy.wait("@currentPeriod");
+      });
     });
 
     it("Period Summary", () => {
-      cy.get("[data-testid='period-summary-card']").within(() => {
-        cy.get("#rc-tabs-1-tab-balance").click();
-        cy.get("[data-testid='monthly-value']").then(($items) => {
-          expect($items).to.contain("500,00");
-        });
-        cy.get("[data-testid='monthly-diff']").then(($items) => {
-          expect($items).to.contain("-87,78");
+      cy.wait("@currentPeriod").then(() => {
+        cy.get("[data-testid='period-summary-card']").within(() => {
+          cy.get("#rc-tabs-1-tab-balance").click();
+          cy.get("[data-testid='monthly-value']").then(($items) => {
+            expect($items).to.contain("500,00");
+          });
+          cy.get("[data-testid='monthly-diff']").then(($items) => {
+            expect($items).to.contain("-87,78");
+          });
+
+          cy.get("#rc-tabs-1-tab-expense").click();
+          cy.get("[data-testid='monthly-value']").then(($items) => {
+            expect($items).to.contain("10.500,00");
+          });
+          cy.get("[data-testid='monthly-diff']").then(($items) => {
+            expect($items).to.contain("32,70");
+          });
+
+          cy.get("#rc-tabs-1-tab-income").click();
+          cy.get("[data-testid='monthly-value']").then(($items) => {
+            expect($items).to.contain("11.000,00");
+          });
+          cy.get("[data-testid='monthly-diff']").then(($items) => {
+            expect($items).to.contain("-8,33");
+          });
         });
 
-        cy.get("#rc-tabs-1-tab-expense").click();
-        cy.get("[data-testid='monthly-value']").then(($items) => {
-          expect($items).to.contain("10.500,00");
-        });
-        cy.get("[data-testid='monthly-diff']").then(($items) => {
-          expect($items).to.contain("32,70");
-        });
+        cy.get("[data-testid='navigate-left']").click();
+        cy.wait("@previousPeriod");
 
-        cy.get("#rc-tabs-1-tab-income").click();
-        cy.get("[data-testid='monthly-value']").then(($items) => {
-          expect($items).to.contain("11.000,00");
-        });
-        cy.get("[data-testid='monthly-diff']").then(($items) => {
-          expect($items).to.contain("-8,33");
-        });
-      });
-
-      cy.get("[data-testid='navigate-left']").click();
-      cy.wait("@previousPeriod");
-
-      cy.get("[data-testid='period-summary-card']").within(() => {
-        cy.get("#rc-tabs-1-tab-balance").click();
-        cy.get("[data-testid='monthly-value']").then(($items) => {
-          expect($items).to.contain("0,00");
-        });
-        cy.get("[data-testid='monthly-diff']").then(($items) => {
-          expect($items).to.contain("0,00");
+        cy.get("[data-testid='period-summary-card']").within(() => {
+          cy.get("#rc-tabs-1-tab-balance").click();
+          cy.get("[data-testid='monthly-value']").then(($items) => {
+            expect($items).to.contain("0,00");
+          });
+          cy.get("[data-testid='monthly-diff']").then(($items) => {
+            expect($items).to.contain("0,00");
+          });
         });
       });
     });
@@ -84,17 +87,19 @@ describe("Panel Tests", () => {
         }).as("itemComplete");
         cy.intercept("POST", "/api/panel/add-item", { statusCode: 200 }).as("addItem");
 
-        cy.get("[data-testid='month-items-card']").within(() => {
-          cy.get("[data-testid='description']").type(itemDesc);
-          cy.get("[data-testid='value']").type(`${itemValue}`);
-          cy.wait("@itemComplete");
+        cy.wait("@currentPeriod").then(() => {
+          cy.get("[data-testid='month-items-card']").within(() => {
+            cy.get("[data-testid='description']").type(itemDesc);
+            cy.get("[data-testid='value']").type(`${itemValue}`);
+            cy.wait("@itemComplete");
 
-          cy.get("[data-testid='add-item']").click();
-          cy.wait("@addItem").its("request.body").should("deep.equal", {
-            period: period,
-            description: itemDesc,
-            value: itemValue,
-            itemType: "EXPENSE",
+            cy.get("[data-testid='add-item']").click();
+            cy.wait("@addItem").its("request.body").should("deep.equal", {
+              period: period,
+              description: itemDesc,
+              value: itemValue,
+              itemType: "EXPENSE",
+            });
           });
         });
       });
@@ -102,71 +107,79 @@ describe("Panel Tests", () => {
       it("Edit Item", () => {
         cy.intercept("PATCH", "/api/panel/edit-item/57", { statusCode: 200 }).as("editItem");
 
-        cy.get("[data-testid='month-items-card']").within(() => {
-          cy.get(".panel-edit:first").click();
+        cy.wait("@currentPeriod").then(() => {
+          cy.get("[data-testid='month-items-card']").within(() => {
+            cy.get(".panel-edit:first").click();
 
-          cy.get("td #description").type("{selectall}{backspace}Workout");
-          cy.get("td #value").type("{selectall}{backspace}150");
+            cy.get("td #description").type("{selectall}{backspace}Workout");
+            cy.get("td #value").type("{selectall}{backspace}150");
 
-          cy.get(".panel-confirm:first").should("exist").click();
-          cy.wait("@editItem");
-          cy.wait("@currentPeriod");
+            cy.get(".panel-confirm:first").should("exist").click();
+            cy.wait("@editItem");
+            cy.wait("@currentPeriod");
+          });
         });
       });
 
       it("Delete Item", () => {
         cy.intercept("DELETE", "/api/panel/remove-item/57", { statusCode: 200 }).as("deleteItem");
 
-        cy.get("[data-testid='month-items-card']").within(() => {
-          cy.get(".panel-delete:first").should("exist").click({ force: true });
-        });
+        cy.wait("@currentPeriod").then(() => {
+          cy.get("[data-testid='month-items-card']").within(() => {
+            cy.get(".panel-delete:first").should("exist").click({ force: true });
+          });
 
-        cy.get("div.ant-popover-inner button.ant-btn-primary").should("exist").click();
-        cy.wait("@deleteItem");
-        cy.wait("@currentPeriod");
+          cy.get("div.ant-popover-inner button.ant-btn-primary").should("exist").click();
+          cy.wait("@deleteItem");
+          cy.wait("@currentPeriod");
+        });
       });
 
       it("Delete Items", () => {
         cy.intercept("DELETE", `/api/panel/remove-items/${period}?ids=57,58`, { statusCode: 200 }).as("removeItems");
 
-        cy.get("[data-testid='month-items-card']").within(() => {
-          cy.get(".ant-checkbox-input:nth(1)").click();
-          cy.get(".ant-checkbox-input:nth(2)").click();
+        cy.wait("@currentPeriod").then(() => {
+          cy.get("[data-testid='month-items-card']").within(() => {
+            cy.get(".ant-checkbox-input:nth(1)").click();
+            cy.get(".ant-checkbox-input:nth(2)").click();
 
-          cy.get("[data-testid='delete-selected']").click();
+            cy.get("[data-testid='delete-selected']").click();
+          });
+
+          cy.get("div.ant-modal-content button.ant-btn-primary").should("exist").click();
+
+          cy.wait("@removeItems");
         });
-
-        cy.get("div.ant-modal-content button.ant-btn-primary").should("exist").click();
-
-        cy.wait("@removeItems");
       });
 
       it("Replicate Items", () => {
         cy.intercept("POST", `/api/panel/copy-items`, { statusCode: 200 }).as("copyItems");
 
-        cy.get("[data-testid='month-items-card']").within(() => {
-          cy.get(".ant-checkbox-input:nth(1)").click();
-          cy.get(".ant-checkbox-input:nth(2)").click();
+        cy.wait("@currentPeriod").then(() => {
+          cy.get("[data-testid='month-items-card']").within(() => {
+            cy.get(".ant-checkbox-input:nth(1)").click();
+            cy.get(".ant-checkbox-input:nth(2)").click();
 
-          cy.get("[data-testid='replicate-month']").click();
+            cy.get("[data-testid='replicate-month']").click();
+          });
+
+          cy.wait("@copyItems")
+            .its("request.body")
+            .should("deep.equal", [
+              {
+                period: "2023-09",
+                description: "Gym",
+                itemType: "EXPENSE",
+                value: 100,
+              },
+              {
+                period: "2023-09",
+                description: "Condominium",
+                itemType: "EXPENSE",
+                value: 4000,
+              },
+            ]);
         });
-
-        cy.wait("@copyItems")
-          .its("request.body")
-          .should("deep.equal", [
-            {
-              period: "2023-09",
-              description: "Gym",
-              itemType: "EXPENSE",
-              value: 100,
-            },
-            {
-              period: "2023-09",
-              description: "Condominium",
-              itemType: "EXPENSE",
-              value: 4000,
-            },
-          ]);
       });
     });
   });
