@@ -7,11 +7,14 @@ describe("Panel Tests", () => {
     beforeEach(() => {
       cy.clearLocalStorage();
 
-      cy.intercept("POST", "/api/login", { fixture: "login/common.user.json" });
-      cy.intercept("GET", `/api/panel?&period=${period}`, { fixture: "panel/control.json" }).as("currentPeriod");
-      cy.intercept("GET", `/api/panel?&period=${previous}`, { fixture: "panel/control-empty.json" }).as(
-        "previousPeriod"
+      cy.intercept("POST", "/api/login", { fixture: "login/common.user.json", statusCode: 200 });
+      cy.intercept("GET", `/api/panel?&period=${period}`, { fixture: "panel/control.json", statusCode: 200 }).as(
+        "currentPeriod"
       );
+      cy.intercept("GET", `/api/panel?&period=${previous}`, {
+        fixture: "panel/control-empty.json",
+        statusCode: 200,
+      }).as("previousPeriod");
 
       const { username, password } = user;
 
@@ -81,6 +84,7 @@ describe("Panel Tests", () => {
 
         cy.intercept("GET", `/api/panel/item-complete?&description=${encodeURI(itemDesc)}`, {
           fixture: "panel/item-complete.json",
+          statusCode: 200,
         }).as("itemComplete");
         cy.intercept("POST", "/api/panel/add-item", { statusCode: 200 }).as("addItem");
 
