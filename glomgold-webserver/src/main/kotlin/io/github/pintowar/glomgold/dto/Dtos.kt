@@ -43,7 +43,9 @@ data class BalanceSummary(
     )
 
     private fun percentDiff(actual: BigDecimal?, last: BigDecimal?) = if (actual != null && last != null) {
-        ((actual.divide(last, MathContext(4, RoundingMode.HALF_UP))) - BigDecimal.ONE)
+        if (BigDecimal.ZERO != last) {
+            ((actual.divide(last, MathContext(4, RoundingMode.HALF_UP))) - BigDecimal.ONE)
+        } else BigDecimal.ZERO
     } else {
         BigDecimal.ZERO
     }
