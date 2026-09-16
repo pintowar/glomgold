@@ -58,7 +58,7 @@ jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" 
 logback-classic = { module = "ch.qos.logback:logback-classic" }
 jbcrypt = { module = "org.mindrot:jbcrypt", version = "0.4" }
 
-postgresql-jdbc = { module = "org.postgresql:postgresql", version = "42.7.12" }
+postgresql-jdbc = { module = "org.postgresql:postgresql", version = "42.7.13" }
 postgresql-r2dbc = { module = "org.postgresql:r2dbc-postgresql" }
 r2dbc-pool = { module = "io.r2dbc:r2dbc-pool", version = "1.0.2.RELEASE" }
 
@@ -68,7 +68,7 @@ testcontainers = { module = "org.testcontainers:testcontainers" }
 testcontainers-r2dbc = { module = "org.testcontainers:testcontainers-r2dbc" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
 
-liquibase-core = { module = "org.liquibase:liquibase-core", version = "5.0.3" }
+liquibase-core = { module = "org.liquibase:liquibase-core", version = "5.0.4" }
 liquibase-groovy-dsl = { module = "org.liquibase:liquibase-groovy-dsl", version = "4.0.1" }
 liquibase-picocli = { module = "info.picocli:picocli", version = "4.7.7" }
 liquibase-hibernate = { module = "org.liquibase.ext:liquibase-hibernate5", version = "4.27.0" }
