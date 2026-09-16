@@ -1,6 +1,6 @@
 [versions]
-kotlin = "2.3.21"
-kotlin-coroutines = "1.10.2"
+kotlin = "2.4.20"
+kotlin-coroutines = "1.11.0"
 ksp = "2.3.12"
 micronaut = "5.1.5"
 gradle-micronaut = "5.0.2"
