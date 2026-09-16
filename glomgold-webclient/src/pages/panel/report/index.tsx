@@ -31,24 +31,30 @@ export const ReportPanel: React.FC = () => {
 
   const currentPeriod = useMemo(() => dayjs(period, periodFormat), [period, periodFormat]);
 
-  const { data: dataTable, isLoading } = useCustom<IPanelAnnualReport>({
+  const {
+    query: { isLoading },
+
+    result: dataTable,
+  } = useCustom<IPanelAnnualReport>({
     url: `/api/panel/report`,
     method: "get",
     config: { query: { year: currentPeriod.year(), type } },
   });
 
   const onChangePeriod = (date: dayjs.Dayjs | null) => {
-    date &&
+    if (date) {
       setSearchParams((params) => {
         return { ...Object.fromEntries(params), [periodParam]: date.format(periodFormat) };
       });
+    }
   };
 
   const onTypeChange = (value: string) => {
-    value &&
+    if (value) {
       setSearchParams((params) => {
         return { ...Object.fromEntries(params), [typeParam]: value };
       });
+    }
   };
 
   const tabsItems = [

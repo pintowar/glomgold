@@ -10,9 +10,10 @@ import { IUser } from "../../../interfaces";
 const { Title, Text } = Typography;
 
 export const UserShow: React.FC<IResourceComponentsProps> = () => {
-  const { queryResult } = useShow<IUser>();
-  const { data, isLoading } = queryResult;
-  const record = data?.data;
+  const {
+    result: record,
+    query: { isLoading },
+  } = useShow<IUser>();
 
   return (
     <Show isLoading={isLoading}>

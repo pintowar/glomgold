@@ -42,10 +42,16 @@ export const ControlPanel: React.FC = () => {
   const currentPeriod = useMemo(() => dayjs(period, periodFormat), [period, periodFormat]);
   const formattedPeriod = useMemo(() => currentPeriod.format(periodFormat), [currentPeriod]);
   const onCurrentPeriodChange = (value: dayjs.Dayjs | null) => {
-    value && setSearchParams({ [periodParam]: value.format(periodFormat) });
+    if (value) {
+      setSearchParams({ [periodParam]: value.format(periodFormat) });
+    }
   };
 
-  const { data: panelData, isLoading } = useCustom<ControlPanelData>({
+  const {
+    query: { isLoading },
+
+    result: panelData,
+  } = useCustom<ControlPanelData>({
     url: "/api/panel",
     method: "get",
     config: { query: { period: formattedPeriod } },
@@ -54,7 +60,8 @@ export const ControlPanel: React.FC = () => {
     },
   });
 
-  const invalidateQuery = async (period: string) => await queryClient.invalidateQueries([controlPanelKey, period]);
+  const invalidateQuery = async (period: string) =>
+    await queryClient.invalidateQueries({ queryKey: [controlPanelKey, period] });
 
   const tableData = (panelData?.data?.items ?? []).map(({ id, description, value, itemType }) => ({
     key: id,

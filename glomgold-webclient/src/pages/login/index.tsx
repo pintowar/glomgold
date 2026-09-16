@@ -21,7 +21,7 @@ export const Login: React.FC = () => {
   const [form] = Form.useForm<ILoginForm>();
   const translate = useTranslate();
 
-  const { mutate: login, isLoading } = useLogin<ILoginForm>();
+  const { mutate: login, isPending: isLoading } = useLogin<ILoginForm>();
 
   const CardTitle = (
     <Title level={3} style={titleStyles}>
