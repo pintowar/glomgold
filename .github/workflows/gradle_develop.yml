@@ -31,10 +31,8 @@ jobs:
       - name: Setup GraalVM CE
         uses: graalvm/setup-graalvm@v1
         with:
-          version: '22.3.3'
-          java-version: '17'
-      - name: Install Native Image
-        run: gu install native-image
+          version: 'latest'
+          java-version: '25'
 
       - name: Running gradle task
         uses: gradle/gradle-build-action@v2

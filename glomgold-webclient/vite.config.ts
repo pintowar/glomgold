@@ -1,7 +1,6 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import istanbul from "vite-plugin-istanbul";
-import eslintPlugin from "vite-plugin-eslint";
 
 export default defineConfig({
   server: {
@@ -26,6 +25,5 @@ export default defineConfig({
           cypress: true,
           requireEnv: false,
         }),
-    eslintPlugin(),
   ],
 });

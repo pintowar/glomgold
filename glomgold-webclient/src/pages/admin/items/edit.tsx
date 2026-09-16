@@ -8,11 +8,11 @@ import { DollarOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import { IItem, IUser } from "../../../interfaces";
 
 export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
-  const { formProps, saveButtonProps, queryResult } = useForm<IItem>({
+  const { formProps, saveButtonProps, query } = useForm<IItem>({
     warnWhenUnsavedChanges: true,
   });
 
-  const postData = queryResult?.data?.data;
+  const postData = query?.data?.data;
   const { selectProps: userSelectProps } = useSelect<IUser>({
     resource: "users",
     optionLabel: "name",

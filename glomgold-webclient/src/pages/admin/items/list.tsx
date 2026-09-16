@@ -42,7 +42,10 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
   });
 
   const userIds = tableProps?.dataSource?.map((item) => item.userId) ?? [];
-  const { data, isLoading } = useMany<IUser>({
+  const {
+    result: data,
+    query: { isLoading },
+  } = useMany<IUser>({
     resource: "users",
     ids: userIds,
     queryOptions: {

@@ -7,7 +7,14 @@ import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.github.pintowar.glomgold.service.PanelService
 import io.micronaut.http.HttpResponse
-import io.micronaut.http.annotation.*
+import io.micronaut.http.annotation.Body
+import io.micronaut.http.annotation.Controller
+import io.micronaut.http.annotation.Delete
+import io.micronaut.http.annotation.Get
+import io.micronaut.http.annotation.Patch
+import io.micronaut.http.annotation.PathVariable
+import io.micronaut.http.annotation.Post
+import io.micronaut.http.annotation.QueryValue
 import io.micronaut.security.authentication.Authentication
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -20,21 +27,29 @@ class PanelController(
     private val itemRepository: ItemRepository,
     private val panelService: PanelService
 ) {
-
     @Get("/{?period}")
-    suspend fun panel(auth: Authentication, @QueryValue period: YearMonth?) =
-        panelService.panelInfo(authId(auth), period ?: YearMonth.now())
+    suspend fun panel(
+        auth: Authentication,
+        @QueryValue period: YearMonth?
+    ) = panelService.panelInfo(authId(auth), period ?: YearMonth.now())
 
     @Get("/report{?year,type}")
-    suspend fun report(auth: Authentication, @QueryValue year: Int?, @QueryValue type: String?): PanelAnnualReport {
+    suspend fun report(
+        auth: Authentication,
+        @QueryValue year: Int?,
+        @QueryValue type: String?
+    ): PanelAnnualReport {
         val currentYear = year ?: YearMonth.now().year
         val currentType = if (type in listOf("EXPENSE", "INCOME")) type else ""
         return panelService.annualReport(authId(auth), currentYear, currentType ?: "")
     }
 
     @Post("/profile/password")
-    suspend fun profilePassword(auth: Authentication, passwords: ChangePassword): HttpResponse<Unit> {
-        return userRepository.findById(authId(auth)).let { user ->
+    suspend fun profilePassword(
+        auth: Authentication,
+        passwords: ChangePassword
+    ): HttpResponse<Unit> =
+        userRepository.findById(authId(auth)).let { user ->
             if (user?.checkPassword(passwords.actualPassword) == true) {
                 userRepository.update(user.apply { applyPassword(passwords.newPassword) })
                 HttpResponse.ok()
@@ -42,10 +57,12 @@ class PanelController(
                 HttpResponse.notModified()
             }
         }
-    }
 
     @Get("/item-complete{?description}")
-    suspend fun itemComplete(auth: Authentication, @QueryValue description: String?): List<String> {
+    suspend fun itemComplete(
+        auth: Authentication,
+        @QueryValue description: String?
+    ): List<String> {
         val desc = if (description != null) "$description%" else ""
         return if (desc.isNotEmpty()) {
             itemRepository.findDistinctDescriptionByUserIdAndDescriptionIlike(authId(auth), desc)
@@ -55,20 +72,30 @@ class PanelController(
     }
 
     @Post("/add-item")
-    suspend fun addItem(auth: Authentication, @Body item: ItemBody): HttpResponse<Unit> {
+    suspend fun addItem(
+        auth: Authentication,
+        @Body item: ItemBody
+    ): HttpResponse<Unit> {
         itemRepository.save(item.toItem(authId(auth)))
         return HttpResponse.ok()
     }
 
     @Patch("/edit-item/{id}")
-    suspend fun editItem(auth: Authentication, @PathVariable id: Long, @Body item: ItemBody): HttpResponse<Unit> =
+    suspend fun editItem(
+        auth: Authentication,
+        @PathVariable id: Long,
+        @Body item: ItemBody
+    ): HttpResponse<Unit> =
         itemRepository.findByIdAndUserId(id, authId(auth))?.let { foundItem ->
             itemRepository.update(id, foundItem.version!!, item.description, item.value, item.itemType)
             HttpResponse.ok()
         } ?: HttpResponse.notFound()
 
     @Delete("/remove-item/{id}")
-    suspend fun removeItem(auth: Authentication, @PathVariable id: Long): HttpResponse<Unit> =
+    suspend fun removeItem(
+        auth: Authentication,
+        @PathVariable id: Long
+    ): HttpResponse<Unit> =
         itemRepository.findByIdAndUserId(id, authId(auth))?.let { item ->
             itemRepository.delete(item)
             HttpResponse.ok()
@@ -90,14 +117,23 @@ class PanelController(
         }
 
     @Post("/copy-items")
-    suspend fun copyItems(auth: Authentication, @Body items: List<ItemBody>): HttpResponse<Unit> {
-        val itemsToCopy = items.map { it.toItem(authId(auth)) }.groupBy { it.period }
-            .flatMap { (period, periodItems) ->
-                val nextPeriod = period.plusMonths(1)
-                val nextItemsDesc = itemRepository.findByUserIdAndPeriod(authId(auth), nextPeriod)
-                    .map { it.description }.toSet()
-                periodItems.filter { it.description !in nextItemsDesc }.map { it.copy(period = nextPeriod) }
-            }
+    suspend fun copyItems(
+        auth: Authentication,
+        @Body items: List<ItemBody>
+    ): HttpResponse<Unit> {
+        val itemsToCopy =
+            items
+                .map { it.toItem(authId(auth)) }
+                .groupBy { it.period }
+                .flatMap { (period, periodItems) ->
+                    val nextPeriod = period.plusMonths(1)
+                    val nextItemsDesc =
+                        itemRepository
+                            .findByUserIdAndPeriod(authId(auth), nextPeriod)
+                            .map { it.description }
+                            .toSet()
+                    periodItems.filter { it.description !in nextItemsDesc }.map { it.copy(period = nextPeriod) }
+                }
         if (itemsToCopy.isNotEmpty()) itemRepository.saveAll(itemsToCopy).toList()
         return HttpResponse.ok()
     }

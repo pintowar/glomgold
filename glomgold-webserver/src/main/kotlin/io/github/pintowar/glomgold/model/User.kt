@@ -32,7 +32,6 @@ data class User(
     @field:NotNull
     var timezone: ZoneId = ZoneId.systemDefault()
 ) : Entity() {
-
     companion object : KLogging() {
         private val secureRandom = SecureRandom()
     }
@@ -52,17 +51,21 @@ data class User(
 
     fun roles() = listOf(if (admin) "ROLE_ADMIN" else "ROLE_USER")
 
-    fun attributes() = Currency.getInstance(locale).let { currency ->
-        mapOf(
-            "userId" to id,
-            "name" to name,
-            "locale" to locale.toLanguageTag(),
-            "currency" to currency.currencyCode,
-            "symbol" to currency.symbol
-        )
-    }
+    fun attributes() =
+        Currency.getInstance(locale).let { currency ->
+            mapOf(
+                "userId" to id,
+                "name" to name,
+                "locale" to locale.toLanguageTag(),
+                "currency" to currency.currencyCode,
+                "symbol" to currency.symbol
+            )
+        }
 
     private fun generatePasswordHash(passwd: String) = BCrypt.hashpw(passwd, BCrypt.gensalt(10, secureRandom))
 
-    private fun checkPasswordHash(passwordHash: String, password: String) = BCrypt.checkpw(password, passwordHash)
+    private fun checkPasswordHash(
+        passwordHash: String,
+        password: String
+    ) = BCrypt.checkpw(password, passwordHash)
 }

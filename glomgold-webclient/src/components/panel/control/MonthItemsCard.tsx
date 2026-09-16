@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
+  App as AntdApp,
   AutoComplete,
   Button,
   Card,
@@ -7,7 +8,6 @@ import {
   Input,
   InputNumber,
   InputRef,
-  Modal,
   Popconfirm,
   Select,
   Space,
@@ -66,6 +66,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 }) => {
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
+  const { modal } = AntdApp.useApp();
   const descInputRef = useRef<BaseSelectRef>(null);
 
   // start selected rows
@@ -85,9 +86,12 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     onChange: onSelectRowChange,
   };
 
-  useEffect(() => {
+  const [prevTableData, setPrevTableData] = useState(tableData);
+
+  if (prevTableData !== tableData) {
+    setPrevTableData(tableData);
     setSelectedRows({ keys: [], rows: [] });
-  }, [tableData]);
+  }
   // end selected rows
 
   // start inputnumber formatter / parser
@@ -141,6 +145,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
         <Input
+          // eslint-disable-next-line react-hooks/refs -- passing ref to antd Input is the documented table-filter pattern; ref is only read in event handlers
           ref={searchInput}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
@@ -178,7 +183,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       </div>
     ),
     filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
-    onFilter: (value: string | number | boolean, record: PanelItem) => {
+    onFilter: (value, record) => {
       switch (dataIndex) {
         case "description":
           return record.description.toLowerCase().includes(`${value}`.toLowerCase());
@@ -216,7 +221,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 
   const [searchText, setSearchText] = useState("");
 
-  const { data: itemSearchData } = useCustom<string[]>({
+  const { result: itemSearchData } = useCustom<string[]>({
     url: "/api/panel/item-complete",
     method: "get",
     config: { query: { description: searchText } },
@@ -317,7 +322,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   };
 
   const confirmDeleteSelected = () => {
-    Modal.confirm({
+    // NOTE: use context-based modal — static Modal.confirm renders via rc-util's
+    // legacy ReactDOM entry point, which silently no-ops under React 19
+    modal.confirm({
       title: "Sure to delete all selected?",
       onOk() {
         deleteSelected();
@@ -342,7 +349,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   };
 
   const onSearch = () => {
-    setAutoCompleteOptions((itemSearchData?.data ?? []).map((r) => ({ value: r })));
+    // Refine v5 normalizes missing useCustom data to {} (not undefined), so guard with Array.isArray
+    const data = itemSearchData?.data;
+    setAutoCompleteOptions((Array.isArray(data) ? data : []).map((r) => ({ value: r })));
   };
 
   const columns = [
