@@ -11,50 +11,48 @@ import java.util.*
 
 @Factory
 class TypeConverters {
-
     private val zone = ZoneId.systemDefault()
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM")
 
     @Singleton
-    fun periodDateTypeConverter(): TypeConverter<YearMonth, Instant> {
-        return TypeConverter<YearMonth, Instant> { obj, _, _ ->
-            val startOfMonth = obj.atDay(1).atStartOfDay().atZone(zone).toInstant()
+    fun periodDateTypeConverter(): TypeConverter<YearMonth, Instant> =
+        TypeConverter<YearMonth, Instant> { obj, _, _ ->
+            val startOfMonth =
+                obj
+                    .atDay(1)
+                    .atStartOfDay()
+                    .atZone(zone)
+                    .toInstant()
             Optional.of(startOfMonth)
         }
-    }
 
     @Singleton
-    fun datePeriodTypeConverter(): TypeConverter<Instant, YearMonth> {
-        return TypeConverter<Instant, YearMonth> { obj, _, _ ->
+    fun datePeriodTypeConverter(): TypeConverter<Instant, YearMonth> =
+        TypeConverter<Instant, YearMonth> { obj, _, _ ->
             Optional.of(YearMonth.from(obj.atZone(zone)))
         }
-    }
 
     @Singleton
-    fun zoneStringTypeConverter(): TypeConverter<ZoneId, String> {
-        return TypeConverter<ZoneId, String> { obj, _, _ ->
+    fun zoneStringTypeConverter(): TypeConverter<ZoneId, String> =
+        TypeConverter<ZoneId, String> { obj, _, _ ->
             Optional.of(obj.toString())
         }
-    }
 
     @Singleton
-    fun stringZoneTypeConverter(): TypeConverter<String, ZoneId> {
-        return TypeConverter<String, ZoneId> { obj, _, _ ->
+    fun stringZoneTypeConverter(): TypeConverter<String, ZoneId> =
+        TypeConverter<String, ZoneId> { obj, _, _ ->
             Optional.of(ZoneId.of(obj))
         }
-    }
 
     @Singleton
-    fun periodStringTypeConverter(): TypeConverter<YearMonth, String> {
-        return TypeConverter<YearMonth, String> { obj, _, _ ->
+    fun periodStringTypeConverter(): TypeConverter<YearMonth, String> =
+        TypeConverter<YearMonth, String> { obj, _, _ ->
             Optional.of(obj.format(formatter))
         }
-    }
 
     @Singleton
-    fun stringPeriodTypeConverter(): TypeConverter<String, YearMonth> {
-        return TypeConverter<String, YearMonth> { obj, _, _ ->
+    fun stringPeriodTypeConverter(): TypeConverter<String, YearMonth> =
+        TypeConverter<String, YearMonth> { obj, _, _ ->
             Optional.of(YearMonth.parse(obj))
         }
-    }
 }

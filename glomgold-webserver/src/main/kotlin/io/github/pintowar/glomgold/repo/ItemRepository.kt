@@ -15,14 +15,26 @@ import java.time.YearMonth
 
 @R2dbcRepository(dialect = Dialect.POSTGRES)
 interface ItemRepository : EntityRepository<Item, Long> {
+    fun findByUserIdAndPeriod(
+        userId: Long,
+        period: YearMonth
+    ): Flow<Item>
 
-    fun findByUserIdAndPeriod(userId: Long, period: YearMonth): Flow<Item>
+    suspend fun findByIdAndUserId(
+        id: Long,
+        userId: Long
+    ): Item?
 
-    suspend fun findByIdAndUserId(id: Long, userId: Long): Item?
+    fun findByIdInAndPeriodAndUserId(
+        id: List<Long>,
+        period: YearMonth,
+        userId: Long
+    ): Flow<Item>
 
-    fun findByIdInAndPeriodAndUserId(id: List<Long>, period: YearMonth, userId: Long): Flow<Item>
-
-    fun listByPeriodAndUserIdOrderByCreatedAtAndDescription(period: YearMonth, userId: Long): Flow<Item>
+    fun listByPeriodAndUserIdOrderByCreatedAtAndDescription(
+        period: YearMonth,
+        userId: Long
+    ): Flow<Item>
 
     @Query(
         """
@@ -35,7 +47,10 @@ interface ItemRepository : EntityRepository<Item, Long> {
         ORDER BY i.item_type, i.description
         """
     )
-    fun monthSummary(period: YearMonth, userId: Long): Flow<ItemSummary>
+    fun monthSummary(
+        period: YearMonth,
+        userId: Long
+    ): Flow<ItemSummary>
 
     @Query(
         """
@@ -48,7 +63,10 @@ interface ItemRepository : EntityRepository<Item, Long> {
         ORDER BY i.period, i.item_type, i.description
         """
     )
-    fun yearSummary(year: Int, userId: Long): Flow<ItemSummary>
+    fun yearSummary(
+        year: Int,
+        userId: Long
+    ): Flow<ItemSummary>
 
     @Query(
         """
@@ -61,7 +79,11 @@ interface ItemRepository : EntityRepository<Item, Long> {
         ORDER BY i.period, i.item_type, i.description
         """
     )
-    fun yearSummary(year: Int, itemType: String, userId: Long): Flow<ItemSummary>
+    fun yearSummary(
+        year: Int,
+        itemType: String,
+        userId: Long
+    ): Flow<ItemSummary>
 
     @Query(
         """
@@ -72,9 +94,15 @@ interface ItemRepository : EntityRepository<Item, Long> {
         WHERE i.period = :period AND i.user_id = :userId
         """
     )
-    suspend fun periodSummary(period: YearMonth, userId: Long): BalanceSummary
+    suspend fun periodSummary(
+        period: YearMonth,
+        userId: Long
+    ): BalanceSummary
 
-    suspend fun findDistinctDescriptionByUserIdAndDescriptionIlike(userId: Long, description: String): List<String>
+    suspend fun findDistinctDescriptionByUserIdAndDescriptionIlike(
+        userId: Long,
+        description: String
+    ): List<String>
 
     suspend fun update(
         @Id id: Long,

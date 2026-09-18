@@ -12,22 +12,24 @@ export const UserEdit: React.FC<IResourceComponentsProps> = () => {
     warnWhenUnsavedChanges: true,
   });
 
-  const { data: locales } = useCustom({
+  const { result: locales } = useCustom({
     url: `${apiUrl}/users/locales`,
     method: "get",
   });
 
   const localeOptions = useMemo(() => {
-    return (locales?.data ?? []).map((it: string) => ({ label: it, value: it }));
+    const data = locales?.data;
+    return (Array.isArray(data) ? data : []).map((it: string) => ({ label: it, value: it }));
   }, [locales]);
 
-  const { data: timezones } = useCustom({
+  const { result: timezones } = useCustom({
     url: `${apiUrl}/users/timezones`,
     method: "get",
   });
 
   const timezonesOptions = useMemo(() => {
-    return (timezones?.data ?? []).map((it: string) => ({ label: it, value: it }));
+    const data = timezones?.data;
+    return (Array.isArray(data) ? data : []).map((it: string) => ({ label: it, value: it }));
   }, [timezones]);
 
   return (

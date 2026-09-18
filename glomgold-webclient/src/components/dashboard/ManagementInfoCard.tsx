@@ -3,7 +3,7 @@ import { useCustom } from "@refinedev/core";
 import { Card, Space } from "antd";
 
 export const ManagementInfoCard: React.FC = () => {
-  const { data } = useCustom({
+  const { result: data } = useCustom({
     url: `/api/management/info`,
     method: "get",
   });

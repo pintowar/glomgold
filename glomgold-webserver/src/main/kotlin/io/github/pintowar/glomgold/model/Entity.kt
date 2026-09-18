@@ -1,6 +1,10 @@
 package io.github.pintowar.glomgold.model
 
-import io.micronaut.data.annotation.*
+import io.micronaut.data.annotation.DateCreated
+import io.micronaut.data.annotation.DateUpdated
+import io.micronaut.data.annotation.GeneratedValue
+import io.micronaut.data.annotation.Id
+import io.micronaut.data.annotation.Version
 import java.time.Instant
 
 open class Entity {

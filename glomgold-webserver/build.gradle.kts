@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.allopen")
     id("com.google.devtools.ksp")
-    id("com.github.johnrengelman.shadow")
+    id("com.gradleup.shadow")
     id("io.micronaut.application")
     id("io.micronaut.aot")
     id("com.gorylenko.gradle-git-properties")
@@ -22,15 +22,16 @@ repositories {
     mavenCentral()
 }
 
-val defaultJavaLang = JavaLanguageVersion.of(17)
+val defaultJavaLang = JavaLanguageVersion.of(25)
 val defaultJavaVendor = JvmVendorSpec.matching("GraalVM Community")
-val defaultJvmArgs = listOf(
-    "-Dmicronaut.environments=dev",
-    "-Duser.timezone=UTC",
-    "-Duser.language=en",
-    "-Duser.region=US",
-    "-Djava.security.egd=file:/dev/./urandom"
-)
+val defaultJvmArgs =
+    listOf(
+        "-Dmicronaut.environments=dev",
+        "-Duser.timezone=UTC",
+        "-Duser.language=en",
+        "-Duser.region=US",
+        "-Djava.security.egd=file:/dev/./urandom"
+    )
 
 java {
     toolchain {
@@ -52,7 +53,6 @@ dependencies {
     runtimeOnly(libs.bundles.postgresql)
     runtimeOnly(libs.jackson.module.kotlin)
 
-    compileOnly(libs.graalvm.svm)
     testImplementation(libs.bundles.testcontainers)
     testImplementation(libs.bundles.ktest)
 
@@ -93,25 +93,28 @@ tasks {
 
     compileKotlin {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.JVM_25)
         }
     }
     compileTestKotlin {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.JVM_25)
         }
     }
 
-    val imagesTags = listOf(
-        "pintowar/glomgold:$version",
-        "pintowar/glomgold:latest"
-    )
+    val imagesTags =
+        listOf(
+            "pintowar/glomgold:$version",
+            "pintowar/glomgold:latest"
+        )
 
     optimizedDockerfileNative {
         val isProd = project.hasProperty("prod")
-        val commands = defaultJvmArgs.filterNot {
-            isProd && it.contains("micronaut.environments")
-        }.toTypedArray()
+        val commands =
+            defaultJvmArgs
+                .filterNot {
+                    isProd && it.contains("micronaut.environments")
+                }.toTypedArray()
         defaultCommand(*commands)
     }
 
@@ -149,6 +152,12 @@ tasks {
         doLast {
             logger.quiet("Finishing Coverage Report!!")
         }
+    }
+
+    // Gradle 9 validates implicit task dependencies: the Micronaut classpath
+    // inspector scans the git-properties output, so declare the dependency.
+    named("inspectRuntimeClasspath") {
+        dependsOn("generateGitProperties")
     }
 }
 

@@ -32,20 +32,25 @@ data class BalanceSummary(
     val expense: BigDecimal? = null,
     val income: BigDecimal? = null
 ) {
-
     val balance: BigDecimal?
         get() = expense?.let { income?.minus(it) }
 
-    fun percentDiff(last: BalanceSummary) = BalancePercent(
-        percentDiff(expense, last.expense),
-        percentDiff(income, last.income),
-        percentDiff(balance, last.balance)
-    )
+    fun percentDiff(last: BalanceSummary) =
+        BalancePercent(
+            percentDiff(expense, last.expense),
+            percentDiff(income, last.income),
+            percentDiff(balance, last.balance)
+        )
 
-    private fun percentDiff(actual: BigDecimal?, last: BigDecimal?) = if (actual != null && last != null) {
+    private fun percentDiff(
+        actual: BigDecimal?,
+        last: BigDecimal?
+    ) = if (actual != null && last != null) {
         if (BigDecimal.ZERO != last) {
             ((actual.divide(last, MathContext(4, RoundingMode.HALF_UP))) - BigDecimal.ONE)
-        } else BigDecimal.ZERO
+        } else {
+            BigDecimal.ZERO
+        }
     } else {
         BigDecimal.ZERO
     }
@@ -72,13 +77,14 @@ data class ItemBody(
     val value: BigDecimal,
     val itemType: ItemType
 ) {
-    fun toItem(userId: Long) = Item(
-        description,
-        value,
-        itemType,
-        period,
-        userId
-    )
+    fun toItem(userId: Long) =
+        Item(
+            description,
+            value,
+            itemType,
+            period,
+            userId
+        )
 }
 
 @Introspected
@@ -132,24 +138,25 @@ data class ItemCommand(
     @field:NotNull val month: Int,
     @field:NotNull val userId: Long
 ) {
-
-    fun toItem() = Item(description, BigDecimal.valueOf(value), itemType, YearMonth.of(year, month), userId)
-        .apply {
-            id = this@ItemCommand.id
-            version = this@ItemCommand.version
-        }
+    fun toItem() =
+        Item(description, BigDecimal.valueOf(value), itemType, YearMonth.of(year, month), userId)
+            .apply {
+                id = this@ItemCommand.id
+                version = this@ItemCommand.version
+            }
 }
 
-fun Item.toCommand() = ItemCommand(
-    this.id,
-    this.version,
-    this.description,
-    this.value.toDouble(),
-    this.itemType,
-    this.period.year,
-    this.period.monthValue,
-    this.userId
-)
+fun Item.toCommand() =
+    ItemCommand(
+        this.id,
+        this.version,
+        this.description,
+        this.value.toDouble(),
+        this.itemType,
+        this.period.year,
+        this.period.monthValue,
+        this.userId
+    )
 
 @Introspected
 data class UserCommand(
@@ -163,16 +170,30 @@ data class UserCommand(
     var locale: Locale = Locale.getDefault(),
     var timezone: ZoneId = ZoneId.systemDefault()
 ) {
-
-    fun toUser() = User(username, name, email, enabled = enabled, admin = admin, locale = locale, timezone = timezone)
-        .apply {
-            id = this@UserCommand.id
-            version = this@UserCommand.version
-            applyPassword(UUID.randomUUID().toString().replace("-", "").take(12))
-        }
+    fun toUser() =
+        User(username, name, email, enabled = enabled, admin = admin, locale = locale, timezone = timezone)
+            .apply {
+                id = this@UserCommand.id
+                version = this@UserCommand.version
+                applyPassword(
+                    UUID
+                        .randomUUID()
+                        .toString()
+                        .replace("-", "")
+                        .take(12)
+                )
+            }
 }
 
-fun User.toCommand() = UserCommand(
-    this.id, this.version, this.username, this.name, this.email,
-    this.enabled, this.admin, this.locale, this.timezone
-)
+fun User.toCommand() =
+    UserCommand(
+        this.id,
+        this.version,
+        this.username,
+        this.name,
+        this.email,
+        this.enabled,
+        this.admin,
+        this.locale,
+        this.timezone
+    )

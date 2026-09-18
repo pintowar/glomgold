@@ -10,11 +10,15 @@ import { IItem, IUser } from "../../../interfaces";
 const { Title, Text } = Typography;
 
 export const ItemShow: React.FC<IResourceComponentsProps> = () => {
-  const { queryResult } = useShow<IItem>();
-  const { data, isLoading } = queryResult;
-  const record = data?.data;
+  const {
+    result: record,
+    query: { isLoading },
+  } = useShow<IItem>();
 
-  const { data: userData, isLoading: userIsLoading } = useOne<IUser>({
+  const {
+    result: userData,
+    query: { isLoading: userIsLoading },
+  } = useOne<IUser>({
     resource: "users",
     id: record?.userId ?? "",
     queryOptions: {
@@ -39,7 +43,7 @@ export const ItemShow: React.FC<IResourceComponentsProps> = () => {
       </Text>
 
       <Title level={5}>User</Title>
-      <Text>{userIsLoading ? "Loading..." : userData?.data.name}</Text>
+      <Text>{userIsLoading ? "Loading..." : userData?.name}</Text>
     </Show>
   );
 };

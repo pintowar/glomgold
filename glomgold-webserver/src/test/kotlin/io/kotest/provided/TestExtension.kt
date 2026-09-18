@@ -10,10 +10,13 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 
-fun fakeItems(userId: Long, numItems: Int = 25): List<Item> {
+fun fakeItems(
+    userId: Long,
+    numItems: Int = 25
+): List<Item> {
     val faker = faker { fakerConfig { randomSeed = 42 } }
     return (0 until numItems).map {
-        faker.randomProvider.randomClassInstance() {
+        faker.randomProvider.randomClassInstance {
             typeGenerator { faker.coffee.blendName() }
             typeGenerator { (faker.random.nextDouble() * 100).toBigDecimal().setScale(2, RoundingMode.HALF_UP) }
             typeGenerator { YearMonth.now().plusMonths(faker.random.nextLong(24)) }
@@ -22,8 +25,8 @@ fun fakeItems(userId: Long, numItems: Int = 25): List<Item> {
     }
 }
 
-fun fakeUsers(): Map<String, User> {
-    return listOf(
+fun fakeUsers(): Map<String, User> =
+    listOf(
         User(
             username = "admin",
             name = "Administrator",
@@ -47,7 +50,8 @@ fun fakeUsers(): Map<String, User> {
             timezone = ZoneId.of("America/Fortaleza")
         ).apply { applyPassword("donald") }
     ).associateBy { it.username }
-}
 
-suspend fun authHeader(authClient: AuthClient, username: String): String =
-    "Bearer ${authClient.login(UsernamePasswordCredentials(username, username)).accessToken}"
+suspend fun authHeader(
+    authClient: AuthClient,
+    username: String
+): String = "Bearer ${authClient.login(UsernamePasswordCredentials(username, username)).accessToken}"

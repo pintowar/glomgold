@@ -10,8 +10,9 @@ import jakarta.validation.ConstraintViolationException
 import mu.KLogging
 
 @Factory
-class EntityListeners(private val validator: Validator) : KLogging() {
-
+class EntityListeners(
+    private val validator: Validator
+) : KLogging() {
     @Singleton
     fun beforeUserPersist() = PrePersistEventListener(this::generalValidation)
 

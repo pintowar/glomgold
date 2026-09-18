@@ -3,20 +3,20 @@ package io.github.pintowar.glomgold.conf
 import io.github.pintowar.glomgold.model.User
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.micronaut.http.HttpRequest
-import io.micronaut.security.authentication.AuthenticationProvider
 import io.micronaut.security.authentication.AuthenticationRequest
 import io.micronaut.security.authentication.AuthenticationResponse
+import io.micronaut.security.authentication.provider.HttpRequestReactiveAuthenticationProvider
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactive.asPublisher
 
 @Singleton
-class AuthenticationProviderUserPassword(private val userRepo: UserRepository) :
-    AuthenticationProvider<HttpRequest<*>> {
-
+class AuthenticationProviderUserPassword(
+    private val userRepo: UserRepository
+) : HttpRequestReactiveAuthenticationProvider<Any> {
     override fun authenticate(
-        httpRequest: HttpRequest<*>,
-        authenticationRequest: AuthenticationRequest<*, *>
+        httpRequest: HttpRequest<Any>?,
+        authenticationRequest: AuthenticationRequest<String, String>
     ) = flow {
         userRepo.findByUsername(authenticationRequest.identity.toString())?.let { user ->
             when {

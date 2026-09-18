@@ -1,6 +1,6 @@
-import { AuthBindings } from "@refinedev/core";
+import { AuthProvider } from "@refinedev/core";
 
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosHeaders, AxiosInstance } from "axios";
 import { LocalStorage } from "./LocalStorage";
 
 const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
@@ -10,11 +10,13 @@ const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
     (config) => {
       const tokenKey = storage.getToken();
       if (tokenKey) {
-        if (!config?.headers?.Authorization) {
-          config.headers = { Authorization: `Bearer ${tokenKey}` };
+        const headers = AxiosHeaders.from(config.headers ?? {});
+        if (!headers.getAuthorization()) {
+          headers.setAuthorization(`Bearer ${tokenKey}`);
         } else {
-          config.headers.Authorization = "";
+          headers.setAuthorization("");
         }
+        config.headers = headers;
       }
       return config;
     },
@@ -42,7 +44,7 @@ const storage = LocalStorage.getInstance();
 
 export const axiosInstance: AxiosInstance = generateAxiosInstance(storage);
 
-export const authProvider: AuthBindings = {
+export const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
     const { data, status } = await axios.post("/api/login", { username, password });
     if (status === 200) {

@@ -4,9 +4,11 @@ import io.micronaut.runtime.EmbeddedApplication
 import io.micronaut.test.extensions.kotest5.annotation.MicronautTest
 
 @MicronautTest(transactional = false)
-class GlomgoldTest(private val application: EmbeddedApplication<*>) : StringSpec({
+class GlomgoldTest(
+    private val application: EmbeddedApplication<*>
+) : StringSpec({
 
-    "test the server is running" {
-        assert(application.isRunning)
-    }
-})
+        "test the server is running" {
+            assert(application.isRunning)
+        }
+    })
