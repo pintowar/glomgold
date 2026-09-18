@@ -9,6 +9,11 @@ on:
       - 'bugfix/**'
       - 'release/**'
       - 'support/**'
+
+env:
+  JAVA_VERSION: '25'
+  JAVA_DISTRO: 'graalvm-community'
+
 jobs:
   gradle_dev_build:
     name: Gradle Dev Build
@@ -22,16 +27,18 @@ jobs:
       - name: Setup GraalVM CE
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '25'
-          distribution: 'graalvm-community'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRO }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
       - name: Running gradle task
         run: |
-          ./gradlew clean :glomgold-webserver:coverageReport sonar
+          ./gradlew clean :glomgold-webserver:coverageReport sonar --scan \
+          -Dscan.tag.CI \
+          -Dscan.tag.${{ github.event_name }} \
+          -Dscan.value.Job-ID=${{ github.run_id }} \
+          -Dscan.link.GitHub-Action=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
