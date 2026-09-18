@@ -35,10 +35,11 @@ jobs:
           java-version: '25'
 
       - name: Running gradle task
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Running gradle task
+        run: |
+          ./gradlew clean coverageReport sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          gradle-version: wrapper
-          arguments: clean coverageReport sonar
