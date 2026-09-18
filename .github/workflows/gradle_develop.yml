@@ -15,18 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.m2/repository
-          key: ${{ runner.os }}-gradle-test-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-test-
 
       - name: Setup GraalVM CE
         uses: graalvm/setup-graalvm@v1
@@ -34,12 +25,12 @@ jobs:
           version: 'latest'
           java-version: '25'
 
-      - name: Running gradle task
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
       - name: Running gradle task
         run: |
-          ./gradlew clean coverageReport sonar
+          ./gradlew clean :glomgold-webserver:coverageReport sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
