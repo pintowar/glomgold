@@ -46,7 +46,7 @@ fun fakeUsers(): Map<String, User> =
             username = "donald",
             name = "Donald Duck",
             email = "donald@glomgold.com",
-            locale = Locale("pt", "BR"),
+            locale = Locale.of("pt", "BR"),
             timezone = ZoneId.of("America/Fortaleza")
         ).apply { applyPassword("donald") }
     ).associateBy { it.username }
