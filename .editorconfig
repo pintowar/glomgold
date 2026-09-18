@@ -1,5 +1,5 @@
 [*]
-ktlint_disabled_rules=no-wildcard-imports
+ktlint_no-wildcard-imports = disabled
 charset = utf-8
 end_of_line = lf
 indent_size = 4

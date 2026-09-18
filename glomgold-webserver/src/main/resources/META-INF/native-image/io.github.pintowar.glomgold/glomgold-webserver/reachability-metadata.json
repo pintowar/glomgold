@@ -1,0 +1,12 @@
+{
+  "reflection": [
+    {
+      "type": "kotlin.Unit",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
+    }
+  ]
+}
