@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   App as AntdApp,
   AutoComplete,
@@ -52,12 +52,92 @@ interface MonthItemsCardProps {
   currency: string;
   symbol: string;
   initialSearch: string;
+  onSearchChange?: (value: string) => void;
   invalidateQuery: (period: string) => Promise<void>;
 }
+
+type EditableInputType = "number" | "text" | "select";
+
+const ITEM_TYPE_OPTIONS = [
+  { value: "EXPENSE", label: <ShoppingCartOutlined /> },
+  { value: "INCOME", label: <DollarOutlined /> },
+];
+
+const INITIAL_FORM_VALUES = { itemType: "EXPENSE", description: "", value: 0 };
+
+const HIGHLIGHT_STYLE = { backgroundColor: "#ffc069", padding: 0 };
+
+// Single source of locale-aware number format/parse, shared by the add-form
+// InputNumber and the editable table cells.
+const useLocaleNumberFormat = (locale: string) =>
+  useMemo(() => {
+    const numFmt = new d2lIntl.NumberFormat(locale, { maximumFractionDigits: 2 });
+    const numParser = new d2lIntl.NumberParse(locale);
+    return {
+      formatter: (value: number | undefined) => {
+        const num = parseFloat(`${value}`);
+        return Number.isNaN(num) ? "" : numFmt.format(num);
+      },
+      parser: (value: string | undefined) => (value ? numParser.parse(value) : 0),
+    };
+  }, [locale]);
+
+interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
+  editing: boolean;
+  dataIndex: string;
+  title: string;
+  inputType: EditableInputType;
+  locale: string;
+  children: React.ReactNode;
+}
+
+// Module-level so antd gets a stable component type across renders
+// (a per-render factory would remount every cell, dropping edit focus).
+const EditableCell: React.FC<EditableCellProps> = ({
+  editing,
+  dataIndex,
+  title,
+  inputType,
+  locale,
+  children,
+  ...restProps
+}) => {
+  const { formatter, parser } = useLocaleNumberFormat(locale);
+  const inputNode =
+    inputType === "number" ? (
+      <InputNumber min={0} formatter={formatter} parser={parser} />
+    ) : inputType === "select" ? (
+      <Select options={ITEM_TYPE_OPTIONS} />
+    ) : (
+      <Input />
+    );
+
+  return (
+    <td {...restProps}>
+      {editing ? (
+        <Form.Item
+          name={dataIndex}
+          style={{ margin: 0 }}
+          rules={[
+            {
+              required: true,
+              message: `Please Input ${title}!`,
+            },
+          ]}
+        >
+          {inputNode}
+        </Form.Item>
+      ) : (
+        children
+      )}
+    </td>
+  );
+};
 
 export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   formattedPeriod,
   initialSearch,
+  onSearchChange,
   tableData,
   locale,
   currency,
@@ -68,23 +148,29 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   const [editForm] = Form.useForm();
   const { modal } = AntdApp.useApp();
   const descInputRef = useRef<RefSelectProps>(null);
+  const searchInput = useRef<InputRef>(null);
+
+  const { formatter: inputNumberFormatter, parser: inputNumberParser } = useLocaleNumberFormat(locale);
+  const currencyFormat = useCallback(
+    (value: number) => value.toLocaleString(locale, { style: "currency", currency: currency }),
+    [locale, currency]
+  );
 
   // start selected rows
-  const [autoCompleteOptions, setAutoCompleteOptions] = useState<{ value: string }[]>([]);
-
   const [selectedRows, setSelectedRows] = useState({
     keys: [] as React.Key[],
     rows: [] as PanelItem[],
   });
 
-  const onSelectRowChange = (selectedRowKeys: React.Key[], selected: PanelItem[]) => {
-    setSelectedRows({ keys: selectedRowKeys, rows: selected });
-  };
-
-  const rowSelection = {
-    selectedRowKeys: selectedRows.keys,
-    onChange: onSelectRowChange,
-  };
+  const rowSelection = useMemo(
+    () => ({
+      selectedRowKeys: selectedRows.keys,
+      onChange: (selectedRowKeys: React.Key[], selected: PanelItem[]) => {
+        setSelectedRows({ keys: selectedRowKeys, rows: selected });
+      },
+    }),
+    [selectedRows.keys]
+  );
 
   const [prevTableData, setPrevTableData] = useState(tableData);
 
@@ -93,17 +179,6 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     setSelectedRows({ keys: [], rows: [] });
   }
   // end selected rows
-
-  // start inputnumber formatter / parser
-  const numFmt = useMemo(() => new d2lIntl.NumberFormat(locale, { maximumFractionDigits: 2 }), [locale]);
-  const numParser = useMemo(() => new d2lIntl.NumberParse(locale), [locale]);
-
-  const inputNumberFormatter = (value: number | undefined) => {
-    const num = parseFloat(`${value}`);
-    return Number.isNaN(num) ? "" : numFmt.format(num);
-  };
-  const inputNumberParser = (value: string | undefined) => (value ? numParser.parse(value) : 0);
-  // end inputnumber formatter / parser
 
   // start of editable cells
   const [editingKey, setEditingKey] = useState("");
@@ -117,29 +192,46 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 
   const cancel = () => setEditingKey("");
 
+  const cellProps = (dataIndex: string, title: string, inputType: EditableInputType, record: PanelItem) => ({
+    dataIndex,
+    title,
+    inputType,
+    locale,
+    editing: isEditing(record),
+  });
   // end of editable cells
 
   // start of filter components
-  const searchInput = useRef<InputRef>(null);
-  const [filterState, setFilterState] = useState({
-    searchText: "",
-    searchedColumn: "",
-  });
+  // The URL (?desc=) is the source of truth for the description filter, so its
+  // highlight derives directly from the prop — no sync state needed. The value
+  // column filter is uncontrolled (antd-internal), so only its highlight is local.
+  const descFilter = initialSearch ?? "";
+  const [valueHighlight, setValueHighlight] = useState("");
 
-  const handleSearch = (selectedKeys: React.Key[], confirm: () => void, dataIndex: string) => {
-    confirm();
-    setFilterState({
-      searchText: `${selectedKeys[0]}`,
-      searchedColumn: dataIndex,
-    });
-  };
+  const applyColumnFilter = useCallback(
+    (selectedKeys: React.Key[], confirmFilter: () => void, dataIndex: string) => {
+      confirmFilter();
+      const next = `${selectedKeys[0] ?? ""}`;
+      if (dataIndex === "description") {
+        onSearchChange?.(next);
+      } else {
+        setValueHighlight(next);
+      }
+    },
+    [onSearchChange]
+  );
 
-  const handleReset = (clearFilters: (() => void) | undefined) => {
-    if (clearFilters) clearFilters();
-    setFilterState((state) => ({ ...state, searchText: "" }));
-  };
-
-  const currencyFormat = (value: number) => value.toLocaleString(locale, { style: "currency", currency: currency });
+  const resetColumnFilter = useCallback(
+    (clearFilters: (() => void) | undefined, dataIndex: string) => {
+      clearFilters?.();
+      if (dataIndex === "description") {
+        onSearchChange?.("");
+      } else {
+        setValueHighlight("");
+      }
+    },
+    [onSearchChange]
+  );
 
   const getColumnSearchProps = (dataIndex: string, format = false): TableColumnsType<PanelItem>[number] => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
@@ -150,32 +242,26 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
           onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          onPressEnter={() => applyColumnFilter(selectedKeys, confirm, dataIndex)}
           style={{ marginBottom: 8, display: "block" }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            onClick={() => applyColumnFilter(selectedKeys, confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
             style={{ width: 90 }}
           >
             Search
           </Button>
-          <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+          <Button onClick={() => resetColumnFilter(clearFilters, dataIndex)} size="small" style={{ width: 90 }}>
             Reset
           </Button>
           <Button
             type="link"
             size="small"
-            onClick={() => {
-              confirm({ closeDropdown: false });
-              setFilterState({
-                searchText: `${selectedKeys[0]}`,
-                searchedColumn: dataIndex,
-              });
-            }}
+            onClick={() => applyColumnFilter(selectedKeys, () => confirm({ closeDropdown: false }), dataIndex)}
           >
             Filter
           </Button>
@@ -184,14 +270,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     ),
     filterIcon: (filtered) => <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />,
     onFilter: (value, record) => {
-      switch (dataIndex) {
-        case "description":
-          return record.description.toLowerCase().includes(`${value}`.toLowerCase());
-        case "value":
-          return `${record.value}`.toLowerCase().includes(`${value}`.toLowerCase());
-        default:
-          return false;
-      }
+      const query = `${value}`.toLowerCase();
+      const target = dataIndex === "description" ? record.description : `${record.value}`;
+      return target.toLowerCase().includes(query);
     },
     filterDropdownProps: {
       onOpenChange: (open) => {
@@ -201,109 +282,120 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       },
     },
     render: (text) => {
-      const amount = format ? currencyFormat(text) : text;
-      return filterState.searchedColumn === dataIndex ? (
+      const display = format ? currencyFormat(text) : text;
+      const query = dataIndex === "description" ? descFilter : valueHighlight;
+      return query ? (
         <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[filterState.searchText]}
+          highlightStyle={HIGHLIGHT_STYLE}
+          searchWords={[query]}
           autoEscape
-          textToHighlight={text ? amount : ""}
+          textToHighlight={text ? display : ""}
         />
       ) : (
-        amount
+        display
       );
     },
   });
-  // end of filter components
-  const addItemOnEnter = async (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      await addItem();
+
+  // Backstop: keep ?desc= in sync when the description filter changes via the table itself.
+  const handleTableChange = (_: unknown, filters: Record<string, (React.Key | boolean | null)[] | null>) => {
+    const next = filters?.description?.[0] != null ? `${filters.description[0]}` : "";
+    if (next !== descFilter) {
+      onSearchChange?.(next);
     }
   };
+  // end of filter components
 
-  const [searchText, setSearchText] = useState("");
+  const [autocompleteQuery, setAutocompleteQuery] = useState("");
 
   const { result: itemSearchData } = useCustom<string[]>({
     url: "/api/panel/item-complete",
     method: "get",
-    config: { query: { description: searchText } },
+    config: { query: { description: autocompleteQuery } },
     queryOptions: {
-      enabled: searchText.length >= 3,
+      enabled: autocompleteQuery.length >= 3,
     },
   });
+
+  const autoCompleteOptions = useMemo(() => {
+    // Refine v5 normalizes missing useCustom data to {} (not undefined), so guard with Array.isArray
+    const data = itemSearchData?.data;
+    return (Array.isArray(data) ? data : []).map((value) => ({ value }));
+  }, [itemSearchData]);
 
   const { mutate: onCreateUpdateItem } = useCustomMutation<ItemBody>();
   const { mutate: onMonthItemCopy } = useCustomMutation<ItemBody[]>();
   const { mutate: onDeleteItem } = useCustomMutation();
 
-  const addItem = async () => {
+  // Shared add/edit path: only the form, endpoint, and callbacks differ.
+  const saveItem = async (
+    source: typeof addForm,
+    url: string,
+    method: "post" | "patch",
+    callbacks: { onSuccess?: () => void; onSettled?: () => void; onValidationError?: () => void } = {}
+  ) => {
+    let row: PanelItem;
     try {
-      const row = (await addForm.validateFields()) as PanelItem;
-      onCreateUpdateItem(
-        {
-          url: "/api/panel/add-item",
-          method: "post",
-          values: {
-            description: row.description,
-            value: row.value,
-            itemType: row.itemType,
-            period: formattedPeriod,
-          },
-        },
-        {
-          onSuccess: () => {
-            addForm.resetFields();
-            descInputRef.current?.focus();
-            invalidateQuery(formattedPeriod);
-          },
-        }
-      );
+      row = (await source.validateFields()) as PanelItem;
     } catch (errInfo) {
       console.error("Validate Failed:", errInfo);
+      callbacks.onValidationError?.();
+      return;
     }
-  };
-
-  const editItem = async (key: number) => {
-    try {
-      const row = (await editForm.validateFields()) as PanelItem;
-      onCreateUpdateItem(
-        {
-          url: `/api/panel/edit-item/${key}`,
-          method: "patch",
-          values: {
-            description: row.description,
-            value: row.value,
-            itemType: row.itemType,
-            period: formattedPeriod,
-          },
+    onCreateUpdateItem(
+      {
+        url,
+        method,
+        values: {
+          period: formattedPeriod,
+          description: row.description,
+          value: row.value,
+          itemType: row.itemType,
         },
-        {
-          onSuccess: () => {
-            invalidateQuery(formattedPeriod);
-          },
-          onSettled: () => setEditingKey(""),
-        }
-      );
-    } catch (errInfo) {
-      console.error("Validate Failed:", errInfo);
-      setEditingKey("");
-    }
+      },
+      {
+        onSuccess: callbacks.onSuccess,
+        onSettled: callbacks.onSettled,
+      }
+    );
   };
 
-  const deleteItem = (item: PanelItem) => {
+  const addItem = () =>
+    saveItem(addForm, "/api/panel/add-item", "post", {
+      onSuccess: () => {
+        addForm.resetFields();
+        descInputRef.current?.focus();
+        void invalidateQuery(formattedPeriod);
+      },
+    });
+
+  const editItem = (key: number) =>
+    saveItem(editForm, `/api/panel/edit-item/${key}`, "patch", {
+      onSuccess: () => {
+        void invalidateQuery(formattedPeriod);
+      },
+      onSettled: () => setEditingKey(""),
+      onValidationError: () => setEditingKey(""),
+    });
+
+  // Shared delete path: only the endpoint and the post-invalidation follow-up differ.
+  const removeItems = (url: string, afterSuccess?: () => void) => {
     onDeleteItem(
       {
-        url: `/api/panel/remove-item/${item.key}`,
+        url,
         method: "delete",
         values: {},
       },
       {
         onSuccess: () => {
-          invalidateQuery(formattedPeriod).then(() => addForm.resetFields());
+          void invalidateQuery(formattedPeriod).then(() => afterSuccess?.());
         },
       }
     );
   };
+
+  const deleteItem = (item: PanelItem) =>
+    removeItems(`/api/panel/remove-item/${item.key}`, () => addForm.resetFields());
 
   const copyNextMonth = () => {
     onMonthItemCopy({
@@ -323,6 +415,11 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     });
   };
 
+  const deleteSelected = () => {
+    const itemIds = selectedRows.rows.map((r) => r.key).join(",");
+    removeItems(`/api/panel/remove-items/${formattedPeriod}?ids=${itemIds}`);
+  };
+
   const confirmDeleteSelected = () => {
     // NOTE: use context-based modal — static Modal.confirm renders via rc-util's
     // legacy ReactDOM entry point, which silently no-ops under React 19
@@ -334,28 +431,6 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     });
   };
 
-  const deleteSelected = () => {
-    const itemIds = selectedRows.rows.map((r) => r.key).join(",");
-    onDeleteItem(
-      {
-        url: `/api/panel/remove-items/${formattedPeriod}?ids=${itemIds}`,
-        method: "delete",
-        values: {},
-      },
-      {
-        onSuccess: () => {
-          invalidateQuery(formattedPeriod);
-        },
-      }
-    );
-  };
-
-  const onSearch = () => {
-    // Refine v5 normalizes missing useCustom data to {} (not undefined), so guard with Array.isArray
-    const data = itemSearchData?.data;
-    setAutoCompleteOptions((Array.isArray(data) ? data : []).map((r) => ({ value: r })));
-  };
-
   const columns = [
     {
       key: "description",
@@ -363,30 +438,17 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       dataIndex: "description",
       width: "60%",
       sorter: (a: PanelItem, b: PanelItem) => a.description.localeCompare(b.description),
-      onCell: (record: PanelItem) => ({
-        record,
-        inputType: "text",
-        dataIndex: "description",
-        title: "Description",
-        editing: isEditing(record),
-      }),
-      defaultFilteredValue: [initialSearch],
+      onCell: (record: PanelItem) => cellProps("description", "Description", "text", record),
       ...getColumnSearchProps("description"),
+      filteredValue: descFilter ? [descFilter] : null,
     },
     {
       key: "itemType",
       title: "Type",
       dataIndex: "itemType",
       width: "10%",
-      onCell: (record: PanelItem) => ({
-        record,
-        inputType: "select",
-        dataIndex: "itemType",
-        title: "Type",
-        editing: isEditing(record),
-      }),
+      onCell: (record: PanelItem) => cellProps("itemType", "Type", "select", record),
       sorter: (a: PanelItem, b: PanelItem) => a.itemType.localeCompare(b.itemType),
-      // ...getColumnSearchProps("itemType"),
       render: (record: string) => (
         <Tooltip placement="left" title={record}>
           {record === "EXPENSE" ? <ShoppingCartOutlined /> : <DollarOutlined />}
@@ -398,13 +460,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       title: "Value",
       dataIndex: "value",
       width: "20%",
-      onCell: (record: PanelItem) => ({
-        record,
-        inputType: "number",
-        dataIndex: "value",
-        title: "Value",
-        editing: isEditing(record),
-      }),
+      onCell: (record: PanelItem) => cellProps("value", "Value", "number", record),
       sorter: (a: PanelItem, b: PanelItem) => a.value - b.value,
       ...getColumnSearchProps("value", true),
     },
@@ -442,28 +498,20 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     },
   ];
 
-  const initialFormValues = { itemType: "EXPENSE", description: "", value: 0 };
-
   return (
     <Card data-testid={"month-items-card"} title="Month Items" variant="borderless">
       <Space direction="vertical" size={12} wrap style={{ width: "100%" }}>
-        <Form form={addForm} layout="inline" initialValues={initialFormValues}>
+        <Form form={addForm} layout="inline" initialValues={INITIAL_FORM_VALUES}>
           <Form.Item data-testid={"itemType"} name="itemType">
-            <Select
-              options={[
-                { value: "EXPENSE", label: <ShoppingCartOutlined /> },
-                { value: "INCOME", label: <DollarOutlined /> },
-              ]}
-            />
+            <Select options={ITEM_TYPE_OPTIONS} />
           </Form.Item>
           <Form.Item name="description" rules={[{ required: true }]}>
             <AutoComplete
               data-testid={"description"}
               ref={descInputRef}
-              value={searchText}
-              onChange={setSearchText}
+              value={autocompleteQuery}
+              onChange={setAutocompleteQuery}
               options={autoCompleteOptions}
-              onSearch={onSearch}
               placeholder="Description"
               style={{ width: 250 }}
             />
@@ -476,7 +524,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
               formatter={inputNumberFormatter}
               parser={inputNumberParser}
               placeholder="Value"
-              onKeyDown={addItemOnEnter}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void addItem();
+              }}
             />
           </Form.Item>
         </Form>
@@ -506,7 +556,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           <Table
             components={{
               body: {
-                cell: genEditableCell(inputNumberFormatter, inputNumberParser),
+                cell: EditableCell,
               },
             }}
             rowSelection={rowSelection}
@@ -514,71 +564,10 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             dataSource={tableData}
             size="small"
             pagination={false}
+            onChange={handleTableChange}
           />
         </Form>
       </Space>
     </Card>
   );
-};
-
-interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
-  editing: boolean;
-  dataIndex: string;
-  title: string;
-  inputType: "number" | "text" | "select";
-  record: PanelItem;
-  index: number;
-  children: React.ReactNode;
-}
-
-const genEditableCell = (
-  inputNumberFormatter: (value: number | undefined) => string,
-  inputNumberParser: (value: string | undefined) => number
-) => {
-  const EditableCell: React.FC<EditableCellProps> = ({
-    editing,
-    dataIndex,
-    title,
-    inputType,
-    children,
-    ...restProps
-  }) => {
-    const inputNode =
-      inputType === "number" ? (
-        <InputNumber min={0} formatter={inputNumberFormatter} parser={inputNumberParser} />
-      ) : inputType === "select" ? (
-        <Select
-          options={[
-            { value: "EXPENSE", label: <ShoppingCartOutlined /> },
-            { value: "INCOME", label: <DollarOutlined /> },
-          ]}
-        />
-      ) : (
-        <Input />
-      );
-
-    // const swithProp = inputType === "switch" ? ({valuePropName: }) : ({});
-
-    return (
-      <td {...restProps}>
-        {editing ? (
-          <Form.Item
-            name={dataIndex}
-            style={{ margin: 0 }}
-            rules={[
-              {
-                required: true,
-                message: `Please Input ${title}!`,
-              },
-            ]}
-          >
-            {inputNode}
-          </Form.Item>
-        ) : (
-          children
-        )}
-      </td>
-    );
-  };
-  return EditableCell;
 };
