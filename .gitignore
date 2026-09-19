@@ -2,6 +2,9 @@ Thumbs.db
 .DS_Store
 .gradle
 build/
+buildSrc/build/
+buildSrc/.kotlin/
+.kotlin/
 target/
 out/
 .idea
