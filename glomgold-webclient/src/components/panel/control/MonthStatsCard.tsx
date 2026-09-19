@@ -1,9 +1,10 @@
 import { IItem } from "../../../interfaces";
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { ColorModeContext } from "../../../contexts/color-mode";
 import { Card } from "antd";
 import Chart from "react-apexcharts";
-import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
+import { EXPENSE_COLOR, INCOME_COLOR, ITEM_TYPES } from "../../../constants";
+import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 
 interface MonthStatsCardProps {
   tableData: IItem[];
@@ -19,7 +20,7 @@ const groupItemsByDescription = (items: IItem[]) => {
 
 const groupItemsByType = (items: Map<string, IItem[]>) => {
   const descriptions = Array.from(items.keys());
-  const types = ["EXPENSE", "INCOME"];
+  const types = ITEM_TYPES;
 
   return types.map((type) => ({
     name: type,
@@ -33,23 +34,26 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
   const { mode } = useContext(ColorModeContext);
   const themeMode: "dark" | "light" = mode === "dark" ? "dark" : "light";
 
-  const currencyFormat = (value: number) => value.toLocaleString(locale, { style: "currency", currency });
+  const currencyFormat = useCurrencyFormat(locale, currency);
 
-  const nameGrouped = groupItemsByDescription(tableData);
+  const nameGrouped = useMemo(() => groupItemsByDescription(tableData), [tableData]);
+  const categories = useMemo(() => Array.from(nameGrouped.keys()), [nameGrouped]);
+  const series = useMemo(() => groupItemsByType(nameGrouped), [nameGrouped]);
 
-  const barChartOptions = {
-    chart: { id: "basic-bar", background: "transparent", stacked: true, animations: { enabled: false } },
-    plotOptions: { bar: { horizontal: true } },
-    dataLabels: { enabled: false, formatter: currencyFormat },
-    colors: [EXPENSE_COLOR, INCOME_COLOR],
-    theme: { mode: themeMode },
-    tooltip: { y: { formatter: currencyFormat } },
-    xaxis: {
-      categories: Array.from(nameGrouped.keys()),
-    },
-  };
-
-  const series = groupItemsByType(nameGrouped);
+  const barChartOptions = useMemo(
+    () => ({
+      chart: { id: "basic-bar", background: "transparent", stacked: true, animations: { enabled: false } },
+      plotOptions: { bar: { horizontal: true } },
+      dataLabels: { enabled: false, formatter: currencyFormat },
+      colors: [EXPENSE_COLOR, INCOME_COLOR],
+      theme: { mode: themeMode },
+      tooltip: { y: { formatter: currencyFormat } },
+      xaxis: {
+        categories,
+      },
+    }),
+    [currencyFormat, themeMode, categories]
+  );
 
   return (
     <Card title="Month Stats" variant="borderless">

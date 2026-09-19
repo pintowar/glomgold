@@ -1,22 +1,16 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 import { CrudFilters, IResourceComponentsProps, HttpError, useMany } from "@refinedev/core";
 
-import {
-  List,
-  TextField,
-  EditButton,
-  DeleteButton,
-  useImport,
-  ImportButton,
-  useTable,
-  useSelect,
-} from "@refinedev/antd";
-import { Table, Space, Select, Row, Col, Form, Input, Button, Tooltip } from "antd";
+import { List, TextField, useImport, ImportButton, useTable } from "@refinedev/antd";
+import { Table, Select, Row, Col, Form, Input, Button, Tooltip } from "antd";
 
-import { DollarOutlined, SearchOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 
 import { IItem, IUser } from "../../../interfaces";
+import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
+import { ResourceActions } from "../../../components/common/ResourceActions";
+import { useUserSelect } from "../../../hooks/useUserSelect";
 
 export const ItemList: React.FC<IResourceComponentsProps> = () => {
   const importProps = useImport<IItem>();
@@ -41,7 +35,7 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
     },
   });
 
-  const userIds = tableProps?.dataSource?.map((item) => item.userId) ?? [];
+  const userIds = useMemo(() => tableProps?.dataSource?.map((item) => item.userId) ?? [], [tableProps?.dataSource]);
   const {
     result: data,
     query: { isLoading },
@@ -53,11 +47,9 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
     },
   });
 
-  const { selectProps: userSelectProps } = useSelect<IUser>({
-    resource: "users",
-    optionLabel: "name",
-    optionValue: "id",
-  });
+  const userNameById = useMemo(() => new Map((data?.data ?? []).map((user) => [user.id, user.name] as const)), [data]);
+
+  const { selectProps: userSelectProps } = useUserSelect();
 
   return (
     <Row gutter={[16, 16]}>
@@ -89,7 +81,7 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
               title="Type"
               render={(value) => (
                 <Tooltip placement="left" title={value}>
-                  {value == "EXPENSE" ? <ShoppingCartOutlined /> : <DollarOutlined />}
+                  <ItemTypeIcon type={value} />
                 </Tooltip>
               )}
             />
@@ -105,18 +97,13 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
                   return <TextField value="Loading..." />;
                 }
 
-                return <TextField value={data?.data.find((user) => user.id === value)?.name} />;
+                return <TextField value={userNameById.get(value)} />;
               }}
             />
             <Table.Column<IItem>
               title="Actions"
               dataIndex="actions"
-              render={(_, record) => (
-                <Space>
-                  <EditButton hideText size="small" recordItemId={record.id} />
-                  <DeleteButton hideText size="small" recordItemId={record.id} />
-                </Space>
-              )}
+              render={(_, record) => <ResourceActions recordId={record.id} />}
             />
           </Table>
         </List>

@@ -3,11 +3,9 @@ import React from "react";
 import { useShow, IResourceComponentsProps } from "@refinedev/core";
 
 import { Show } from "@refinedev/antd";
-import { Typography } from "antd";
 
 import { IUser } from "../../../interfaces";
-
-const { Title, Text } = Typography;
+import { ShowField } from "../../../components/common/ShowField";
 
 export const UserShow: React.FC<IResourceComponentsProps> = () => {
   const {
@@ -17,29 +15,21 @@ export const UserShow: React.FC<IResourceComponentsProps> = () => {
 
   return (
     <Show isLoading={isLoading}>
-      <Title level={5}>Id</Title>
-      <Text>{record?.id}</Text>
+      <ShowField label="Id">{record?.id}</ShowField>
 
-      <Title level={5}>Name</Title>
-      <Text>{record?.name}</Text>
+      <ShowField label="Name">{record?.name}</ShowField>
 
-      <Title level={5}>Username</Title>
-      <Text>{record?.username}</Text>
+      <ShowField label="Username">{record?.username}</ShowField>
 
-      <Title level={5}>E-Mail</Title>
-      <Text>{record?.email}</Text>
+      <ShowField label="E-Mail">{record?.email}</ShowField>
 
-      <Title level={5}>Locale</Title>
-      <Text>{record?.locale}</Text>
+      <ShowField label="Locale">{record?.locale}</ShowField>
 
-      <Title level={5}>Timezone</Title>
-      <Text>{record?.timezone}</Text>
+      <ShowField label="Timezone">{record?.timezone}</ShowField>
 
-      <Title level={5}>Enabled</Title>
-      <Text>{record?.enabled}</Text>
+      <ShowField label="Enabled">{record?.enabled}</ShowField>
 
-      <Title level={5}>Admin</Title>
-      <Text>{record?.admin}</Text>
+      <ShowField label="Admin">{record?.admin}</ShowField>
     </Show>
   );
 };

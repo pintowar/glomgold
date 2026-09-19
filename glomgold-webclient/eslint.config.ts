@@ -11,14 +11,7 @@ import type { Linter } from "eslint";
 
 export default defineConfig([
   {
-    ignores: [
-      "node_modules",
-      "dist",
-      "coverage",
-      ".nyc_output",
-      "cypress/videos",
-      "cypress/screenshots",
-    ],
+    ignores: ["node_modules", "dist", "coverage", ".nyc_output", "cypress/videos", "cypress/screenshots"],
   },
   js.configs.recommended,
   ...(tsPlugin.configs["flat/recommended"] as unknown as Linter.Config[]),

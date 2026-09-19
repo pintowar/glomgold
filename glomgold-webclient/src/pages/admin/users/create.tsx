@@ -1,10 +1,11 @@
-import React, { useMemo } from "react";
-import { IResourceComponentsProps, useApiUrl, useCustom } from "@refinedev/core";
+import React from "react";
+import { IResourceComponentsProps, useApiUrl } from "@refinedev/core";
 
 import { Create, useForm } from "@refinedev/antd";
-import { Form, Input, Checkbox, Select } from "antd";
+import { Form } from "antd";
 
 import { IUser } from "../../../interfaces";
+import { UserFormFields } from "../../../components/admin/UserFormFields";
 
 export const UserCreate: React.FC<IResourceComponentsProps> = () => {
   const apiUrl = useApiUrl();
@@ -12,50 +13,10 @@ export const UserCreate: React.FC<IResourceComponentsProps> = () => {
     // warnWhenUnsavedChanges: true,
   });
 
-  const { result: locales } = useCustom({
-    url: `${apiUrl}/users/locales`,
-    method: "get",
-  });
-
-  const localeOptions = useMemo(() => {
-    const data = locales?.data;
-    return (Array.isArray(data) ? data : []).map((it: string) => ({ label: it, value: it }));
-  }, [locales]);
-
-  const { result: timezones } = useCustom({
-    url: `${apiUrl}/users/timezones`,
-    method: "get",
-  });
-
-  const timezonesOptions = useMemo(() => {
-    const data = timezones?.data;
-    return (Array.isArray(data) ? data : []).map((it: string) => ({ label: it, value: it }));
-  }, [timezones]);
-
   return (
     <Create saveButtonProps={saveButtonProps}>
       <Form {...formProps} layout="vertical">
-        <Form.Item label="Name" name="name" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="Username" name="username" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="E-mail" name="email" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="Locale" name="locale" rules={[{ required: true }]} initialValue="en_US">
-          <Select options={localeOptions} showSearch />
-        </Form.Item>
-        <Form.Item label="Timezone" name="timezone" rules={[{ required: true }]} initialValue="UTC">
-          <Select options={timezonesOptions} showSearch />
-        </Form.Item>
-        <Form.Item label="Enabled" name="enabled" valuePropName="checked">
-          <Checkbox />
-        </Form.Item>
-        <Form.Item label="Admin" name="admin" valuePropName="checked">
-          <Checkbox />
-        </Form.Item>
+        <UserFormFields apiUrl={apiUrl} localeInitialValue="en_US" timezoneInitialValue="UTC" />
       </Form>
     </Create>
   );

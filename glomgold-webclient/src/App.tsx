@@ -16,7 +16,7 @@ import routerBindings, {
 import dataProvider from "@refinedev/simple-rest";
 import { HashRouter, Outlet, Route, Routes, Navigate } from "react-router-dom";
 import { axiosInstance, authProvider } from "./authProvider";
-import { Header } from "./components/header";
+import { Header } from "./components";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 
 import { ItemList, ItemEdit, ItemShow } from "./pages/admin/items";
@@ -32,6 +32,49 @@ import { LocalStorage } from "./LocalStorage";
 
 import logoCollapsed from "./assets/images/glomgold-logo-collapsed.png";
 
+const accessControlProvider = {
+  can: async ({ resource }: { resource?: string }) => {
+    const roles = LocalStorage.getInstance().getUserRoles();
+
+    const isAdmin = roles.includes("ROLE_ADMIN");
+    const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
+    const cond = !(!isAdmin && isAdminResource);
+    return { can: cond };
+  },
+};
+
+const resources = [
+  {
+    name: "dashboard",
+    list: "/admin/dashboard",
+    meta: {
+      label: "Dashboard",
+      icon: <DashboardOutlined />,
+    },
+  },
+  {
+    name: "users",
+    list: "/admin/users",
+    create: "/admin/users/create",
+    edit: "/admin/users/edit/:id",
+    show: "/admin/users/show/:id",
+    meta: {
+      icon: <UsergroupAddOutlined />,
+      canDelete: true,
+    },
+  },
+  {
+    name: "items",
+    list: "/admin/items",
+    edit: "/admin/items/edit/:id",
+    show: "/admin/items/show/:id",
+    meta: {
+      icon: <ShopOutlined />,
+      canDelete: true,
+    },
+  },
+];
+
 function InnerApp() {
   const notificationProvider = useNotificationProvider();
 
@@ -41,47 +84,8 @@ function InnerApp() {
       notificationProvider={notificationProvider}
       routerProvider={routerBindings}
       authProvider={authProvider}
-      accessControlProvider={{
-        can: async ({ resource }) => {
-          const roles = LocalStorage.getInstance().getUserRoles();
-
-          const isAdmin = roles.includes("ROLE_ADMIN");
-          const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
-          const cond = !(!isAdmin && isAdminResource);
-          return { can: cond };
-        },
-      }}
-      resources={[
-        {
-          name: "dashboard",
-          list: "/admin/dashboard",
-          meta: {
-            label: "Dashboard",
-            icon: <DashboardOutlined />,
-          },
-        },
-        {
-          name: "users",
-          list: "/admin/users",
-          create: "/admin/users/create",
-          edit: "/admin/users/edit/:id",
-          show: "/admin/users/show/:id",
-          meta: {
-            icon: <UsergroupAddOutlined />,
-            canDelete: true,
-          },
-        },
-        {
-          name: "items",
-          list: "/admin/items",
-          edit: "/admin/items/edit/:id",
-          show: "/admin/items/show/:id",
-          meta: {
-            icon: <ShopOutlined />,
-            canDelete: true,
-          },
-        },
-      ]}
+      accessControlProvider={accessControlProvider}
+      resources={resources}
       options={{
         syncWithLocation: true,
         warnWhenUnsavedChanges: true,

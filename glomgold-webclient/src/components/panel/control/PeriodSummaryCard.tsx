@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Card, Space, Statistic, Tabs } from "antd";
 import {
   FallOutlined,
@@ -58,52 +58,54 @@ interface PeriodSummaryCardProps {
 }
 
 export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({ total, difference, locale, symbol }) => {
+  const tabItems = useMemo(
+    () => [
+      {
+        label: "Balance",
+        key: "balance",
+        children: (
+          <PeriodSummaryTab
+            desc="Balance"
+            total={total.balance}
+            difference={difference.balance}
+            locale={locale}
+            symbol={symbol}
+          />
+        ),
+      },
+      {
+        label: "Expense",
+        key: "expense",
+        children: (
+          <PeriodSummaryTab
+            desc="Expense"
+            total={total.expense}
+            difference={difference.expense}
+            locale={locale}
+            symbol={symbol}
+          />
+        ),
+      },
+      {
+        label: "Income",
+        key: "income",
+        children: (
+          <PeriodSummaryTab
+            desc="Income"
+            total={total.income}
+            difference={difference.income}
+            locale={locale}
+            symbol={symbol}
+          />
+        ),
+      },
+    ],
+    [total, difference, locale, symbol]
+  );
+
   return (
     <Card data-testid={"period-summary-card"} title="Period Summary" variant="borderless">
-      <Tabs
-        type="line"
-        items={[
-          {
-            label: "Balance",
-            key: "balance",
-            children: (
-              <PeriodSummaryTab
-                desc="Balance"
-                total={total.balance}
-                difference={difference.balance}
-                locale={locale}
-                symbol={symbol}
-              />
-            ),
-          },
-          {
-            label: "Expense",
-            key: "expense",
-            children: (
-              <PeriodSummaryTab
-                desc="Expense"
-                total={total.expense}
-                difference={difference.expense}
-                locale={locale}
-                symbol={symbol}
-              />
-            ),
-          },
-          {
-            label: "Income",
-            key: "income",
-            children: (
-              <PeriodSummaryTab
-                desc="Income"
-                total={total.income}
-                difference={difference.income}
-                locale={locale}
-                symbol={symbol}
-              />
-            ),
-          },
-        ]}
-      />
+      <Tabs type="line" items={tabItems} />
     </Card>
   );
 };

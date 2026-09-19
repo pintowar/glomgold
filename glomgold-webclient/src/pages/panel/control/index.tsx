@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCustom, useGetIdentity } from "@refinedev/core";
+import { useCustom } from "@refinedev/core";
 
 import { Row, Col, Spin } from "antd";
 import dayjs from "dayjs";
@@ -15,19 +14,14 @@ import {
   MonthStatsCard,
 } from "../../../components/panel/control";
 
-import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../../constants";
+import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
+import { usePanelSearchParams } from "../../../hooks/usePanelSearchParams";
 
 interface ControlPanelData {
   items: IItem[];
   stats: IItem[];
   total: ISummary;
   diff: ISummary;
-}
-
-interface ControlPanelIdentity {
-  locale: string;
-  currency: string;
-  symbol: string;
 }
 
 const CONTROL_PANEL_KEY = "control-panel-key";
@@ -39,32 +33,11 @@ const EMPTY_SUMMARY: ISummary = { expense: 0, income: 0, balance: 0 };
 
 export const ControlPanel: React.FC = () => {
   const queryClient = useQueryClient();
-  const { data: identity } = useGetIdentity<ControlPanelIdentity>();
-  const locale = identity?.locale ?? DEFAULT_LOCALE;
-  const currency = identity?.currency ?? DEFAULT_CURRENCY;
-  const symbol = identity?.symbol ?? DEFAULT_SYMBOL;
+  const { locale, currency, symbol } = useIdentityDefaults();
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, updateSearchParams } = usePanelSearchParams();
   const period = searchParams.get(PERIOD_PARAM) ?? dayjs().format(PERIOD_FORMAT);
   const desc = searchParams.get(DESC_PARAM) ?? "";
-
-  // Single merge point for URL params: set a value, or pass undefined to drop it.
-  const updateSearchParams = useCallback(
-    (patch: Record<string, string | undefined>) => {
-      setSearchParams((params) => {
-        const next = { ...Object.fromEntries(params) };
-        for (const [key, value] of Object.entries(patch)) {
-          if (value === undefined) {
-            delete next[key];
-          } else {
-            next[key] = value;
-          }
-        }
-        return next;
-      });
-    },
-    [setSearchParams]
-  );
 
   const onCurrentPeriodChange = useCallback(
     (value: dayjs.Dayjs | null) => {

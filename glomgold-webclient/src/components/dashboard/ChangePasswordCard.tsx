@@ -1,8 +1,13 @@
 import React from "react";
 import { useApiUrl, useCustomMutation } from "@refinedev/core";
 import { Button, Card, Form, Input, Select } from "antd";
-import { useSelect } from "@refinedev/antd";
-import { IUser } from "../../interfaces";
+import { errorPayload, successPayload } from "../../utils/notify";
+import { useUserSelect } from "../../hooks/useUserSelect";
+
+interface PasswordForm {
+  userId: number;
+  password: string;
+}
 
 export const ChangePasswordCard: React.FC = () => {
   const apiUrl = useApiUrl();
@@ -13,31 +18,14 @@ export const ChangePasswordCard: React.FC = () => {
       url: `${apiUrl}/users/${values.userId}/password`,
       method: "patch",
       values,
-      successNotification: () => ({
-        message: "Successfuly Operation",
-        description: "Password changed for selected user.",
-        type: "success",
-      }),
-      errorNotification: () => ({
-        message: "Operation Error",
-        description: "Could not change password for selected user.",
-        type: "error",
-      }),
+      successNotification: successPayload("Password changed for selected user."),
+      errorNotification: errorPayload("Could not change password for selected user."),
     });
   };
 
-  interface PasswordForm {
-    userId: number;
-    password: string;
-  }
-
   const [form] = Form.useForm<PasswordForm>();
 
-  const { selectProps } = useSelect<IUser>({
-    resource: "users",
-    optionLabel: "name",
-    optionValue: "id",
-  });
+  const { selectProps } = useUserSelect();
 
   return (
     <Card

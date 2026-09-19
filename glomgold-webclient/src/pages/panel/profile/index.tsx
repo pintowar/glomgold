@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 
 import { Row, Col, Card, Form, Input, Button, Select } from "antd";
 
 import { useApiUrl, useCustom, useCustomMutation, useLogout } from "@refinedev/core";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useLabelValueOptions } from "../../../hooks/useLabelValueOptions";
+import { errorPayload, successPayload } from "../../../utils/notify";
 
 interface PasswordForm {
   actualPassword: string;
@@ -50,25 +52,8 @@ export const ProfilePanel: React.FC = () => {
     }
   }, [profile, profileForm]);
 
-  const { result: locales } = useCustom({
-    url: `${apiUrl}/panel/locales`,
-    method: "get",
-  });
-
-  const localeOptions = useMemo(() => {
-    const data = locales?.data;
-    return (Array.isArray(data) ? data : []).map((it: string) => ({ label: it, value: it }));
-  }, [locales]);
-
-  const { result: timezones } = useCustom({
-    url: `${apiUrl}/panel/timezones`,
-    method: "get",
-  });
-
-  const timezonesOptions = useMemo(() => {
-    const data = timezones?.data;
-    return (Array.isArray(data) ? data : []).map((it: string) => ({ label: it, value: it }));
-  }, [timezones]);
+  const localeOptions = useLabelValueOptions(`${apiUrl}/panel/locales`);
+  const timezonesOptions = useLabelValueOptions(`${apiUrl}/panel/timezones`);
 
   const onFinishProfile = async (form: ProfileForm) => {
     updateProfile(
@@ -76,11 +61,8 @@ export const ProfilePanel: React.FC = () => {
         url: `${apiUrl}/panel/profile`,
         method: "patch",
         values: form,
-        successNotification: () => ({
-          message: "Successfuly Operation",
-          description: "Profile updated.",
-          type: "success",
-        }),
+        successNotification: successPayload("Profile updated."),
+        // 409 branch needs the server error — errorPayload can't express it, so it stays inline.
         errorNotification: (error?: { statusCode?: number }) => ({
           message: "Operation Error",
           description: error?.statusCode === 409 ? "E-mail already in use." : "Could not update profile.",
@@ -101,16 +83,8 @@ export const ProfilePanel: React.FC = () => {
         url: `${apiUrl}/panel/profile/password`,
         method: "post",
         values: { passwords: form },
-        successNotification: () => ({
-          message: "Successfuly Operation",
-          description: "Password changed.",
-          type: "success",
-        }),
-        errorNotification: () => ({
-          message: "Operation Error",
-          description: "Could not change password.",
-          type: "error",
-        }),
+        successNotification: successPayload("Password changed."),
+        errorNotification: errorPayload("Could not change password."),
       },
       {
         onSuccess: () => logout(),

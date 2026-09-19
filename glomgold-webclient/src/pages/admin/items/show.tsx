@@ -3,11 +3,9 @@ import React from "react";
 import { useShow, IResourceComponentsProps, useOne } from "@refinedev/core";
 
 import { Show } from "@refinedev/antd";
-import { Typography } from "antd";
 
 import { IItem, IUser } from "../../../interfaces";
-
-const { Title, Text } = Typography;
+import { ShowField } from "../../../components/common/ShowField";
 
 export const ItemShow: React.FC<IResourceComponentsProps> = () => {
   const {
@@ -28,22 +26,17 @@ export const ItemShow: React.FC<IResourceComponentsProps> = () => {
 
   return (
     <Show isLoading={isLoading}>
-      <Title level={5}>Id</Title>
-      <Text>{record?.id}</Text>
+      <ShowField label="Id">{record?.id}</ShowField>
 
-      <Title level={5}>Description</Title>
-      <Text>{record?.description}</Text>
+      <ShowField label="Description">{record?.description}</ShowField>
 
-      <Title level={5}>Value</Title>
-      <Text>{record?.value}</Text>
+      <ShowField label="Value">{record?.value}</ShowField>
 
-      <Title level={5}>Period</Title>
-      <Text>
+      <ShowField label="Period">
         {record?.year}-{record?.month}
-      </Text>
+      </ShowField>
 
-      <Title level={5}>User</Title>
-      <Text>{userIsLoading ? "Loading..." : userData?.name}</Text>
+      <ShowField label="User">{userIsLoading ? "Loading..." : userData?.name}</ShowField>
     </Show>
   );
 };
