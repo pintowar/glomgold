@@ -122,7 +122,7 @@ export const ProfilePanel: React.FC = () => {
     <div className="card-row">
       <Row gutter={[24, 24]}>
         <Col span={24}>
-          <Card title={"Profile Information"} bordered={false}>
+          <Card title={"Profile Information"} variant="borderless">
             <Form form={profileForm} name="profile-form" onFinish={onFinishProfile}>
               <Form.Item label="Name" name="name" rules={[{ required: true }]}>
                 <Input />
@@ -145,7 +145,7 @@ export const ProfilePanel: React.FC = () => {
           </Card>
         </Col>
         <Col span={24}>
-          <Card title={"Change Password"} bordered={false}>
+          <Card title={"Change Password"} variant="borderless">
             <Form form={passwordForm} name="user-form" onFinish={onFinishPassword}>
               <Form.Item label="Actual Password" name="actualPassword" rules={[{ required: true }]}>
                 <Input.Password />

@@ -113,23 +113,43 @@ export const ReportPanel: React.FC = () => {
       <div className="card-row">
         <Row gutter={[24, 24]}>
           <Col span={24}>
-            <Card title={"Report Navigation"} bordered={false}>
+            <Card title={"Report Navigation"} variant="borderless">
               <Row gutter={[16, 16]}>
                 <Col>
                   <DatePicker value={currentPeriod} picker="year" onChange={onChangePeriod} allowClear={false} />
                 </Col>
                 <Col>
-                  <Select value={type} onChange={onTypeChange} style={{ width: 160 }}>
-                    <Select.Option value={"BALANCE"}>
-                      <CalculatorOutlined /> - BALANCE
-                    </Select.Option>
-                    <Select.Option value={"EXPENSE"}>
-                      <ShoppingCartOutlined /> - EXPENSE
-                    </Select.Option>
-                    <Select.Option value={"INCOME"}>
-                      <DollarOutlined /> - INCOME
-                    </Select.Option>
-                  </Select>
+                  <Select
+                    value={type}
+                    onChange={onTypeChange}
+                    style={{ width: 160 }}
+                    options={[
+                      {
+                        value: "BALANCE",
+                        label: (
+                          <span>
+                            <CalculatorOutlined /> - BALANCE
+                          </span>
+                        ),
+                      },
+                      {
+                        value: "EXPENSE",
+                        label: (
+                          <span>
+                            <ShoppingCartOutlined /> - EXPENSE
+                          </span>
+                        ),
+                      },
+                      {
+                        value: "INCOME",
+                        label: (
+                          <span>
+                            <DollarOutlined /> - INCOME
+                          </span>
+                        ),
+                      },
+                    ]}
+                  />
                 </Col>
                 <Col span={14} />
               </Row>
@@ -140,7 +160,7 @@ export const ReportPanel: React.FC = () => {
       <div className="card-row">
         <Row gutter={[24, 24]}>
           <Col span={24}>
-            <Card bordered={false}>
+            <Card variant="borderless">
               <Space direction="vertical" size={12} style={{ width: "100%" }}>
                 {!isLoading ? <Tabs type="card" items={tabsItems} /> : <Skeleton active />}
               </Space>

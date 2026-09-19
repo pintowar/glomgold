@@ -9,15 +9,15 @@ import {
   InputNumber,
   InputRef,
   Popconfirm,
+  RefSelectProps,
   Select,
   Space,
   Table,
+  type TableColumnsType,
   Tooltip,
   Typography,
 } from "antd";
-import { BaseSelectRef } from "rc-select";
 import d2lIntl from "d2l-intl";
-import { ColumnType } from "antd/lib/table";
 import {
   CheckOutlined,
   CloseOutlined,
@@ -67,7 +67,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
   const { modal } = AntdApp.useApp();
-  const descInputRef = useRef<BaseSelectRef>(null);
+  const descInputRef = useRef<RefSelectProps>(null);
 
   // start selected rows
   const [autoCompleteOptions, setAutoCompleteOptions] = useState<{ value: string }[]>([]);
@@ -141,7 +141,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 
   const currencyFormat = (value: number) => value.toLocaleString(locale, { style: "currency", currency: currency });
 
-  const getColumnSearchProps = (dataIndex: string, format = false): ColumnType<PanelItem> => ({
+  const getColumnSearchProps = (dataIndex: string, format = false): TableColumnsType<PanelItem>[number] => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
         <Input
@@ -193,10 +193,12 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           return false;
       }
     },
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
+    filterDropdownProps: {
+      onOpenChange: (open) => {
+        if (open) {
+          setTimeout(() => searchInput.current?.select(), 100);
+        }
+      },
     },
     render: (text) => {
       const amount = format ? currencyFormat(text) : text;
@@ -443,18 +445,16 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   const initialFormValues = { itemType: "EXPENSE", description: "", value: 0 };
 
   return (
-    <Card data-testid={"month-items-card"} title="Month Items" bordered={false}>
+    <Card data-testid={"month-items-card"} title="Month Items" variant="borderless">
       <Space direction="vertical" size={12} wrap style={{ width: "100%" }}>
         <Form form={addForm} layout="inline" initialValues={initialFormValues}>
           <Form.Item data-testid={"itemType"} name="itemType">
-            <Select>
-              <Select.Option value="EXPENSE">
-                <ShoppingCartOutlined />
-              </Select.Option>
-              <Select.Option value="INCOME">
-                <DollarOutlined />
-              </Select.Option>
-            </Select>
+            <Select
+              options={[
+                { value: "EXPENSE", label: <ShoppingCartOutlined /> },
+                { value: "INCOME", label: <DollarOutlined /> },
+              ]}
+            />
           </Form.Item>
           <Form.Item name="description" rules={[{ required: true }]}>
             <AutoComplete
@@ -498,7 +498,6 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             danger
             disabled={selectedRows.keys.length === 0}
             onClick={() => confirmDeleteSelected()}
-            className={"ant-btn-danger"}
           >
             Delete Selected
           </Button>
@@ -548,14 +547,12 @@ const genEditableCell = (
       inputType === "number" ? (
         <InputNumber min={0} formatter={inputNumberFormatter} parser={inputNumberParser} />
       ) : inputType === "select" ? (
-        <Select>
-          <Select.Option value="EXPENSE">
-            <ShoppingCartOutlined />
-          </Select.Option>
-          <Select.Option value="INCOME">
-            <DollarOutlined />
-          </Select.Option>
-        </Select>
+        <Select
+          options={[
+            { value: "EXPENSE", label: <ShoppingCartOutlined /> },
+            { value: "INCOME", label: <DollarOutlined /> },
+          ]}
+        />
       ) : (
         <Input />
       );

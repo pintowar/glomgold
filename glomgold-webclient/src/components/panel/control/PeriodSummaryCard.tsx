@@ -59,7 +59,7 @@ interface PeriodSummaryCardProps {
 
 export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({ total, difference, locale, symbol }) => {
   return (
-    <Card data-testid={"period-summary-card"} title="Period Summary" bordered={false}>
+    <Card data-testid={"period-summary-card"} title="Period Summary" variant="borderless">
       <Tabs
         type="line"
         items={[

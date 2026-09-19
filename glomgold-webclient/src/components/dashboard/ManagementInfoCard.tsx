@@ -15,7 +15,11 @@ export const ManagementInfoCard: React.FC = () => {
   }, [data]);
 
   return (
-    <Card title="Management Info" style={{ height: "300px", borderRadius: "15px" }} headStyle={{ textAlign: "center" }}>
+    <Card
+      title="Management Info"
+      style={{ height: "300px", borderRadius: "15px" }}
+      styles={{ header: { textAlign: "center" } }}
+    >
       <Space align="center" direction="horizontal">
         <ul>
           <li>Branch: {appInfo.branch}</li>

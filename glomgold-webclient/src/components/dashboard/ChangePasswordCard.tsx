@@ -40,7 +40,11 @@ export const ChangePasswordCard: React.FC = () => {
   });
 
   return (
-    <Card title="Change Password" style={{ height: "300px", borderRadius: "15px" }} headStyle={{ textAlign: "center" }}>
+    <Card
+      title="Change Password"
+      style={{ height: "300px", borderRadius: "15px" }}
+      styles={{ header: { textAlign: "center" } }}
+    >
       <Form form={form} name="control-hooks" onFinish={onFinish}>
         <Form.Item label="User" name="userId" rules={[{ required: true }]}>
           <Select placeholder="Select user" {...selectProps} />

@@ -38,14 +38,12 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
             },
           ]}
         >
-          <Select>
-            <Select.Option value="EXPENSE">
-              <ShoppingCartOutlined />
-            </Select.Option>
-            <Select.Option value="INCOME">
-              <DollarOutlined />
-            </Select.Option>
-          </Select>
+          <Select
+            options={[
+              { value: "EXPENSE", label: <ShoppingCartOutlined /> },
+              { value: "INCOME", label: <DollarOutlined /> },
+            ]}
+          />
         </Form.Item>
         <Form.Item
           label="Description"

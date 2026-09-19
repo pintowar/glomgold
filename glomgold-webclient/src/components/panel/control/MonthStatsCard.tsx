@@ -52,7 +52,7 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
   const series = groupItemsByType(nameGrouped);
 
   return (
-    <Card title="Month Stats" bordered={false}>
+    <Card title="Month Stats" variant="borderless">
       <Chart options={barChartOptions} series={series} type="bar" width="100%" />
     </Card>
   );

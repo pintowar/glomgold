@@ -43,7 +43,7 @@ export const Login: React.FC = () => {
             <div style={imageContainer}>
               <img src={logo} alt="Glomgold Logo" />
             </div>
-            <Card title={CardTitle} headStyle={{ borderBottom: 0 }}>
+            <Card title={CardTitle} styles={{ header: { borderBottom: 0 } }}>
               <Form<ILoginForm>
                 layout="vertical"
                 form={form}
@@ -68,7 +68,7 @@ export const Login: React.FC = () => {
                   rules={[{ required: true }]}
                   style={{ marginBottom: "12px" }}
                 >
-                  <Input type="password" placeholder="●●●●●●●●" size="large" />
+                  <Input.Password placeholder="●●●●●●●●" size="large" />
                 </Form.Item>
                 {/* <div style={{ marginBottom: "12px" }}>
                                     <Form.Item
