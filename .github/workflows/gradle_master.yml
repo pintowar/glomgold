@@ -6,44 +6,44 @@ on:
       # Push events on master branch
       - master
 
+env:
+  JAVA_VERSION: '25'
+  JAVA_DISTRO: 'graalvm-community'
+
 jobs:
   gradle_build:
     name: Gradle Build on master
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Seting up Git
         run: git config user.email "${{ github.actor }}@users.noreply.github.com" && git config user.name "Github Actions"
 
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.m2/repository
-          key: ${{ runner.os }}-gradle-test-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-test-
-
       - name: Setup GraalVM CE
         uses: graalvm/setup-graalvm@v1
         with:
-          version: 'latest'
-          java-version: '25'
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRO }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Running gradle task
-        uses: gradle/gradle-build-action@v2
+        run: |
+          ./gradlew -Pprod clean release -Prelease.useAutomaticVersion=true --scan \
+          -Dscan.tag.CI \
+          -Dscan.tag.${{ github.event_name }} \
+          -Dscan.value.Job-ID=${{ github.run_id }} \
+          -Dscan.link.GitHub-Action=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
-        with:
-          gradle-version: wrapper
-          arguments: -Pprod clean release -Prelease.useAutomaticVersion=true
 
   release:
     name: Create Release Tag
@@ -51,7 +51,7 @@ jobs:
     needs: gradle_build
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -68,7 +68,7 @@ jobs:
           excludes: prerelease,draft
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         if: steps.get_latest_tag.outputs.latest_tag != steps.last_release.outputs.release
         with:
           repository: ${{ github.repository }}
