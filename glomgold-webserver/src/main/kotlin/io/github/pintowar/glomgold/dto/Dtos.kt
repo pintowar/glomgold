@@ -71,6 +71,22 @@ data class ChangePassword(
 )
 
 @Introspected
+data class ProfileInfo(
+    val name: String,
+    val email: String,
+    val locale: Locale,
+    val timezone: ZoneId
+)
+
+@Introspected
+data class UpdateProfile(
+    @field:NotBlank val name: String,
+    @field:Email val email: String,
+    @field:NotNull val locale: Locale,
+    @field:NotNull val timezone: ZoneId
+)
+
+@Introspected
 data class ItemBody(
     val period: YearMonth,
     val description: String,

@@ -5,11 +5,14 @@ import io.github.pintowar.glomgold.dto.BalanceSummary
 import io.github.pintowar.glomgold.dto.ItemBody
 import io.github.pintowar.glomgold.dto.PanelAnnualReport
 import io.github.pintowar.glomgold.dto.PanelInfo
+import io.github.pintowar.glomgold.dto.ProfileInfo
+import io.github.pintowar.glomgold.dto.UpdateProfile
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.provided.authHeader
@@ -27,13 +30,16 @@ import io.micronaut.http.annotation.PathVariable
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.QueryValue
 import io.micronaut.http.client.annotation.Client
+import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.extensions.kotest5.annotation.MicronautTest
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
 import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
 import java.time.YearMonth
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @MicronautTest(transactional = false)
 class PanelControllerTest(
@@ -262,6 +268,59 @@ class PanelControllerTest(
                 body["total"].decimalValue() shouldBe BigDecimal(4200)
             }
         }
+
+        describe("panel operations - profile") {
+            val testUsername = "donald"
+            val token = authHeader(authClient, testUsername)
+
+            it("show profile") {
+                val result = panelClient.profile(token)
+
+                result.status shouldBe HttpStatus.OK
+                result.body.get().name shouldBe "Donald Duck"
+                result.body.get().email shouldBe "donald@glomgold.com"
+            }
+
+            it("update profile") {
+                val dto =
+                    UpdateProfile(
+                        "Donald D.",
+                        "donald@glomgold.com",
+                        Locale.US,
+                        ZoneId.of("UTC")
+                    )
+                val result = panelClient.updateProfile(token, dto)
+
+                result.status shouldBe HttpStatus.OK
+                userRepo.findByUsername(testUsername)?.name shouldBe "Donald D."
+            }
+
+            it("update profile with duplicate email") {
+                val dto =
+                    UpdateProfile(
+                        "Donald Duck",
+                        "admin@glomgold.com",
+                        Locale.US,
+                        ZoneId.of("UTC")
+                    )
+                val ex =
+                    shouldThrow<HttpClientResponseException> {
+                        panelClient.updateProfile(token, dto)
+                    }
+
+                ex.status shouldBe HttpStatus.CONFLICT
+            }
+
+            it("list locales and timezones") {
+                val locales = panelClient.locales(token)
+                val timezones = panelClient.timezones(token)
+
+                locales.status shouldBe HttpStatus.OK
+                (locales.body.get().isNotEmpty()) shouldBe true
+                timezones.status shouldBe HttpStatus.OK
+                (timezones.body.get().isNotEmpty()) shouldBe true
+            }
+        }
     })
 
 @Client("/api/panel")
@@ -308,4 +367,25 @@ interface PanelClient {
         @Header(HttpHeaders.AUTHORIZATION) auth: String,
         @Body items: List<ItemBody>
     ): HttpResponse<Unit>
+
+    @Get("/profile")
+    suspend fun profile(
+        @Header(HttpHeaders.AUTHORIZATION) auth: String
+    ): HttpResponse<ProfileInfo>
+
+    @Patch("/profile")
+    suspend fun updateProfile(
+        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Body dto: UpdateProfile
+    ): HttpResponse<Unit>
+
+    @Get("/locales")
+    suspend fun locales(
+        @Header(HttpHeaders.AUTHORIZATION) auth: String
+    ): HttpResponse<List<String>>
+
+    @Get("/timezones")
+    suspend fun timezones(
+        @Header(HttpHeaders.AUTHORIZATION) auth: String
+    ): HttpResponse<List<String>>
 }

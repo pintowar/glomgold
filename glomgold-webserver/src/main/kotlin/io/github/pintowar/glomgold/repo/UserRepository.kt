@@ -7,4 +7,6 @@ import io.micronaut.data.r2dbc.annotation.R2dbcRepository
 @R2dbcRepository(dialect = Dialect.POSTGRES)
 interface UserRepository : EntityRepository<User, Long> {
     suspend fun findByUsername(username: String): User?
+
+    suspend fun findByEmail(email: String): User?
 }

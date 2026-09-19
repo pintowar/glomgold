@@ -3,10 +3,13 @@ package io.github.pintowar.glomgold.controller
 import io.github.pintowar.glomgold.dto.ChangePassword
 import io.github.pintowar.glomgold.dto.ItemBody
 import io.github.pintowar.glomgold.dto.PanelAnnualReport
+import io.github.pintowar.glomgold.dto.ProfileInfo
+import io.github.pintowar.glomgold.dto.UpdateProfile
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.github.pintowar.glomgold.service.PanelService
 import io.micronaut.http.HttpResponse
+import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.Body
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Delete
@@ -20,6 +23,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
 import java.time.YearMonth
+import java.time.ZoneId
+import java.util.Locale
 
 @Controller("/api/panel")
 class PanelController(
@@ -57,6 +62,37 @@ class PanelController(
                 HttpResponse.notModified()
             }
         }
+
+    @Get("/profile")
+    suspend fun profile(auth: Authentication): HttpResponse<ProfileInfo> =
+        userRepository.findById(authId(auth))?.let { user ->
+            HttpResponse.ok(ProfileInfo(user.name, user.email, user.locale, user.timezone))
+        } ?: HttpResponse.notFound()
+
+    @Patch("/profile")
+    suspend fun updateProfile(
+        auth: Authentication,
+        @Body dto: UpdateProfile
+    ): HttpResponse<Unit> =
+        userRepository.findById(authId(auth))?.let { user ->
+            val emailOwner = userRepository.findByEmail(dto.email)
+            if (emailOwner != null && emailOwner.id != user.id) {
+                HttpResponse.status(HttpStatus.CONFLICT)
+            } else {
+                user.name = dto.name
+                user.email = dto.email
+                user.locale = dto.locale
+                user.timezone = dto.timezone
+                userRepository.update(user)
+                HttpResponse.ok()
+            }
+        } ?: HttpResponse.notFound()
+
+    @Get("/locales")
+    fun panelLocales(): List<Locale> = Locale.getAvailableLocales().sortedBy { it.toLanguageTag() }
+
+    @Get("/timezones")
+    fun panelTimezones(): List<String> = ZoneId.getAvailableZoneIds().sorted()
 
     @Get("/item-complete{?description}")
     suspend fun itemComplete(
