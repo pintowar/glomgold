@@ -35,7 +35,10 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
     },
   });
 
-  const userIds = useMemo(() => tableProps?.dataSource?.map((item) => item.userId) ?? [], [tableProps?.dataSource]);
+  const userIds = useMemo(
+    () => [...new Set(tableProps?.dataSource?.map((item) => item.userId) ?? [])],
+    [tableProps?.dataSource]
+  );
   const {
     result: data,
     query: { isLoading },
