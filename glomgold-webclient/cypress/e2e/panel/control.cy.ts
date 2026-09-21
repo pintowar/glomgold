@@ -140,7 +140,7 @@ describe("Panel Tests", () => {
           cy.get("[data-testid='delete-selected']").click();
         });
 
-        cy.get("div.ant-modal-content button.ant-btn-primary").should("exist").click();
+        cy.get(".ant-popconfirm-buttons > .ant-btn-primary").should("exist").click();
 
         cy.wait("@removeItems");
       });

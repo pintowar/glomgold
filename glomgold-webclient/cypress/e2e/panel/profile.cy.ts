@@ -13,10 +13,10 @@ describe("Panel Profile Tests", () => {
     cy.intercept("POST", "/api/login", { fixture: "login/common.user.json", statusCode: 200 }).as("login");
     // Control panel is the post-login landing page for common users (authProvider redirectTo "/panel").
     cy.intercept("GET", "/api/panel*", { fixture: "panel/control-empty.json", statusCode: 200 }).as("control");
-    cy.intercept("GET", "/api/panel/profile", { body: profile, statusCode: 200 }).as("profile");
+    cy.intercept("GET", "/api/panel/profile*", { body: profile, statusCode: 200 }).as("profile");
     // useLabelValueOptions expects plain string arrays, mapped to { label, value } pairs.
-    cy.intercept("GET", "/api/panel/locales", { body: ["en_US", "pt_BR"], statusCode: 200 }).as("locales");
-    cy.intercept("GET", "/api/panel/timezones", { body: ["UTC", "America/Fortaleza"], statusCode: 200 }).as(
+    cy.intercept("GET", "/api/panel/locales*", { body: ["en_US", "pt_BR"], statusCode: 200 }).as("locales");
+    cy.intercept("GET", "/api/panel/timezones*", { body: ["UTC", "America/Fortaleza"], statusCode: 200 }).as(
       "timezones"
     );
 
@@ -42,14 +42,14 @@ describe("Panel Profile Tests", () => {
     cy.contains("Profile Information").should("exist");
     cy.contains("Change Password").should("exist");
 
-    cy.get('form[name="profile-form"]').within(() => {
+    cy.get('form[id="profile-form"]').within(() => {
       cy.contains("label", "Name").should("exist");
       cy.contains("label", "E-mail").should("exist");
       cy.contains("label", "Locale").should("exist");
       cy.contains("label", "Timezone").should("exist");
     });
 
-    cy.get('form[name="user-form"]').within(() => {
+    cy.get('form[id="user-form"]').within(() => {
       cy.contains("label", "Actual Password").should("exist");
       cy.contains("label", "New Password").should("exist");
     });
@@ -68,7 +68,7 @@ describe("Panel Profile Tests", () => {
     const newName = "Donald Fauntleroy Duck";
     cy.get("#profile-form_name").type(`{selectall}{backspace}${newName}`);
 
-    cy.get('form[name="profile-form"]').within(() => {
+    cy.get('form[id="profile-form"]').within(() => {
       cy.contains("button", "Save").click();
     });
 
@@ -82,7 +82,7 @@ describe("Panel Profile Tests", () => {
     cy.get("#user-form_actualPassword").type("123123");
     cy.get("#user-form_newPassword").type("newpass123");
 
-    cy.get('form[name="user-form"]').within(() => {
+    cy.get('form[id="user-form"]').within(() => {
       cy.contains("button", "Change").click();
     });
 

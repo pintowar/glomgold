@@ -32,7 +32,6 @@ describe("Admin Items Tests", () => {
     cy.intercept("POST", "/api/login", { fixture: "login/admin.user.json", statusCode: 200 }).as("login");
     cy.intercept("GET", "/api/items*", { body: items, statusCode: 200 }).as("items");
     cy.intercept("GET", "/api/users*", { fixture: "admin/users.json", statusCode: 200 }).as("users");
-    cy.intercept("GET", "/api/management/info*", { fixture: "admin/info.json", statusCode: 200 }).as("dashboardInfo");
 
     const { username, password } = admin;
 
@@ -44,7 +43,6 @@ describe("Admin Items Tests", () => {
 
     // Admin login redirects to /admin (dashboard), not back to the visited page.
     cy.url().should("include", "/admin");
-    cy.wait("@dashboardInfo");
   });
 
   it("List renders items with user names", () => {
