@@ -17,7 +17,7 @@ export const panelDataProvider: DataProvider = {
   },
   update: async ({ resource, id, variables, meta }) => {
     if (isPanelProfile(resource)) {
-      const { data } = await axiosInstance.patch("/api/panel/profile", variables);
+      const { data } = await axiosInstance.patch(PANEL_URLS.profile, variables);
       return { data };
     }
     if (!isPanelItems(resource)) return base.update({ resource, id, variables, meta });
@@ -46,7 +46,7 @@ export const panelDataProvider: DataProvider = {
   },
   getOne: async ({ resource, id, meta }) => {
     if (isPanelProfile(resource)) {
-      const { data } = await axiosInstance.get("/api/panel/profile");
+      const { data } = await axiosInstance.get(PANEL_URLS.profile);
       return { data };
     }
     return base.getOne({ resource, id, meta });

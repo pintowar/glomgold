@@ -12,9 +12,10 @@ export const DOWN_COLOR = "#FAAD14";
 export type ItemType = "EXPENSE" | "INCOME";
 export const ITEM_TYPES: ItemType[] = ["EXPENSE", "INCOME"];
 export const PERIOD_FORMAT = "YYYY-MM";
-export const PANEL_QUERY_KEYS = { control: "control-panel-key", profile: "panel-profile", items: "panel-items" } as const;
+export const PANEL_QUERY_KEYS = { control: "control-panel-key", profile: "panel-profile" } as const;
 export const PANEL_URLS = {
   panel: "/api/panel",
+  profile: "/api/panel/profile",
   addItem: "/api/panel/add-item",
   editItem: (key: number | string) => `/api/panel/edit-item/${key}`,
   removeItem: (key: number | string) => `/api/panel/remove-item/${key}`,

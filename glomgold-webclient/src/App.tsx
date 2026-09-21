@@ -32,7 +32,7 @@ import logoCollapsed from "./assets/images/glomgold-logo-collapsed.png";
 
 const accessControlProvider = {
   can: async ({ resource }: { resource?: string }) => {
-    const roles = (await authProvider.getPermissions?.()) as string[];
+    const roles = ((await authProvider.getPermissions?.()) ?? []) as string[];
 
     const isAdmin = roles.includes("ROLE_ADMIN");
     const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
