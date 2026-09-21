@@ -4,7 +4,8 @@ import { Card, Form, Input, Button, Select } from "antd";
 
 import { useApiUrl, useCustomMutation } from "@refinedev/core";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { PANEL_QUERY_KEYS } from "../../../constants";
+import { usePanelInvalidate } from "../../../hooks/usePanelInvalidate";
 import { successPayload } from "../../../utils/notify";
 import type { ProfileForm, ProfileInfo } from "./types";
 
@@ -23,7 +24,7 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({
   const [profileForm] = Form.useForm<ProfileForm>();
   const { mutate: updateProfile } = useCustomMutation<ProfileForm>();
 
-  const queryClient = useQueryClient();
+  const invalidatePanel = usePanelInvalidate();
 
   useEffect(() => {
     if (initialProfile) {
@@ -51,9 +52,7 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({
         }),
       },
       {
-        onSuccess: () => {
-          void queryClient.invalidateQueries({ queryKey: ["panel-profile"] });
-        },
+        onSuccess: () => void invalidatePanel(PANEL_QUERY_KEYS.profile),
       }
     );
   };

@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useCustom } from "@refinedev/core";
 
 import { Row, Col, Spin } from "antd";
 import dayjs from "dayjs";
 
 import { IItem, ISummary } from "../../../interfaces";
+import { PANEL_QUERY_KEYS } from "../../../constants";
 
 import {
   PeriodSummaryCard,
@@ -16,6 +16,7 @@ import {
 
 import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
 import { usePanelSearchParams } from "../../../hooks/usePanelSearchParams";
+import { usePanelInvalidate } from "../../../hooks/usePanelInvalidate";
 
 interface ControlPanelData {
   items: IItem[];
@@ -24,7 +25,6 @@ interface ControlPanelData {
   diff: ISummary;
 }
 
-const CONTROL_PANEL_KEY = "control-panel-key";
 const PERIOD_FORMAT = "YYYY-MM";
 const PERIOD_PARAM = "period";
 const DESC_PARAM = "desc";
@@ -32,7 +32,11 @@ const DESC_PARAM = "desc";
 const EMPTY_SUMMARY: ISummary = { expense: 0, income: 0, balance: 0 };
 
 export const ControlPanel: React.FC = () => {
-  const queryClient = useQueryClient();
+  const invalidatePanel = usePanelInvalidate();
+  const invalidateQuery = useCallback(
+    (period: string) => invalidatePanel(PANEL_QUERY_KEYS.control, period),
+    [invalidatePanel]
+  );
   const { locale, currency, symbol } = useIdentityDefaults();
 
   const { searchParams, updateSearchParams } = usePanelSearchParams();
@@ -66,14 +70,9 @@ export const ControlPanel: React.FC = () => {
     method: "get",
     config: { query: { period: formattedPeriod } },
     queryOptions: {
-      queryKey: [CONTROL_PANEL_KEY, formattedPeriod],
+      queryKey: [PANEL_QUERY_KEYS.control, formattedPeriod],
     },
   });
-
-  const invalidateQuery = useCallback(
-    (period: string) => queryClient.invalidateQueries({ queryKey: [CONTROL_PANEL_KEY, period] }),
-    [queryClient]
-  );
 
   const tableData = useMemo(
     () =>

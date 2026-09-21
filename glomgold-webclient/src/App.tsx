@@ -28,13 +28,12 @@ import { Login } from "./pages/login";
 import { API_URL } from "./constants";
 import { PanelLayout } from "./pages/panel/layout";
 import { ControlPanel, ReportPanel, ProfilePanel } from "./pages/panel";
-import { LocalStorage } from "./LocalStorage";
 
 import logoCollapsed from "./assets/images/glomgold-logo-collapsed.png";
 
 const accessControlProvider = {
   can: async ({ resource }: { resource?: string }) => {
-    const roles = LocalStorage.getInstance().getUserRoles();
+    const roles = (await authProvider.getPermissions?.()) as string[];
 
     const isAdmin = roles.includes("ROLE_ADMIN");
     const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
