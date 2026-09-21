@@ -2,64 +2,55 @@ import React, { useEffect } from "react";
 
 import { Card, Form, Input, Button, Select } from "antd";
 
-import { useApiUrl, useCustomMutation } from "@refinedev/core";
+import { useForm } from "@refinedev/antd";
 
 import { PANEL_QUERY_KEYS } from "../../../constants";
 import { usePanelInvalidate } from "../../../hooks/usePanelInvalidate";
 import { successPayload } from "../../../utils/notify";
-import type { ProfileForm, ProfileInfo } from "./types";
+import type { ProfileForm } from "./types";
 
 interface ProfileInfoCardProps {
   localeOptions: { label: string; value: string }[];
   timezonesOptions: { label: string; value: string }[];
-  initialProfile: ProfileInfo | undefined;
 }
 
 export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({
   localeOptions,
   timezonesOptions,
-  initialProfile,
 }) => {
-  const apiUrl = useApiUrl();
-  const [profileForm] = Form.useForm<ProfileForm>();
-  const { mutate: updateProfile } = useCustomMutation<ProfileForm>();
-
   const invalidatePanel = usePanelInvalidate();
 
+  const { form: profileForm, formProps, saveButtonProps, query } = useForm<ProfileForm>({
+    resource: "panel-profile",
+    action: "edit",
+    id: "profile",
+    redirect: false,
+    successNotification: successPayload("Profile updated."),
+    // 409 branch needs the server error — errorPayload can't express it, so it stays inline.
+    errorNotification: (error) => ({
+      message: "Operation Error",
+      description: error?.statusCode === 409 ? "E-mail already in use." : "Could not update profile.",
+      type: "error",
+    }),
+    onMutationSuccess: () => void invalidatePanel(PANEL_QUERY_KEYS.profile),
+  });
+
+  const liveProfile = query?.data?.data;
+
   useEffect(() => {
-    if (initialProfile) {
+    if (liveProfile) {
       profileForm.setFieldsValue({
-        name: initialProfile.name,
-        email: initialProfile.email,
-        locale: initialProfile.locale,
-        timezone: initialProfile.timezone,
+        name: liveProfile.name,
+        email: liveProfile.email,
+        locale: liveProfile.locale,
+        timezone: liveProfile.timezone,
       });
     }
-  }, [initialProfile, profileForm]);
-
-  const onFinishProfile = async (form: ProfileForm) => {
-    updateProfile(
-      {
-        url: `${apiUrl}/panel/profile`,
-        method: "patch",
-        values: form,
-        successNotification: successPayload("Profile updated."),
-        // 409 branch needs the server error — errorPayload can't express it, so it stays inline.
-        errorNotification: (error?: { statusCode?: number }) => ({
-          message: "Operation Error",
-          description: error?.statusCode === 409 ? "E-mail already in use." : "Could not update profile.",
-          type: "error",
-        }),
-      },
-      {
-        onSuccess: () => void invalidatePanel(PANEL_QUERY_KEYS.profile),
-      }
-    );
-  };
+  }, [liveProfile, profileForm]);
 
   return (
     <Card title={"Profile Information"} variant="borderless">
-      <Form form={profileForm} name="profile-form" onFinish={onFinishProfile}>
+      <Form {...formProps} name="profile-form">
         <Form.Item label="Name" name="name" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
@@ -73,7 +64,7 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({
           <Select options={timezonesOptions} showSearch />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" {...saveButtonProps}>
             Save
           </Button>
         </Form.Item>
