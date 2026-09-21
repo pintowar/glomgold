@@ -13,9 +13,9 @@ import routerBindings, {
   NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import dataProvider from "@refinedev/simple-rest";
+import { panelDataProvider } from "./providers/panelDataProvider";
 import { HashRouter, Outlet, Route, Routes, Navigate } from "react-router-dom";
-import { axiosInstance, authProvider } from "./authProvider";
+import { authProvider } from "./authProvider";
 import { Header } from "./components";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 
@@ -25,7 +25,6 @@ import { DashboardPage } from "./pages/admin/dashboard";
 
 import { Login } from "./pages/login";
 
-import { API_URL } from "./constants";
 import { PanelLayout } from "./pages/panel/layout";
 import { ControlPanel, ReportPanel, ProfilePanel } from "./pages/panel";
 
@@ -78,7 +77,7 @@ function InnerApp() {
 
   return (
     <Refine
-      dataProvider={dataProvider(API_URL, axiosInstance)}
+      dataProvider={panelDataProvider}
       notificationProvider={notificationProvider}
       routerProvider={routerBindings}
       authProvider={authProvider}

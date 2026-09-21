@@ -16,7 +16,6 @@ import {
 
 import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
 import { usePanelSearchParams } from "../../../hooks/usePanelSearchParams";
-import { usePanelInvalidate } from "../../../hooks/usePanelInvalidate";
 
 interface ControlPanelData {
   items: IItem[];
@@ -32,11 +31,6 @@ const DESC_PARAM = "desc";
 const EMPTY_SUMMARY: ISummary = { expense: 0, income: 0, balance: 0 };
 
 export const ControlPanel: React.FC = () => {
-  const invalidatePanel = usePanelInvalidate();
-  const invalidateQuery = useCallback(
-    (period: string) => invalidatePanel(PANEL_QUERY_KEYS.control, period),
-    [invalidatePanel]
-  );
   const { locale, currency, symbol } = useIdentityDefaults();
 
   const { searchParams, updateSearchParams } = usePanelSearchParams();
@@ -113,7 +107,6 @@ export const ControlPanel: React.FC = () => {
               locale={locale}
               currency={currency}
               symbol={symbol}
-              invalidateQuery={invalidateQuery}
             />
           </Col>
           <Col span={12}>

@@ -35,7 +35,6 @@ interface MonthItemsCardProps {
   symbol: string;
   initialSearch: string;
   onSearchChange?: (value: string) => void;
-  invalidateQuery: (period: string) => Promise<void>;
 }
 
 const INITIAL_FORM_VALUES = { itemType: "EXPENSE", description: "", value: 0 };
@@ -48,7 +47,6 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   locale,
   currency,
   symbol,
-  invalidateQuery,
 }) => {
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -176,7 +174,6 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     addForm,
     editForm,
     selectedRows,
-    invalidateQuery,
     setEditingKey,
     focusDescription: () => descInputRef.current?.focus(),
   });
