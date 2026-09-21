@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
-  App as AntdApp,
   AutoComplete,
   Button,
   Card,
@@ -53,7 +52,6 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 }) => {
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
-  const { modal } = AntdApp.useApp();
   const descInputRef = useRef<RefSelectProps>(null);
   const searchInput = useRef<InputRef>(null);
 
@@ -173,13 +171,12 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     return (Array.isArray(data) ? data : []).map((value) => ({ value }));
   }, [itemSearchData]);
 
-  const { addItem, editItem, deleteItem, copyNextMonth, confirmDeleteSelected } = useMonthItemsMutations({
+  const { addItem, editItem, deleteItem, copyNextMonth, deleteSelected } = useMonthItemsMutations({
     formattedPeriod,
     addForm,
     editForm,
     selectedRows,
     invalidateQuery,
-    modal,
     setEditingKey,
     focusDescription: () => descInputRef.current?.focus(),
   });
@@ -300,15 +297,16 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           >
             Replicate Next Month
           </Button>
-          <Button
-            data-testid={"delete-selected"}
-            type="primary"
-            danger
-            disabled={selectedRows.keys.length === 0}
-            onClick={() => confirmDeleteSelected()}
-          >
-            Delete Selected
-          </Button>
+          <Popconfirm title="Sure to delete all selected?" onConfirm={() => deleteSelected()}>
+            <Button
+              data-testid={"delete-selected"}
+              type="primary"
+              danger
+              disabled={selectedRows.keys.length === 0}
+            >
+              Delete Selected
+            </Button>
+          </Popconfirm>
         </Space>
         <Form form={editForm} component={false}>
           <Table

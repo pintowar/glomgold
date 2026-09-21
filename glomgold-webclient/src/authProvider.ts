@@ -26,11 +26,9 @@ const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
   );
 
   axiosCli.interceptors.response.use(
-    (response) => {
-      return response;
-    },
+    (response) => response,
     (error) => {
-      if (401 === error.response.status) {
+      if (error?.response?.status === 401) {
         storage.clearUser();
       }
       return Promise.reject(error);
@@ -46,21 +44,17 @@ export const axiosInstance: AxiosInstance = generateAxiosInstance(storage);
 
 export const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
-    const { data, status } = await axios.post("/api/login", { username, password });
-    if (status === 200) {
+    try {
+      const { data } = await axios.post("/api/login", { username, password });
       storage.setUser(data.access_token);
-      const redirectPath = data.roles.includes("ROLE_ADMIN") ? "/admin" : "/panel";
       return {
         success: true,
-        redirectTo: redirectPath,
+        redirectTo: data.roles.includes("ROLE_ADMIN") ? "/admin" : "/panel",
       };
-    } else {
+    } catch {
       return {
         success: false,
-        error: {
-          name: "LoginError",
-          message: "Invalid username or password",
-        },
+        error: { name: "LoginError", message: "Invalid username or password" },
       };
     }
   },
@@ -90,7 +84,6 @@ export const authProvider: AuthProvider = {
     return storage.getUser();
   },
   onError: async (error) => {
-    console.error(error);
     return { error };
   },
 };

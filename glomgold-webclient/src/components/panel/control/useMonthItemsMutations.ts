@@ -1,11 +1,9 @@
 import React, { useCallback } from "react";
-import { App as AntdApp, type FormInstance } from "antd";
+import { type FormInstance } from "antd";
 import { useCustomMutation } from "@refinedev/core";
 import { PANEL_URLS } from "../../../constants";
 import { errorPayload, successPayload } from "../../../utils/notify";
 import type { ItemBody, PanelItem } from "./types";
-
-type ConfirmApi = ReturnType<typeof AntdApp.useApp>["modal"];
 
 interface MonthItemsMutationsDeps {
   formattedPeriod: string;
@@ -13,7 +11,6 @@ interface MonthItemsMutationsDeps {
   editForm: FormInstance;
   selectedRows: { keys: React.Key[]; rows: PanelItem[] };
   invalidateQuery: (period: string) => Promise<void>;
-  modal: ConfirmApi;
   setEditingKey: (key: string) => void;
   focusDescription: () => void;
 }
@@ -24,7 +21,6 @@ export const useMonthItemsMutations = ({
   editForm,
   selectedRows,
   invalidateQuery,
-  modal,
   setEditingKey,
   focusDescription,
 }: MonthItemsMutationsDeps) => {
@@ -140,16 +136,5 @@ export const useMonthItemsMutations = ({
     removeItems(PANEL_URLS.removeItems(formattedPeriod, itemIds));
   }, [removeItems, selectedRows.rows, formattedPeriod]);
 
-  const confirmDeleteSelected = useCallback(() => {
-    // NOTE: use context-based modal — static Modal.confirm renders via rc-util's
-    // legacy ReactDOM entry point, which silently no-ops under React 19
-    modal.confirm({
-      title: "Sure to delete all selected?",
-      onOk() {
-        deleteSelected();
-      },
-    });
-  }, [modal, deleteSelected]);
-
-  return { addItem, editItem, deleteItem, copyNextMonth, deleteSelected, confirmDeleteSelected };
+  return { addItem, editItem, deleteItem, copyNextMonth, deleteSelected };
 };

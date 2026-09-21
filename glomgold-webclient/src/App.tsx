@@ -38,8 +38,7 @@ const accessControlProvider = {
 
     const isAdmin = roles.includes("ROLE_ADMIN");
     const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
-    const cond = !(!isAdmin && isAdminResource);
-    return { can: cond };
+    return { can: isAdmin || !isAdminResource };
   },
 };
 
