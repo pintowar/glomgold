@@ -38,7 +38,7 @@ class PanelController(
         @QueryValue period: YearMonth?
     ) = panelService.panelInfo(authId(auth), period ?: YearMonth.now())
 
-    @Get("/report{?year,type}")
+    @Get("/yearly-report{?year,type}")
     suspend fun report(
         auth: Authentication,
         @QueryValue year: Int?,

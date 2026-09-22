@@ -331,13 +331,13 @@ interface PanelClient {
         @QueryValue period: String? = null
     ): HttpResponse<PanelInfo>
 
-    @Get("/report{?year}")
+    @Get("/yearly-report{?year}")
     suspend fun report(
         @Header(HttpHeaders.AUTHORIZATION) auth: String,
         @QueryValue year: Int? = null
     ): HttpResponse<PanelAnnualReport>
 
-    @Get("/report{?year}")
+    @Get("/yearly-report{?year}")
     suspend fun rawReport(
         @Header(HttpHeaders.AUTHORIZATION) auth: String,
         @QueryValue year: Int? = null

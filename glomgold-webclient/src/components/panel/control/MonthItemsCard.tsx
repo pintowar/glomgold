@@ -268,10 +268,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
               style={{ width: 250 }}
             />
           </Form.Item>
-          <Form.Item
-            name="value"
-            rules={[{ required: true, message: "Please input a value!" }, greaterThanZeroRule]}
-          >
+          <Form.Item name="value" rules={[{ required: true, message: "Please input a value!" }, greaterThanZeroRule]}>
             <InputNumber
               data-testid={"value"}
               min={0}

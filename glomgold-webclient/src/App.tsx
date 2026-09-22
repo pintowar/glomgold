@@ -136,7 +136,7 @@ function InnerApp() {
           }
         >
           <Route index element={<ControlPanel />} />
-          <Route path="report" element={<ReportPanel />} />
+          <Route path="yearly-report" element={<ReportPanel />} />
           <Route path="profile" element={<ProfilePanel />} />
         </Route>
         <Route

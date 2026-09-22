@@ -30,7 +30,7 @@ export const ReportPanel: React.FC = () => {
 
     result: dataTable,
   } = useCustom<IPanelAnnualReport>({
-    url: `/api/panel/report`,
+    url: `/api/panel/yearly-report`,
     method: "get",
     config: { query: { year: currentPeriod.year(), type } },
   });

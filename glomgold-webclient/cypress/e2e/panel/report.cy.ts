@@ -8,19 +8,19 @@ describe("Panel Report Tests", () => {
 
     it("Report: BALANCE / 2023", () => {
       cy.intercept("POST", "/api/login", { fixture: "login/common.user.json" });
-      cy.intercept("GET", "/api/panel/report?&type=BALANCE&year=2023", { fixture: "panel/report.json" }).as(
+      cy.intercept("GET", "/api/panel/yearly-report?&type=BALANCE&year=2023", { fixture: "panel/report.json" }).as(
         "currentReport"
       );
 
       const { username, password } = user;
 
-      cy.visit("/#/panel/report?period=2023");
+      cy.visit("/#/panel/yearly-report?period=2023");
 
       cy.get("#username").type(username);
       cy.get("#password").type(password);
       cy.get("button.ant-btn").click();
 
-      cy.url().should("include", "/panel/report");
+      cy.url().should("include", "/panel/yearly-report");
       cy.wait("@currentReport");
 
       cy.get(`[data-row-key="1"] > :nth-child(10) a`).should("have.css", "color", "rgb(245, 34, 45)");

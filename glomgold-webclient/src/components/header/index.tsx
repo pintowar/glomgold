@@ -54,7 +54,7 @@ export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({ sticky }) => {
   const menuItems = useMemo(
     () => [
       { key: "menu-panel", label: <Link to={"/panel"}>Panel</Link>, icon: <DollarOutlined /> },
-      { key: "menu-report", label: <Link to={"/panel/report"}>Report</Link>, icon: <LineChartOutlined /> },
+      { key: "menu-report", label: <Link to={"/panel/yearly-report"}>Report</Link>, icon: <LineChartOutlined /> },
       ...(isAdmin ? [{ key: "menu-admin", label: <Link to={"/admin"}>Admin</Link>, icon: <SettingOutlined /> }] : []),
     ],
     [isAdmin]
