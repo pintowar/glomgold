@@ -8,6 +8,13 @@ export type EditableInputType = "number" | "text" | "select";
 
 export const ITEM_TYPE_OPTIONS = ITEM_TYPES.map((value) => ({ value, label: <ItemTypeIcon type={value} /> }));
 
+export const greaterThanZeroRule = {
+  validator: (_: unknown, value: unknown) =>
+    value == null || value === "" || (value as number) > 0
+      ? Promise.resolve()
+      : Promise.reject(new Error("Value must be greater than zero!")),
+};
+
 export interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   editing: boolean;
   dataIndex: string;
@@ -47,6 +54,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
               required: true,
               message: `Please Input ${title}!`,
             },
+            ...(inputType === "number" ? [greaterThanZeroRule] : []),
           ]}
         >
           {inputNode}

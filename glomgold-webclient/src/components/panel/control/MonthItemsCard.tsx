@@ -22,7 +22,7 @@ import { PANEL_URLS, type ItemType } from "../../../constants";
 import { ItemTypeIcon } from "../../common/ItemTypeIcon";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 import { useLocaleNumberFormat } from "../../../hooks/useLocaleNumberFormat";
-import { EditableCell, type EditableInputType, ITEM_TYPE_OPTIONS } from "./EditableCell";
+import { EditableCell, type EditableInputType, ITEM_TYPE_OPTIONS, greaterThanZeroRule } from "./EditableCell";
 import { useColumnSearch } from "./ColumnSearchFilter";
 import { useMonthItemsMutations } from "./useMonthItemsMutations";
 import type { PanelItem } from "./types";
@@ -268,7 +268,10 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
               style={{ width: 250 }}
             />
           </Form.Item>
-          <Form.Item name="value" rules={[{ required: true }]}>
+          <Form.Item
+            name="value"
+            rules={[{ required: true, message: "Please input a value!" }, greaterThanZeroRule]}
+          >
             <InputNumber
               data-testid={"value"}
               min={0}
