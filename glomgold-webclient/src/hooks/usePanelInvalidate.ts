@@ -7,8 +7,7 @@ type PanelKey = (typeof PANEL_QUERY_KEYS)[keyof typeof PANEL_QUERY_KEYS];
 export const usePanelInvalidate = () => {
   const queryClient = useQueryClient();
   return useCallback(
-    (key: PanelKey, period?: string) =>
-      queryClient.invalidateQueries({ queryKey: period ? [key, period] : [key] }),
+    (key: PanelKey, period?: string) => queryClient.invalidateQueries({ queryKey: period ? [key, period] : [key] }),
     [queryClient]
   );
 };

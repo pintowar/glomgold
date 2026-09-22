@@ -1,5 +1,5 @@
 import React from "react";
-import { Row } from "antd";
+import { Col, Row } from "antd";
 import { useApiUrl } from "@refinedev/core";
 import { useLabelValueOptions } from "../../../hooks/useLabelValueOptions";
 import { ProfileInfoCard } from "../../../components/panel/profile/ProfileInfoCard";
@@ -13,11 +13,12 @@ export const ProfilePanel: React.FC = () => {
   return (
     <div className="card-row">
       <Row gutter={[24, 24]}>
-        <ProfileInfoCard
-          localeOptions={localeOptions}
-          timezonesOptions={timezonesOptions}
-        />
-        <ProfilePasswordCard />
+        <Col span={24}>
+          <ProfileInfoCard localeOptions={localeOptions} timezonesOptions={timezonesOptions} />
+        </Col>
+        <Col span={24}>
+          <ProfilePasswordCard />
+        </Col>
       </Row>
     </div>
   );

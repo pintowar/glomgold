@@ -104,10 +104,14 @@ export const useMonthItemsMutations = ({
 
   const editItem = useCallback(
     (key: number) =>
-      saveItem(editForm, { key }, {
-        onSettled: () => setEditingKey(""),
-        onValidationError: () => setEditingKey(""),
-      }),
+      saveItem(
+        editForm,
+        { key },
+        {
+          onSettled: () => setEditingKey(""),
+          onValidationError: () => setEditingKey(""),
+        }
+      ),
     [saveItem, editForm, setEditingKey]
   );
 

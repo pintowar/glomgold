@@ -295,12 +295,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             Replicate Next Month
           </Button>
           <Popconfirm title="Sure to delete all selected?" onConfirm={() => deleteSelected()}>
-            <Button
-              data-testid={"delete-selected"}
-              type="primary"
-              danger
-              disabled={selectedRows.keys.length === 0}
-            >
+            <Button data-testid={"delete-selected"} type="primary" danger disabled={selectedRows.keys.length === 0}>
               Delete Selected
             </Button>
           </Popconfirm>

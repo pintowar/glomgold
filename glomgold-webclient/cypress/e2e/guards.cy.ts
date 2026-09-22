@@ -31,9 +31,7 @@ describe("Route Guard Tests", () => {
   it("Admin user visiting /admin stays and dashboard renders", () => {
     cy.intercept("POST", "/api/login", { fixture: "login/admin.user.json", statusCode: 200 });
     cy.intercept("GET", "/api/users*", { fixture: "admin/users.json", statusCode: 200 }).as("users");
-    cy.intercept("GET", "/api/management/info*", { fixture: "admin/info.json", statusCode: 200 }).as(
-      "dashboardInfo"
-    );
+    cy.intercept("GET", "/api/management/info*", { fixture: "admin/info.json", statusCode: 200 }).as("dashboardInfo");
 
     cy.visit("/#/admin");
     login(adminUser);

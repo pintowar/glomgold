@@ -14,13 +14,15 @@ interface ProfileInfoCardProps {
   timezonesOptions: { label: string; value: string }[];
 }
 
-export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({
-  localeOptions,
-  timezonesOptions,
-}) => {
+export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ localeOptions, timezonesOptions }) => {
   const invalidatePanel = usePanelInvalidate();
 
-  const { form: profileForm, formProps, saveButtonProps, query } = useForm<ProfileForm>({
+  const {
+    form: profileForm,
+    formProps,
+    saveButtonProps,
+    query,
+  } = useForm<ProfileForm>({
     resource: "panel-profile",
     action: "edit",
     id: "profile",
