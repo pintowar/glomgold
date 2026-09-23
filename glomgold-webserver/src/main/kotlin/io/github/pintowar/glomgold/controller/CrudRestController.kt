@@ -75,24 +75,15 @@ abstract class CrudRestController<E : Any, DTO : Any, ID : Any>(
     ): E = dtoToEntity(dto)
 
     open fun predicates(params: Map<String, List<String>>): PredicateSpecification<E> {
-        val cleanParams =
+        val specs =
             params
                 .mapValues { (_, v) -> v.filter { it.isNotEmpty() }.distinct() }
                 .filterValues { it.isNotEmpty() }
-
-        val truePredicate = PredicateSpecification<E> { _, cb -> cb.conjunction() }
-
-        return cleanParams
-            .map { (k, v) ->
-                PredicateSpecification<E> { root, criteriaBuilder ->
-                    val idExp = root.get<Any>(k)
-                    when {
-                        // At the time of writing this code, Micronaut Data doesn't support criteria "in" expression.
-                        v.size > 1 -> criteriaBuilder.or(*(v.map { criteriaBuilder.equal(idExp, it) }.toTypedArray()))
-                        v.size == 1 -> criteriaBuilder.equal(idExp, v.first())
-                        else -> throw IllegalArgumentException("Illegal argument size.")
-                    }
+                .map { (k, v) ->
+                    PredicateSpecification<E> { root, _ -> root.get<Any>(k).`in`(v) }
                 }
-            }.fold(truePredicate) { acc, it -> acc.and(it) }
+
+        return specs.reduceOrNull { acc, it -> acc.and(it) }
+            ?: PredicateSpecification<E> { _, cb -> cb.conjunction() }
     }
 }

@@ -1,4 +1,5 @@
 import { TOKEN_KEY, USER_KEY } from "./constants";
+import { decodeJwtPayload } from "./authUtils.ts";
 
 interface StorageUser {
   sub: string;
@@ -36,21 +37,34 @@ export class LocalStorage {
   }
 
   public setUser(access_token: string): void {
-    localStorage.setItem(TOKEN_KEY, access_token);
-    localStorage.setItem(USER_KEY, atob(access_token.split(".")[1]));
+    this.storage.setItem(TOKEN_KEY, access_token);
+    const user = decodeJwtPayload(access_token);
+    if (user) {
+      this.storage.setItem(USER_KEY, JSON.stringify(user));
+    } else {
+      this.storage.removeItem(USER_KEY);
+    }
   }
 
   public clearUser(): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    this.storage.removeItem(TOKEN_KEY);
+    this.storage.removeItem(USER_KEY);
   }
 
   public getToken(): string {
-    return localStorage.getItem(TOKEN_KEY) ?? "";
+    try {
+      return this.storage.getItem(TOKEN_KEY) ?? "";
+    } catch {
+      return "";
+    }
   }
 
   public getUser(): StorageUser {
-    return JSON.parse(localStorage.getItem(USER_KEY) ?? "{}");
+    try {
+      return JSON.parse(this.storage.getItem(USER_KEY) ?? "{}") as StorageUser;
+    } catch {
+      return {} as StorageUser;
+    }
   }
 
   public isLoggedIn(): boolean {

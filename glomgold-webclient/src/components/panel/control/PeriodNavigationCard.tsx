@@ -16,7 +16,7 @@ export const PeriodNavigationCard: React.FC<PeriodNavigationCardProps> = ({ valu
   };
 
   return (
-    <Card title={"Period Navigation"} bordered={false}>
+    <Card title={"Period Navigation"} variant="borderless">
       <Space direction="horizontal" size={12}>
         <Typography.Link data-testid={"navigate-left"} onClick={() => onValueChange(value.clone().add(-1, "M"))}>
           <LeftOutlined />

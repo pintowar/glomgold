@@ -1,12 +1,11 @@
-import React, { useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCustom, useGetIdentity } from "@refinedev/core";
+import React, { useCallback, useMemo } from "react";
+import { useCustom } from "@refinedev/core";
 
 import { Row, Col, Spin } from "antd";
 import dayjs from "dayjs";
 
 import { IItem, ISummary } from "../../../interfaces";
+import { PANEL_QUERY_KEYS } from "../../../constants";
 
 import {
   PeriodSummaryCard,
@@ -15,7 +14,8 @@ import {
   MonthStatsCard,
 } from "../../../components/panel/control";
 
-import { DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_SYMBOL } from "../../../constants";
+import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
+import { usePanelSearchParams } from "../../../hooks/usePanelSearchParams";
 
 interface ControlPanelData {
   items: IItem[];
@@ -24,65 +24,72 @@ interface ControlPanelData {
   diff: ISummary;
 }
 
+const PERIOD_FORMAT = "YYYY-MM";
+const PERIOD_PARAM = "period";
+const DESC_PARAM = "desc";
+
+const EMPTY_SUMMARY: ISummary = { expense: 0, income: 0, balance: 0 };
+
 export const ControlPanel: React.FC = () => {
-  const queryClient = useQueryClient();
-  const { data: identity } = useGetIdentity<{ locale: string; currency: string; symbol: string }>();
-  const locale = identity?.locale ?? DEFAULT_LOCALE;
-  const currency = identity?.currency ?? DEFAULT_CURRENCY;
-  const symbol = identity?.symbol ?? DEFAULT_SYMBOL;
-  const controlPanelKey = "control-panel-key";
-  const periodFormat = "YYYY-MM";
-  const periodParam = "period";
-  const descParam = "desc";
+  const { locale, currency, symbol } = useIdentityDefaults();
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const period = searchParams.get(periodParam) ?? dayjs().format(periodFormat);
-  const desc = searchParams.get(descParam) ?? "";
+  const { searchParams, updateSearchParams } = usePanelSearchParams();
+  const period = searchParams.get(PERIOD_PARAM) ?? dayjs().format(PERIOD_FORMAT);
+  const desc = searchParams.get(DESC_PARAM) ?? "";
 
-  const currentPeriod = useMemo(() => dayjs(period, periodFormat), [period, periodFormat]);
-  const formattedPeriod = useMemo(() => currentPeriod.format(periodFormat), [currentPeriod]);
-  const onCurrentPeriodChange = (value: dayjs.Dayjs | null) => {
-    if (value) {
-      setSearchParams({ [periodParam]: value.format(periodFormat) });
-    }
-  };
+  const onCurrentPeriodChange = useCallback(
+    (value: dayjs.Dayjs | null) => {
+      if (value) {
+        updateSearchParams({ [PERIOD_PARAM]: value.format(PERIOD_FORMAT) });
+      }
+    },
+    [updateSearchParams]
+  );
+
+  const onDescChange = useCallback(
+    (value: string) => {
+      updateSearchParams({ [DESC_PARAM]: value || undefined });
+    },
+    [updateSearchParams]
+  );
+
+  const currentPeriod = useMemo(() => dayjs(period, PERIOD_FORMAT), [period]);
+  const formattedPeriod = currentPeriod.format(PERIOD_FORMAT);
 
   const {
     query: { isLoading },
-
     result: panelData,
   } = useCustom<ControlPanelData>({
     url: "/api/panel",
     method: "get",
     config: { query: { period: formattedPeriod } },
     queryOptions: {
-      queryKey: [controlPanelKey, formattedPeriod],
+      queryKey: [PANEL_QUERY_KEYS.control, formattedPeriod],
     },
   });
 
-  const invalidateQuery = async (period: string) =>
-    await queryClient.invalidateQueries({ queryKey: [controlPanelKey, period] });
-
-  const tableData = (panelData?.data?.items ?? []).map(({ id, description, value, itemType }) => ({
-    key: id,
-    description,
-    itemType,
-    value,
-  }));
-
-  const defaultSummary = { expense: 0, income: 0, balance: 0 };
+  const tableData = useMemo(
+    () =>
+      (panelData?.data?.items ?? []).map(({ id, description, value, itemType }) => ({
+        key: id,
+        description,
+        itemType,
+        value,
+      })),
+    [panelData?.data?.items]
+  );
 
   return (
     <Spin spinning={isLoading}>
       <div className="card-row">
         <Row gutter={[24, 24]}>
           <Col span={12}>
-            <PeriodNavigationCard value={currentPeriod} onValueChange={onCurrentPeriodChange} format={periodFormat} />
+            <PeriodNavigationCard value={currentPeriod} onValueChange={onCurrentPeriodChange} format={PERIOD_FORMAT} />
           </Col>
           <Col span={12}>
             <PeriodSummaryCard
-              total={panelData?.data.total ?? defaultSummary}
-              difference={panelData?.data.diff ?? defaultSummary}
+              total={panelData?.data.total ?? EMPTY_SUMMARY}
+              difference={panelData?.data.diff ?? EMPTY_SUMMARY}
               locale={locale}
               symbol={symbol}
             />
@@ -95,11 +102,11 @@ export const ControlPanel: React.FC = () => {
             <MonthItemsCard
               formattedPeriod={formattedPeriod}
               initialSearch={desc}
+              onSearchChange={onDescChange}
               tableData={tableData}
               locale={locale}
               currency={currency}
               symbol={symbol}
-              invalidateQuery={invalidateQuery}
             />
           </Col>
           <Col span={12}>

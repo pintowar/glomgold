@@ -6,8 +6,9 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldNotContain
 import io.kotest.provided.fakeUsers
-import io.micronaut.http.HttpHeaders.AUTHORIZATION
+import io.micronaut.http.HttpHeaders
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.Body
 import io.micronaut.http.annotation.Get
@@ -39,6 +40,9 @@ class JwtAuthenticationTest(
                     }
 
                 exception.status shouldBe HttpStatus.UNAUTHORIZED
+                // A "Basic" challenge summons browser-native login popups;
+                // the SPA handles 401s itself by redirecting to /login.
+                (exception.response.headers.get(HttpHeaders.WWW_AUTHENTICATE) ?: "") shouldNotContain "Basic"
             }
 
             it("test access with wrong password") {
@@ -77,6 +81,6 @@ interface AuthClient {
 
     @Get("/api/auth/me")
     fun account(
-        @Header(AUTHORIZATION) authorization: String
+        @Header(HttpHeaders.AUTHORIZATION) authorization: String
     ): Map<String, String>
 }

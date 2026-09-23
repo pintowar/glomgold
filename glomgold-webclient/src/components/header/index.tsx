@@ -1,7 +1,7 @@
 import type { RefineThemedLayoutHeaderProps } from "@refinedev/antd";
 import { useGetIdentity, useLogout, usePermissions } from "@refinedev/core";
 import { Layout as AntdLayout, Dropdown, Menu, Space, Switch, Typography } from "antd";
-import React, { useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { ColorModeContext } from "../../contexts/color-mode";
 import { IUser } from "../../interfaces";
@@ -15,6 +15,12 @@ import {
 } from "@ant-design/icons";
 
 const { Text } = Typography;
+
+const BASE_HEADER_STYLE: React.CSSProperties = {
+  alignItems: "center",
+  padding: "0px 24px",
+  height: "64px",
+};
 
 function menuKeyFromUrl(pathname: string): string {
   if (pathname.includes("report")) {
@@ -43,30 +49,29 @@ export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({ sticky }) => {
     setSelectedMenu(menuKeyFromUrl(location.pathname));
   }
 
-  const handleClick = (key: string) => setSelectedMenu(key);
+  const handleClick = useCallback((key: string) => setSelectedMenu(key), []);
 
-  const menuItems = [
-    { key: "menu-panel", label: <Link to={"/panel"}>Panel</Link>, icon: <DollarOutlined /> },
-    { key: "menu-report", label: <Link to={"/panel/report"}>Report</Link>, icon: <LineChartOutlined /> },
-    { key: `${isAdmin ? "admin" : ""}`, label: <Link to={"/admin"}>Admin</Link>, icon: <SettingOutlined /> },
-  ].filter(({ key }) => key);
+  const menuItems = useMemo(
+    () => [
+      { key: "menu-panel", label: <Link to={"/panel"}>Panel</Link>, icon: <DollarOutlined /> },
+      { key: "menu-report", label: <Link to={"/panel/yearly-report"}>Report</Link>, icon: <LineChartOutlined /> },
+      ...(isAdmin ? [{ key: "menu-admin", label: <Link to={"/admin"}>Admin</Link>, icon: <SettingOutlined /> }] : []),
+    ],
+    [isAdmin]
+  );
 
-  const dropdownItems = [
-    { key: "menu-profile", label: <Link to={"/panel/profile"}>Profile</Link>, icon: <UserOutlined /> },
-    { key: "menu-logout", label: <div onClick={() => logout()}>Logout</div>, icon: <LogoutOutlined /> },
-  ];
+  const dropdownItems = useMemo(
+    () => [
+      { key: "menu-profile", label: <Link to={"/panel/profile"}>Profile</Link>, icon: <UserOutlined /> },
+      { key: "menu-logout", label: <div onClick={() => logout()}>Logout</div>, icon: <LogoutOutlined /> },
+    ],
+    [logout]
+  );
 
-  const headerStyles: React.CSSProperties = {
-    alignItems: "center",
-    padding: "0px 24px",
-    height: "64px",
-  };
-
-  if (sticky) {
-    headerStyles.position = "sticky";
-    headerStyles.top = 0;
-    headerStyles.zIndex = 1;
-  }
+  const headerStyles: React.CSSProperties = useMemo(
+    () => (sticky ? { ...BASE_HEADER_STYLE, position: "sticky", top: 0, zIndex: 1 } : BASE_HEADER_STYLE),
+    [sticky]
+  );
 
   return (
     <AntdLayout.Header style={headerStyles}>

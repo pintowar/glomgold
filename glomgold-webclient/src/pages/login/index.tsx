@@ -43,7 +43,7 @@ export const Login: React.FC = () => {
             <div style={imageContainer}>
               <img src={logo} alt="Glomgold Logo" />
             </div>
-            <Card title={CardTitle} headStyle={{ borderBottom: 0 }}>
+            <Card title={CardTitle} styles={{ header: { borderBottom: 0 } }}>
               <Form<ILoginForm>
                 layout="vertical"
                 form={form}
@@ -68,57 +68,12 @@ export const Login: React.FC = () => {
                   rules={[{ required: true }]}
                   style={{ marginBottom: "12px" }}
                 >
-                  <Input type="password" placeholder="●●●●●●●●" size="large" />
+                  <Input.Password placeholder="●●●●●●●●" size="large" />
                 </Form.Item>
-                {/* <div style={{ marginBottom: "12px" }}>
-                                    <Form.Item
-                                        name="remember"
-                                        valuePropName="checked"
-                                        noStyle
-                                    >
-                                        <Checkbox
-                                            style={{
-                                                fontSize: "12px",
-                                            }}
-                                        >
-                                            {translate(
-                                                "pages.login.remember",
-                                                "Remember me",
-                                            )}
-                                        </Checkbox>
-                                    </Form.Item>
-
-                                    <a
-                                        style={{
-                                            float: "right",
-                                            fontSize: "12px",
-                                        }}
-                                        href="#"
-                                    >
-                                        {translate(
-                                            "pages.login.forgotPassword",
-                                            "Forgot password?",
-                                        )}
-                                    </a>
-                                </div> */}
                 <Button type="primary" size="large" htmlType="submit" loading={isLoading} block>
                   {translate("pages.login.signin", "Sign in")}
                 </Button>
               </Form>
-              {/* <div style={{ marginTop: 8 }}>
-                                <Text style={{ fontSize: 12 }}>
-                                    {translate(
-                                        "pages.login.noAccount",
-                                        "Don’t have an account?",
-                                    )}{" "}
-                                    <a href="#" style={{ fontWeight: "bold" }}>
-                                        {translate(
-                                            "pages.login.signup",
-                                            "Sign up",
-                                        )}
-                                    </a>
-                                </Text>
-                            </div> */}
             </Card>
           </div>
         </Col>

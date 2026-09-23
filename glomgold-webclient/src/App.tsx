@@ -13,10 +13,12 @@ import routerBindings, {
   NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import dataProvider from "@refinedev/simple-rest";
+import type { QueryClientConfig } from "@tanstack/react-query";
+import { shouldRetryQuery } from "./authUtils.ts";
+import { panelDataProvider } from "./providers/panelDataProvider";
 import { HashRouter, Outlet, Route, Routes, Navigate } from "react-router-dom";
-import { axiosInstance, authProvider } from "./authProvider";
-import { Header } from "./components/header";
+import { authProvider } from "./authProvider";
+import { Header } from "./components";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 
 import { ItemList, ItemEdit, ItemShow } from "./pages/admin/items";
@@ -25,66 +27,75 @@ import { DashboardPage } from "./pages/admin/dashboard";
 
 import { Login } from "./pages/login";
 
-import { API_URL } from "./constants";
 import { PanelLayout } from "./pages/panel/layout";
 import { ControlPanel, ReportPanel, ProfilePanel } from "./pages/panel";
-import { LocalStorage } from "./LocalStorage";
 
 import logoCollapsed from "./assets/images/glomgold-logo-collapsed.png";
+
+const accessControlProvider = {
+  can: async ({ resource }: { resource?: string }) => {
+    const roles = ((await authProvider.getPermissions?.()) ?? []) as string[];
+
+    const isAdmin = roles.includes("ROLE_ADMIN");
+    const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
+    return { can: isAdmin || !isAdminResource };
+  },
+};
+
+const queryClientConfig: QueryClientConfig = {
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => shouldRetryQuery(failureCount, error),
+    },
+  },
+};
+
+const resources = [  {
+    name: "dashboard",
+    list: "/admin/dashboard",
+    meta: {
+      label: "Dashboard",
+      icon: <DashboardOutlined />,
+    },
+  },
+  {
+    name: "users",
+    list: "/admin/users",
+    create: "/admin/users/create",
+    edit: "/admin/users/edit/:id",
+    show: "/admin/users/show/:id",
+    meta: {
+      icon: <UsergroupAddOutlined />,
+      canDelete: true,
+    },
+  },
+  {
+    name: "items",
+    list: "/admin/items",
+    edit: "/admin/items/edit/:id",
+    show: "/admin/items/show/:id",
+    meta: {
+      icon: <ShopOutlined />,
+      canDelete: true,
+    },
+  },
+];
 
 function InnerApp() {
   const notificationProvider = useNotificationProvider();
 
   return (
     <Refine
-      dataProvider={dataProvider(API_URL, axiosInstance)}
+      dataProvider={panelDataProvider}
       notificationProvider={notificationProvider}
       routerProvider={routerBindings}
       authProvider={authProvider}
-      accessControlProvider={{
-        can: async ({ resource }) => {
-          const roles = LocalStorage.getInstance().getUserRoles();
-
-          const isAdmin = roles.includes("ROLE_ADMIN");
-          const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
-          const cond = !(!isAdmin && isAdminResource);
-          return { can: cond };
-        },
-      }}
-      resources={[
-        {
-          name: "dashboard",
-          list: "/admin/dashboard",
-          meta: {
-            label: "Dashboard",
-            icon: <DashboardOutlined />,
-          },
-        },
-        {
-          name: "users",
-          list: "/admin/users",
-          create: "/admin/users/create",
-          edit: "/admin/users/edit/:id",
-          show: "/admin/users/show/:id",
-          meta: {
-            icon: <UsergroupAddOutlined />,
-            canDelete: true,
-          },
-        },
-        {
-          name: "items",
-          list: "/admin/items",
-          edit: "/admin/items/edit/:id",
-          show: "/admin/items/show/:id",
-          meta: {
-            icon: <ShopOutlined />,
-            canDelete: true,
-          },
-        },
-      ]}
+      accessControlProvider={accessControlProvider}
+      resources={resources}
       options={{
         syncWithLocation: true,
         warnWhenUnsavedChanges: true,
+        reactQuery: { clientConfig: queryClientConfig },
       }}
     >
       <Routes>
@@ -135,7 +146,7 @@ function InnerApp() {
           }
         >
           <Route index element={<ControlPanel />} />
-          <Route path="report" element={<ReportPanel />} />
+          <Route path="yearly-report" element={<ReportPanel />} />
           <Route path="profile" element={<ProfilePanel />} />
         </Route>
         <Route

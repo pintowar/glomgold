@@ -1,11 +1,13 @@
 import React from "react";
 import { IResourceComponentsProps } from "@refinedev/core";
 
-import { Edit, useForm, useSelect } from "@refinedev/antd";
+import { Edit, useForm } from "@refinedev/antd";
 import { Form, Input, Select } from "antd";
-import { DollarOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 
-import { IItem, IUser } from "../../../interfaces";
+import { IItem } from "../../../interfaces";
+import { ITEM_TYPES } from "../../../constants";
+import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
+import { useUserSelect } from "../../../hooks/useUserSelect";
 
 export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
   const { formProps, saveButtonProps, query } = useForm<IItem>({
@@ -13,12 +15,7 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
   });
 
   const postData = query?.data?.data;
-  const { selectProps: userSelectProps } = useSelect<IUser>({
-    resource: "users",
-    optionLabel: "name",
-    optionValue: "id",
-    defaultValue: postData?.userId,
-  });
+  const { selectProps: userSelectProps } = useUserSelect(postData?.userId);
 
   return (
     <Edit saveButtonProps={saveButtonProps}>
@@ -38,14 +35,7 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
             },
           ]}
         >
-          <Select>
-            <Select.Option value="EXPENSE">
-              <ShoppingCartOutlined />
-            </Select.Option>
-            <Select.Option value="INCOME">
-              <DollarOutlined />
-            </Select.Option>
-          </Select>
+          <Select options={ITEM_TYPES.map((value) => ({ value, label: <ItemTypeIcon type={value} /> }))} />
         </Form.Item>
         <Form.Item
           label="Description"
