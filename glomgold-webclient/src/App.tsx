@@ -13,6 +13,8 @@ import routerBindings, {
   NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
+import type { QueryClientConfig } from "@tanstack/react-query";
+import { shouldRetryQuery } from "./authUtils.ts";
 import { panelDataProvider } from "./providers/panelDataProvider";
 import { HashRouter, Outlet, Route, Routes, Navigate } from "react-router-dom";
 import { authProvider } from "./authProvider";
@@ -40,8 +42,15 @@ const accessControlProvider = {
   },
 };
 
-const resources = [
-  {
+const queryClientConfig: QueryClientConfig = {
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) => shouldRetryQuery(failureCount, error),
+    },
+  },
+};
+
+const resources = [  {
     name: "dashboard",
     list: "/admin/dashboard",
     meta: {
@@ -86,6 +95,7 @@ function InnerApp() {
       options={{
         syncWithLocation: true,
         warnWhenUnsavedChanges: true,
+        reactQuery: { clientConfig: queryClientConfig },
       }}
     >
       <Routes>

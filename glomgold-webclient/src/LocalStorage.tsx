@@ -1,4 +1,5 @@
 import { TOKEN_KEY, USER_KEY } from "./constants";
+import { decodeJwtPayload } from "./authUtils.ts";
 
 interface StorageUser {
   sub: string;
@@ -37,9 +38,10 @@ export class LocalStorage {
 
   public setUser(access_token: string): void {
     this.storage.setItem(TOKEN_KEY, access_token);
-    try {
-      this.storage.setItem(USER_KEY, atob(access_token.split(".")[1] ?? ""));
-    } catch {
+    const user = decodeJwtPayload(access_token);
+    if (user) {
+      this.storage.setItem(USER_KEY, JSON.stringify(user));
+    } else {
       this.storage.removeItem(USER_KEY);
     }
   }

@@ -2,6 +2,7 @@ import { AuthProvider } from "@refinedev/core";
 
 import axios, { AxiosHeaders, AxiosInstance } from "axios";
 import { LocalStorage } from "./LocalStorage";
+import { buildLoginRedirect, decodeJwtPayload, getErrorStatus, isSessionExpired } from "./authUtils.ts";
 
 const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
   const axiosCli = axios.create();
@@ -66,7 +67,8 @@ export const authProvider: AuthProvider = {
     };
   },
   check: async () => {
-    if (storage.getToken().length > 0) {
+    const token = storage.getToken();
+    if (token.length > 0 && !isSessionExpired(decodeJwtPayload(token) ?? storage.getUser())) {
       return {
         authenticated: true,
       };
@@ -84,6 +86,14 @@ export const authProvider: AuthProvider = {
     return storage.getUser();
   },
   onError: async (error) => {
+    if (getErrorStatus(error) === 401) {
+      const hash = typeof window !== "undefined" ? window.location.hash : "";
+      return {
+        logout: true,
+        redirectTo: buildLoginRedirect(hash),
+        error,
+      };
+    }
     return { error };
   },
 };

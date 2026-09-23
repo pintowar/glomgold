@@ -11,6 +11,8 @@ micronaut:
         paths: "classpath:public"
   security:
     authentication: bearer
+    basic-auth:
+      www-authenticate: false
     endpoints:
       login:
         path: /api/login
