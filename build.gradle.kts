@@ -31,9 +31,12 @@ tasks {
 sonarqube {
     properties {
         val sonarToken = project.findProperty("sonar.token")?.toString() ?: System.getenv("SONAR_TOKEN")
-        val (webServ, webCli) = ":glomgold-webserver" to ":glomgold-webclient"
-        val jacocoReportPath = project(webServ).layout.buildDirectory.dir("/reports/jacoco/test").get().toString()
-        val lcovReportPath = "${project(webCli).projectDir.absolutePath}/coverage/"
+        val webServProject = project(":glomgold-webserver")
+        val webCliProject = project(":glomgold-webclient")
+        val jacocoReportPath = webServProject.layout.buildDirectory
+            .file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
+        val lcovReportPath = webCliProject.layout.projectDirectory
+            .file("coverage/lcov.info").asFile.absolutePath
         property("sonar.sourceEncoding", "UTF-8")
         property("sonar.organization", "pintowar")
         property("sonar.projectName", "glomgold")
@@ -43,8 +46,8 @@ sonarqube {
         property("sonar.token", sonarToken)
         property("sonar.verbose", true)
         property("sonar.github.repository", "pintowar/glomgold")
-        property("sonar.coverage.jacoco.xmlReportPaths", "$jacocoReportPath/jacocoTestReport.xml")
-        property("sonar.javascript.lcov.reportPaths", "$lcovReportPath/lcov.info")
+        property("sonar.coverage.jacoco.xmlReportPaths", jacocoReportPath)
+        property("sonar.javascript.lcov.reportPaths", lcovReportPath)
     }
 }
 

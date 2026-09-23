@@ -52,9 +52,9 @@ tasks {
 
 sonarqube {
     properties {
-        val lcovReportPath = "${projectDir.absolutePath}/coverage/"
+        val lcovReportPath = layout.projectDirectory.file("coverage/lcov.info").asFile.absolutePath
         property("sonar.sources", "src")
         property("sonar.tests", "cypress")
-        property("sonar.javascript.lcov.reportPaths", "$lcovReportPath/lcov.info")
+        property("sonar.javascript.lcov.reportPaths", lcovReportPath)
     }
 }
