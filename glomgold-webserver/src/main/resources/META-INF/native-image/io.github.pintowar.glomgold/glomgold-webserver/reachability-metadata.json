@@ -7,6 +7,27 @@
           "name": "INSTANCE"
         }
       ]
+    },
+    {
+      "type": "io.micronaut.security.authentication.UsernamePasswordCredentials",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "allPublicMethods": true
+    },
+    {
+      "type": "io.micronaut.security.token.render.AccessRefreshToken",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "allPublicMethods": true
+    },
+    {
+      "type": "io.micronaut.security.token.render.BearerAccessRefreshToken",
+      "allDeclaredConstructors": true,
+      "allDeclaredMethods": true,
+      "allDeclaredFields": true,
+      "allPublicMethods": true
     }
   ]
 }
