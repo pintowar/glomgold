@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useMemo } from "react";
 import { ColorModeContext } from "../../../contexts/color-mode";
 import { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts";
-import { EXPENSE_COLOR, UP_COLOR } from "../../../constants";
+import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 import { IMonthlyBalance, IYearlySummary } from "../../../interfaces";
 
@@ -12,7 +12,7 @@ const STEPS = 5;
 const EPS = 1e-9;
 const NEUTRAL_COLOR = "#D9D9D9";
 const RED_DARK_TO_LIGHT = ["#A8071A", "#CF1322", EXPENSE_COLOR, "#F78F8B", "#FAC5C3"];
-const GREEN_LIGHT_TO_DARK = ["#D9F7E8", "#B7EB8F", "#73D13D", UP_COLOR, "#237804"];
+const BLUE_LIGHT_TO_DARK = ["#E6F4FF", "#91CAFF", "#4096FF", INCOME_COLOR, "#003EB3"];
 
 interface HeatMapColorRange {
   from: number;
@@ -38,7 +38,7 @@ const buildColorRanges = (heatmap: IMonthlyBalance[]): HeatMapColorRange[] => {
     for (let i = 0; i < STEPS; i++) {
       const from = (max * i) / STEPS;
       const to = (max * (i + 1)) / STEPS;
-      ranges.push({ from: i === 0 ? EPS : from, to, color: GREEN_LIGHT_TO_DARK[i] });
+      ranges.push({ from: i === 0 ? EPS : from, to, color: BLUE_LIGHT_TO_DARK[i] });
     }
   }
 
