@@ -214,8 +214,11 @@ ktlint {
 
 sonarqube {
     properties {
-        val jacocoReportPath = layout.buildDirectory
-            .file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.absolutePath
+        val jacocoReportPath =
+            layout.buildDirectory
+                .file("reports/jacoco/test/jacocoTestReport.xml")
+                .get()
+                .asFile.absolutePath
         property("sonar.sources", "src/main/kotlin")
         property("sonar.tests", "src/test/kotlin")
         property("sonar.exclusions", "src/**/Application.kt,src/**/SeedInitializer.kt")

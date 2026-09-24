@@ -2,6 +2,7 @@ package io.github.pintowar.glomgold.service
 
 import io.github.pintowar.glomgold.dto.PanelAnnualReport
 import io.github.pintowar.glomgold.dto.PanelInfo
+import io.github.pintowar.glomgold.dto.PanelOverallReport
 import io.github.pintowar.glomgold.repo.ItemRepository
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.toList
@@ -60,6 +61,31 @@ class PanelService(
             colSummary,
             colAverage,
             colSummary.fold(null, ::nullableSum) ?: BigDecimal.ZERO
+        )
+    }
+
+    suspend fun overallReport(userId: Long): PanelOverallReport {
+        val years = itemRepository.overallSummary(userId).toList()
+        val heatmap = itemRepository.balanceHeatmap(userId).toList()
+
+        val totalExpense = years.fold(BigDecimal.ZERO) { acc, it -> acc + it.expense }
+        val totalIncome = years.fold(BigDecimal.ZERO) { acc, it -> acc + it.income }
+        val activeMonths = years.fold(0) { acc, it -> acc + it.months }
+        val avgMonthlyExpense =
+            if (activeMonths == 0) {
+                BigDecimal.ZERO
+            } else {
+                totalExpense.divide(BigDecimal(activeMonths), 2, RoundingMode.HALF_UP)
+            }
+
+        return PanelOverallReport(
+            years,
+            heatmap,
+            totalExpense,
+            totalIncome,
+            totalIncome - totalExpense,
+            activeMonths,
+            avgMonthlyExpense
         )
     }
 

@@ -38,3 +38,26 @@ export interface ISummary {
   income: number;
   balance: number;
 }
+
+export interface IYearlySummary {
+  year: number;
+  expense: number;
+  income: number;
+  months: number;
+}
+
+export interface IMonthlyBalance {
+  year: number;
+  month: number;
+  balance: number;
+}
+
+export interface IPanelOverallReport {
+  years: IYearlySummary[];
+  heatmap: IMonthlyBalance[];
+  totalExpense: number;
+  totalIncome: number;
+  totalBalance: number;
+  activeMonths: number;
+  avgMonthlyExpense: number;
+}

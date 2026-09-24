@@ -28,7 +28,7 @@ import { DashboardPage } from "./pages/admin/dashboard";
 import { Login } from "./pages/login";
 
 import { PanelLayout } from "./pages/panel/layout";
-import { ControlPanel, ReportPanel, ProfilePanel } from "./pages/panel";
+import { ControlPanel, ReportPanel, ProfilePanel, OverallReportPanel } from "./pages/panel";
 
 import logoCollapsed from "./assets/images/glomgold-logo-collapsed.png";
 
@@ -50,7 +50,8 @@ const queryClientConfig: QueryClientConfig = {
   },
 };
 
-const resources = [  {
+const resources = [
+  {
     name: "dashboard",
     list: "/admin/dashboard",
     meta: {
@@ -147,6 +148,7 @@ function InnerApp() {
         >
           <Route index element={<ControlPanel />} />
           <Route path="yearly-report" element={<ReportPanel />} />
+          <Route path="overall-report" element={<OverallReportPanel />} />
           <Route path="profile" element={<ProfilePanel />} />
         </Route>
         <Route
