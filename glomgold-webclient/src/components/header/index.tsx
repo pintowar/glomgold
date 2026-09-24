@@ -10,6 +10,7 @@ import {
   DollarOutlined,
   DownOutlined,
   LineChartOutlined,
+  BarChartOutlined,
   LogoutOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -23,7 +24,9 @@ const BASE_HEADER_STYLE: React.CSSProperties = {
 };
 
 function menuKeyFromUrl(pathname: string): string {
-  if (pathname.includes("report")) {
+  if (pathname.includes("overall-report")) {
+    return "menu-overall-report";
+  } else if (pathname.includes("report")) {
     return "menu-report";
   } else if (pathname.includes("profile")) {
     return "menu-profile";
@@ -54,7 +57,16 @@ export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({ sticky }) => {
   const menuItems = useMemo(
     () => [
       { key: "menu-panel", label: <Link to={"/panel"}>Panel</Link>, icon: <DollarOutlined /> },
-      { key: "menu-report", label: <Link to={"/panel/yearly-report"}>Report</Link>, icon: <LineChartOutlined /> },
+      {
+        key: "menu-report",
+        label: <Link to={"/panel/yearly-report"}>Yearly Report</Link>,
+        icon: <LineChartOutlined />,
+      },
+      {
+        key: "menu-overall-report",
+        label: <Link to={"/panel/overall-report"}>Overall Report</Link>,
+        icon: <BarChartOutlined />,
+      },
       ...(isAdmin ? [{ key: "menu-admin", label: <Link to={"/admin"}>Admin</Link>, icon: <SettingOutlined /> }] : []),
     ],
     [isAdmin]

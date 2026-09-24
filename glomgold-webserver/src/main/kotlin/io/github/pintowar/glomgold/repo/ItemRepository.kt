@@ -2,6 +2,8 @@ package io.github.pintowar.glomgold.repo
 
 import io.github.pintowar.glomgold.dto.BalanceSummary
 import io.github.pintowar.glomgold.dto.ItemSummary
+import io.github.pintowar.glomgold.dto.MonthlyBalance
+import io.github.pintowar.glomgold.dto.YearlySummary
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.micronaut.data.annotation.Id
@@ -84,6 +86,36 @@ interface ItemRepository : EntityRepository<Item, Long> {
         itemType: String,
         userId: Long
     ): Flow<ItemSummary>
+
+    @Query(
+        """
+        SELECT
+            cast(extract(year from i.period) as int) as year,
+            sum(case when i.item_type = 'EXPENSE' THEN i.value ELSE 0 END) as expense,
+            sum(case when i.item_type = 'INCOME' THEN i.value ELSE 0 END) as income,
+            count(distinct i.period)::int as months
+        FROM items i
+        WHERE i.user_id = :userId
+        GROUP BY 1
+        ORDER BY 1
+        """
+    )
+    fun overallSummary(userId: Long): Flow<YearlySummary>
+
+    @Query(
+        """
+        SELECT
+            cast(extract(year from i.period) as int) as year,
+            cast(extract(month from i.period) as int) as month,
+            sum(case when i.item_type = 'INCOME' THEN i.value ELSE 0 END)
+                - sum(case when i.item_type = 'EXPENSE' THEN i.value ELSE 0 END) as balance
+        FROM items i
+        WHERE i.user_id = :userId
+        GROUP BY 1, 2
+        ORDER BY 1, 2
+        """
+    )
+    fun balanceHeatmap(userId: Long): Flow<MonthlyBalance>
 
     @Query(
         """

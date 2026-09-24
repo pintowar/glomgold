@@ -3,6 +3,7 @@ package io.github.pintowar.glomgold.controller
 import io.github.pintowar.glomgold.dto.ChangePassword
 import io.github.pintowar.glomgold.dto.ItemBody
 import io.github.pintowar.glomgold.dto.PanelAnnualReport
+import io.github.pintowar.glomgold.dto.PanelOverallReport
 import io.github.pintowar.glomgold.dto.ProfileInfo
 import io.github.pintowar.glomgold.dto.UpdateProfile
 import io.github.pintowar.glomgold.repo.ItemRepository
@@ -48,6 +49,9 @@ class PanelController(
         val currentType = if (type in listOf("EXPENSE", "INCOME")) type else ""
         return panelService.annualReport(authId(auth), currentYear, currentType ?: "")
     }
+
+    @Get("/overall-report")
+    suspend fun overallReport(auth: Authentication): PanelOverallReport = panelService.overallReport(authId(auth))
 
     @Post("/profile/password")
     suspend fun profilePassword(

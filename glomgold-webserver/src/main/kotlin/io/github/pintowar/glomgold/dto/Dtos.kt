@@ -125,6 +125,32 @@ data class PanelAnnualReport(
 )
 
 @Introspected
+data class YearlySummary(
+    val year: Int,
+    val expense: BigDecimal,
+    val income: BigDecimal,
+    val months: Int
+)
+
+@Introspected
+data class MonthlyBalance(
+    val year: Int,
+    val month: Int,
+    val balance: BigDecimal
+)
+
+@Introspected
+data class PanelOverallReport(
+    val years: List<YearlySummary>,
+    val heatmap: List<MonthlyBalance>,
+    val totalExpense: BigDecimal,
+    val totalIncome: BigDecimal,
+    val totalBalance: BigDecimal,
+    val activeMonths: Int,
+    val avgMonthlyExpense: BigDecimal
+)
+
+@Introspected
 data class RefinePaginateQuery(
     private val httpRequest: HttpRequest<Any>,
     @field:QueryValue("_start", defaultValue = "0") val start: Int,

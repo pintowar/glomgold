@@ -81,7 +81,8 @@ describe("buildLoginRedirect", () => {
   });
 });
 
-describe("shouldRetryQuery", () => {  it("never retries 401s in any error shape", () => {
+describe("shouldRetryQuery", () => {
+  it("never retries 401s in any error shape", () => {
     assert.equal(shouldRetryQuery(0, { response: { status: 401 } }), false);
     assert.equal(shouldRetryQuery(0, { statusCode: 401 }), false);
     assert.equal(shouldRetryQuery(2, { response: { status: 401 } }), false);
@@ -96,8 +97,7 @@ describe("shouldRetryQuery", () => {  it("never retries 401s in any error shape"
 });
 
 describe("decodeJwtPayload", () => {
-  const toB64Url = (obj: unknown): string =>
-    Buffer.from(JSON.stringify(obj), "utf8").toString("base64url");
+  const toB64Url = (obj: unknown): string => Buffer.from(JSON.stringify(obj), "utf8").toString("base64url");
 
   it("decodes a standard JWT payload segment", () => {
     const payload = { sub: "donald", exp: 1893456000, roles: ["ROLE_USER"] };
