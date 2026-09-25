@@ -1,5 +1,6 @@
 package io.github.pintowar.glomgold.controller
 
+import dev.mokkery.mock
 import io.github.pintowar.glomgold.dto.ItemCommand
 import io.github.pintowar.glomgold.dto.RefinePaginateQuery
 import io.github.pintowar.glomgold.dto.toCommand
@@ -26,7 +27,6 @@ import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.RequestBean
 import io.micronaut.http.client.annotation.Client
 import io.micronaut.test.extensions.kotest5.annotation.MicronautTest
-import io.mockk.mockk
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
 import java.math.BigDecimal
@@ -54,7 +54,7 @@ class ItemControllerTest(
             val allItems = itemRepo.findAll().toList().sortedBy { it.id }
 
             val token = authHeader(authClient, testUsername)
-            val req = mockk<HttpRequest<Any>>()
+            val req = mock<HttpRequest<Any>>()
 
             data class Page(
                 val start: Int,

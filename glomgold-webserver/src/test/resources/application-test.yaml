@@ -1,3 +1,7 @@
+micronaut:
+  server:
+    port: -1
+
 r2dbc:
   datasources:
     default:

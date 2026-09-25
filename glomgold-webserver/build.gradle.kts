@@ -4,6 +4,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
     kotlin("jvm")
     kotlin("plugin.allopen")
+    id("dev.mokkery")
     id("com.google.devtools.ksp")
     id("com.gradleup.shadow")
     id("io.micronaut.application")

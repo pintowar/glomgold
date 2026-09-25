@@ -1,5 +1,6 @@
 package io.github.pintowar.glomgold.controller
 
+import dev.mokkery.mock
 import io.github.pintowar.glomgold.dto.RefinePaginateQuery
 import io.github.pintowar.glomgold.dto.UserCommand
 import io.github.pintowar.glomgold.repo.UserRepository
@@ -20,7 +21,6 @@ import io.micronaut.http.annotation.RequestBean
 import io.micronaut.http.client.HttpClient
 import io.micronaut.http.client.annotation.Client
 import io.micronaut.test.extensions.kotest5.annotation.MicronautTest
-import io.mockk.mockk
 
 @MicronautTest(transactional = false)
 class UserControllerIndexTest(
@@ -38,7 +38,7 @@ class UserControllerIndexTest(
         describe("list users with id filter") {
             val token = authHeader(authClient, "admin")
 
-            fun page() = RefinePaginateQuery(mockk<HttpRequest<Any>>(), 0, 25, "id", "ASC")
+            fun page() = RefinePaginateQuery(mock<HttpRequest<Any>>(), 0, 25, "id", "ASC")
 
             it("returns all users without filter") {
                 val resp = userIndexClient.index(token, page(), null)
