@@ -1,5 +1,6 @@
 package io.github.pintowar.glomgold.model
 
+import io.micronaut.core.annotation.ReflectiveAccess
 import io.micronaut.data.annotation.DateCreated
 import io.micronaut.data.annotation.DateUpdated
 import io.micronaut.data.annotation.GeneratedValue
@@ -7,6 +8,7 @@ import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.Version
 import java.time.Instant
 
+@ReflectiveAccess
 open class Entity {
     @GeneratedValue(GeneratedValue.Type.SEQUENCE)
     @field:Id

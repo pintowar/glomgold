@@ -52,7 +52,7 @@ dependencies {
 
     runtimeOnly(libs.logback.classic)
     runtimeOnly(libs.bundles.postgresql)
-    runtimeOnly(libs.jackson.module.kotlin)
+    implementation(libs.jackson.module.kotlin)
 
     testImplementation(libs.bundles.testcontainers)
     testImplementation(libs.bundles.ktest)

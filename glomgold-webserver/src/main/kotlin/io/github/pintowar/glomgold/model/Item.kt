@@ -1,5 +1,6 @@
 package io.github.pintowar.glomgold.model
 
+import io.micronaut.core.annotation.ReflectiveAccess
 import io.micronaut.data.annotation.Index
 import io.micronaut.data.annotation.Indexes
 import io.micronaut.data.annotation.MappedEntity
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 import java.time.YearMonth
 
+@ReflectiveAccess
 @Indexes(
     Index(name = "item_period_user", columns = ["period", "user_id"])
 )

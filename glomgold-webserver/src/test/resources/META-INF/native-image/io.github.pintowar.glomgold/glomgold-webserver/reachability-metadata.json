@@ -1,0 +1,12 @@
+{
+  "reflection": [
+    {
+      "type": "io.kotest.provided.ProjectConfig",
+      "fields": [
+        {
+          "name": "INSTANCE"
+        }
+      ]
+    }
+  ]
+}
