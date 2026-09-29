@@ -1,6 +1,8 @@
 package io.github.pintowar.glomgold.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
@@ -127,7 +129,7 @@ data class PanelInfo(
 data class PanelAnnualReport(
     val columns: List<String>,
     val rowIndex: List<String>,
-    val data: List<List<BigDecimal?>>,
+    @param:JsonSetter(contentNulls = Nulls.SET) val data: List<List<BigDecimal?>>,
     val rowSummary: List<BigDecimal?>,
     val rowTrend: List<BigDecimal>,
     val colSummary: List<BigDecimal?>,

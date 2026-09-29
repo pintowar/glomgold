@@ -34,7 +34,6 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.extensions.kotest5.annotation.MicronautTest
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
-import tools.jackson.databind.JsonNode
 import java.math.BigDecimal
 import java.time.YearMonth
 import java.time.ZoneId
@@ -247,25 +246,23 @@ class PanelControllerTest(
             }
 
             it("show report") {
-                // Decoded as JsonNode: Jackson 3's Kotlin module cannot deserialize the
-                // doubly-nested nullable `data` grid (List<List<BigDecimal?>>) of PanelAnnualReport.
-                val body = panelClient.rawReport(token, actualPeriod.year).body.get()
+                val result = panelClient.report(token, actualPeriod.year)
+                val body = result.body.get()
                 val validColsValues = listOf(600, 1000).map { BigDecimal(it) }
 
-                body["columns"].size() shouldBe expectedCols
-                body["rowIndex"].size() shouldBe totalItems
-                val data = body["data"]
-                data.size() shouldBe totalItems
-                data
-                    .flatMap { row -> (0 until row.size()).map { row[it] } }
-                    .filterNot { it.isNull }
-                    .all { it.decimalValue() in validColsValues } shouldBe true
-                body["colSummary"].all { !it.isNull && it.decimalValue() in validColsValues } shouldBe true
-                body["colAverage"].all { !it.isNull && it.decimalValue() in validColsValues } shouldBe true
-                body["rowSummary"][5].decimalValue() shouldBe BigDecimal(3000)
-                body["rowSummary"][6].decimalValue() shouldBe BigDecimal(1200)
-                body["rowTrend"].all { it.decimalValue() <= BigDecimal(2100) } shouldBe true
-                body["total"].decimalValue() shouldBe BigDecimal(4200)
+                body.columns.size shouldBe expectedCols
+                body.rowIndex.size shouldBe totalItems
+                body.data.size shouldBe totalItems
+                body.data
+                    .flatMap { row -> row }
+                    .filterNotNull()
+                    .all { it in validColsValues } shouldBe true
+                body.colSummary.all { it != null && it in validColsValues } shouldBe true
+                body.colAverage.all { it != null && it in validColsValues } shouldBe true
+                body.rowSummary[5] shouldBe BigDecimal(3000)
+                body.rowSummary[6] shouldBe BigDecimal(1200)
+                body.rowTrend.all { it <= BigDecimal(2100) } shouldBe true
+                body.total shouldBe BigDecimal(4200)
             }
         }
 
@@ -336,12 +333,6 @@ interface PanelClient {
         @Header(HttpHeaders.AUTHORIZATION) auth: String,
         @QueryValue year: Int? = null
     ): HttpResponse<PanelAnnualReport>
-
-    @Get("/yearly-report{?year}")
-    suspend fun rawReport(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
-        @QueryValue year: Int? = null
-    ): HttpResponse<JsonNode>
 
     @Post("/add-item")
     suspend fun addItem(
