@@ -1,9 +1,11 @@
 package io.github.pintowar.glomgold.dto
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
 import io.micronaut.core.annotation.Introspected
+import io.micronaut.core.annotation.ReflectiveAccess
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
 import io.micronaut.data.model.Pageable
@@ -20,6 +22,7 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 
+@ReflectiveAccess
 @Introspected
 data class BalancePercent(
     val expense: BigDecimal = BigDecimal.ZERO,
@@ -27,6 +30,7 @@ data class BalancePercent(
     val balance: BigDecimal = BigDecimal.ZERO
 )
 
+@ReflectiveAccess
 @Introspected
 data class BalanceSummary(
     val expense: BigDecimal? = null,
@@ -56,6 +60,7 @@ data class BalanceSummary(
     }
 }
 
+@ReflectiveAccess
 @Introspected
 data class ItemSummary(
     @field:TypeDef(type = DataType.TIMESTAMP) val period: YearMonth,
@@ -64,12 +69,14 @@ data class ItemSummary(
     val value: BigDecimal
 )
 
+@ReflectiveAccess
 @Introspected
 data class ChangePassword(
     val actualPassword: String,
     val newPassword: String
 )
 
+@ReflectiveAccess
 @Introspected
 data class ProfileInfo(
     val name: String,
@@ -78,6 +85,7 @@ data class ProfileInfo(
     val timezone: ZoneId
 )
 
+@ReflectiveAccess
 @Introspected
 data class UpdateProfile(
     @field:NotBlank val name: String,
@@ -86,6 +94,7 @@ data class UpdateProfile(
     @field:NotNull val timezone: ZoneId
 )
 
+@ReflectiveAccess
 @Introspected
 data class ItemBody(
     val period: YearMonth,
@@ -103,6 +112,7 @@ data class ItemBody(
         )
 }
 
+@ReflectiveAccess
 @Introspected
 data class PanelInfo(
     val period: YearMonth,
@@ -112,6 +122,7 @@ data class PanelInfo(
     val diff: BalancePercent
 )
 
+@ReflectiveAccess
 @Introspected
 data class PanelAnnualReport(
     val columns: List<String>,
@@ -124,6 +135,7 @@ data class PanelAnnualReport(
     val total: BigDecimal
 )
 
+@ReflectiveAccess
 @Introspected
 data class YearlySummary(
     val year: Int,
@@ -132,6 +144,7 @@ data class YearlySummary(
     val months: Int
 )
 
+@ReflectiveAccess
 @Introspected
 data class MonthlyBalance(
     val year: Int,
@@ -139,6 +152,7 @@ data class MonthlyBalance(
     val balance: BigDecimal
 )
 
+@ReflectiveAccess
 @Introspected
 data class PanelOverallReport(
     val years: List<YearlySummary>,
@@ -150,8 +164,10 @@ data class PanelOverallReport(
     val avgMonthlyExpense: BigDecimal
 )
 
+@ReflectiveAccess
 @Introspected
 data class RefinePaginateQuery(
+    @JsonIgnore
     private val httpRequest: HttpRequest<Any>,
     @field:QueryValue("_start", defaultValue = "0") val start: Int,
     @field:QueryValue("_end", defaultValue = "25") val end: Int,
@@ -169,6 +185,7 @@ data class RefinePaginateQuery(
     fun filterParams() = httpRequest.parameters.asMap().filterKeys { !it.startsWith("_") }
 }
 
+@ReflectiveAccess
 @Introspected
 data class ItemCommand(
     val id: Long? = null,
@@ -200,6 +217,7 @@ fun Item.toCommand() =
         this.userId
     )
 
+@ReflectiveAccess
 @Introspected
 data class UserCommand(
     val id: Long? = null,

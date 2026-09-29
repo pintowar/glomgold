@@ -1,5 +1,6 @@
 package io.github.pintowar.glomgold.model
 
+import io.micronaut.core.annotation.ReflectiveAccess
 import io.micronaut.data.annotation.Index
 import io.micronaut.data.annotation.Indexes
 import io.micronaut.data.annotation.MappedEntity
@@ -15,6 +16,7 @@ import java.security.SecureRandom
 import java.time.ZoneId
 import java.util.*
 
+@ReflectiveAccess
 @Indexes(
     Index(name = "user_username", columns = ["username"], unique = true),
     Index(name = "user_email", columns = ["email"], unique = true)
