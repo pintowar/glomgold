@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useTranslate } from "@refinedev/core";
 import { Table, Typography } from "antd";
 import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
@@ -27,6 +28,8 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({
   colSummary,
   total,
 }) => {
+  const translate = useTranslate();
+  const totalLabel = translate("panel.report.total", "Total");
   const formatCurrency = useCurrencyFormat(locale, currency);
   const currencyFormatFactory = useCallback(
     (month?: number, desc?: string) => {
@@ -62,8 +65,8 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({
             render: (value?: number) => <>{value}</>,
           }))
         )
-        .concat([{ title: "Total", dataIndex: "total", key: "total", render: currencyFormatFactory() }]),
-    [columns, currencyFormatFactory]
+        .concat([{ title: totalLabel, dataIndex: "total", key: "total", render: currencyFormatFactory() }]),
+    [columns, currencyFormatFactory, totalLabel]
   );
 
   const source = useMemo(
@@ -85,7 +88,7 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({
     () => (
       <Table.Summary.Row>
         <Table.Summary.Cell key={"summary-total"} index={0}>
-          <strong>Total</strong>
+          <strong>{totalLabel}</strong>
         </Table.Summary.Cell>
         {rowSummary.map((it, idx) => (
           <Table.Summary.Cell key={`summary-${idx + 1}`} index={idx}>
@@ -97,7 +100,7 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({
         </Table.Summary.Cell>
       </Table.Summary.Row>
     ),
-    [rowSummary, total, currencyFormat]
+    [rowSummary, total, currencyFormat, totalLabel]
   );
 
   return (

@@ -1,5 +1,5 @@
 import type { RefineThemedLayoutHeaderProps } from "@refinedev/antd";
-import { useGetIdentity, useLogout, usePermissions } from "@refinedev/core";
+import { useGetIdentity, useLogout, usePermissions, useTranslate } from "@refinedev/core";
 import { Layout as AntdLayout, Dropdown, Menu, Space, Switch, Typography } from "antd";
 import React, { useCallback, useContext, useMemo, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
@@ -37,6 +37,7 @@ function menuKeyFromUrl(pathname: string): string {
 
 export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({ sticky }) => {
   const { data: user } = useGetIdentity<IUser>();
+  const translate = useTranslate();
   const { mode, setMode } = useContext(ColorModeContext);
   const { mutate: logout } = useLogout();
   const { data: permissionsData } = usePermissions<string[]>({});
@@ -56,28 +57,48 @@ export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({ sticky }) => {
 
   const menuItems = useMemo(
     () => [
-      { key: "menu-panel", label: <Link to={"/panel"}>Panel</Link>, icon: <DollarOutlined /> },
+      {
+        key: "menu-panel",
+        label: <Link to={"/panel"}>{translate("header.menu.panel", "Panel")}</Link>,
+        icon: <DollarOutlined />,
+      },
       {
         key: "menu-report",
-        label: <Link to={"/panel/yearly-report"}>Yearly Report</Link>,
+        label: <Link to={"/panel/yearly-report"}>{translate("header.menu.yearlyReport", "Yearly Report")}</Link>,
         icon: <LineChartOutlined />,
       },
       {
         key: "menu-overall-report",
-        label: <Link to={"/panel/overall-report"}>Overall Report</Link>,
+        label: <Link to={"/panel/overall-report"}>{translate("header.menu.overallReport", "Overall Report")}</Link>,
         icon: <BarChartOutlined />,
       },
-      ...(isAdmin ? [{ key: "menu-admin", label: <Link to={"/admin"}>Admin</Link>, icon: <SettingOutlined /> }] : []),
+      ...(isAdmin
+        ? [
+            {
+              key: "menu-admin",
+              label: <Link to={"/admin"}>{translate("header.menu.admin", "Admin")}</Link>,
+              icon: <SettingOutlined />,
+            },
+          ]
+        : []),
     ],
-    [isAdmin]
+    [isAdmin, translate]
   );
 
   const dropdownItems = useMemo(
     () => [
-      { key: "menu-profile", label: <Link to={"/panel/profile"}>Profile</Link>, icon: <UserOutlined /> },
-      { key: "menu-logout", label: <div onClick={() => logout()}>Logout</div>, icon: <LogoutOutlined /> },
+      {
+        key: "menu-profile",
+        label: <Link to={"/panel/profile"}>{translate("header.menu.profile", "Profile")}</Link>,
+        icon: <UserOutlined />,
+      },
+      {
+        key: "menu-logout",
+        label: <div onClick={() => logout()}>{translate("header.menu.logout", "Logout")}</div>,
+        icon: <LogoutOutlined />,
+      },
     ],
-    [logout]
+    [logout, translate]
   );
 
   const headerStyles: React.CSSProperties = useMemo(
@@ -133,7 +154,7 @@ export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({ sticky }) => {
             <Dropdown menu={{ items: dropdownItems }}>
               <Space style={{ color: "white" }}>
                 <Text strong style={{ color: "white" }}>
-                  {user?.name ?? "Logged user"}
+                  {user?.name ?? translate("header.user.fallback", "Logged user")}
                 </Text>
                 <DownOutlined />
               </Space>

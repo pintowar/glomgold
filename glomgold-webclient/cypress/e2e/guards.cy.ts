@@ -50,7 +50,7 @@ describe("Route Guard Tests", () => {
     login(commonUser);
 
     cy.url().should("include", "/#/panel");
-    cy.get(".ant-layout-header").should("contain", "Panel");
+    cy.get(".ant-layout-header").should("contain", "Painel");
   });
 
   it("Unauthenticated visit to /panel redirects to /login", () => {

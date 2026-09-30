@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 
 import { ItemChart, PeriodChart, SummaryTable } from "../../../components/panel/report";
 import { IPanelAnnualReport } from "../../../interfaces";
-import { useCustom } from "@refinedev/core";
+import { useCustom, useTranslate } from "@refinedev/core";
 import { REPORT_TYPES, type ReportType } from "../../../constants";
 import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
 import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
@@ -15,6 +15,7 @@ import { usePanelSearchParams } from "../../../hooks/usePanelSearchParams";
 
 export const ReportPanel: React.FC = () => {
   const { locale, currency } = useIdentityDefaults();
+  const translate = useTranslate();
   const periodFormat = "YYYY";
   const periodParam = "period";
   const typeParam = "type";
@@ -54,7 +55,7 @@ export const ReportPanel: React.FC = () => {
         label: (
           <span>
             <TableOutlined />
-            Table
+            {translate("panel.report.table", "Table")}
           </span>
         ),
         children: (
@@ -76,7 +77,7 @@ export const ReportPanel: React.FC = () => {
         label: (
           <span>
             <LineChartOutlined />
-            Chart
+            {translate("panel.report.chart", "Chart")}
           </span>
         ),
         children: (
@@ -98,7 +99,7 @@ export const ReportPanel: React.FC = () => {
         ),
       },
     ],
-    [currentPeriod, locale, currency, dataTable]
+    [currentPeriod, locale, currency, dataTable, translate]
   );
 
   const typeOptions = useMemo(
@@ -107,11 +108,12 @@ export const ReportPanel: React.FC = () => {
         value,
         label: (
           <span>
-            {value === "BALANCE" ? <CalculatorOutlined /> : <ItemTypeIcon type={value} />} - {value}
+            {value === "BALANCE" ? <CalculatorOutlined /> : <ItemTypeIcon type={value} />} -{" "}
+            {translate(`panel.report.type.${value.toLowerCase()}`, value)}
           </span>
         ),
       })),
-    []
+    [translate]
   );
 
   return (
@@ -119,7 +121,7 @@ export const ReportPanel: React.FC = () => {
       <div className="card-row">
         <Row gutter={[24, 24]}>
           <Col span={24}>
-            <Card title={"Report Navigation"} variant="borderless">
+            <Card title={translate("panel.report.navigation", "Report Navigation")} variant="borderless">
               <Row gutter={[16, 16]}>
                 <Col>
                   <DatePicker value={currentPeriod} picker="year" onChange={onChangePeriod} allowClear={false} />

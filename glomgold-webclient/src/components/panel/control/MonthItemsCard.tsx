@@ -17,12 +17,12 @@ import {
 import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 import "./item-card.css";
-import { useCustom } from "@refinedev/core";
+import { useCustom, useTranslate } from "@refinedev/core";
 import { PANEL_URLS, type ItemType } from "../../../constants";
 import { ItemTypeIcon } from "../../common/ItemTypeIcon";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 import { useLocaleNumberFormat } from "../../../hooks/useLocaleNumberFormat";
-import { EditableCell, type EditableInputType, ITEM_TYPE_OPTIONS, greaterThanZeroRule } from "./EditableCell";
+import { EditableCell, type EditableInputType, ITEM_TYPE_OPTIONS, useGreaterThanZeroRule } from "./EditableCell";
 import { useColumnSearch } from "./ColumnSearchFilter";
 import { useMonthItemsMutations } from "./useMonthItemsMutations";
 import type { PanelItem } from "./types";
@@ -50,6 +50,8 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 }) => {
   const [addForm] = Form.useForm();
   const [editForm] = Form.useForm();
+  const translate = useTranslate();
+  const greaterThanZeroRule = useGreaterThanZeroRule();
   const descInputRef = useRef<RefSelectProps>(null);
   const searchInput = useRef<InputRef>(null);
 
@@ -178,24 +180,28 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     focusDescription: () => descInputRef.current?.focus(),
   });
 
+  const colDescription = translate("panel.items.column.description", "Description");
+  const colType = translate("panel.items.column.type", "Type");
+  const colValue = translate("panel.items.column.value", "Value");
+
   const columns = useMemo(
     () => [
       {
         key: "description",
-        title: "Description",
+        title: colDescription,
         dataIndex: "description",
         width: "60%",
         sorter: (a: PanelItem, b: PanelItem) => a.description.localeCompare(b.description),
-        onCell: (record: PanelItem) => cellProps("description", "Description", "text", record),
+        onCell: (record: PanelItem) => cellProps("description", colDescription, "text", record),
         ...getColumnSearchProps("description"),
         filteredValue: descFilter ? [descFilter] : null,
       },
       {
         key: "itemType",
-        title: "Type",
+        title: colType,
         dataIndex: "itemType",
         width: "10%",
-        onCell: (record: PanelItem) => cellProps("itemType", "Type", "select", record),
+        onCell: (record: PanelItem) => cellProps("itemType", colType, "select", record),
         sorter: (a: PanelItem, b: PanelItem) => a.itemType.localeCompare(b.itemType),
         render: (record: string) => (
           <Tooltip placement="left" title={record}>
@@ -205,15 +211,15 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       },
       {
         key: "value",
-        title: "Value",
+        title: colValue,
         dataIndex: "value",
         width: "20%",
-        onCell: (record: PanelItem) => cellProps("value", "Value", "number", record),
+        onCell: (record: PanelItem) => cellProps("value", colValue, "number", record),
         sorter: (a: PanelItem, b: PanelItem) => a.value - b.value,
         ...getColumnSearchProps("value", true),
       },
       {
-        title: "Action",
+        title: translate("panel.items.column.action", "Action"),
         key: "operation",
         render: (record: PanelItem) => {
           const editable = isEditing(record);
@@ -233,7 +239,10 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
                   <Typography.Link disabled={editingKey !== ""} onClick={() => edit(record)} className="panel-edit">
                     <EditOutlined />
                   </Typography.Link>
-                  <Popconfirm title="Sure to delete?" onConfirm={() => deleteItem(record)}>
+                  <Popconfirm
+                    title={translate("panel.items.confirmDelete", "Sure to delete?")}
+                    onConfirm={() => deleteItem(record)}
+                  >
                     <Typography.Link className="panel-delete">
                       <DeleteOutlined />
                     </Typography.Link>
@@ -247,11 +256,24 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
     ],
     // All callbacks above are memoized (cellProps, useColumnSearch, edit/cancel,
     // useMonthItemsMutations), so columns only rebuild when their inputs change.
-    [cellProps, getColumnSearchProps, descFilter, editingKey, edit, cancel, editItem, deleteItem]
+    [
+      cellProps,
+      getColumnSearchProps,
+      descFilter,
+      editingKey,
+      edit,
+      cancel,
+      editItem,
+      deleteItem,
+      colDescription,
+      colType,
+      colValue,
+      translate,
+    ]
   );
 
   return (
-    <Card data-testid={"month-items-card"} title="Month Items" variant="borderless">
+    <Card data-testid={"month-items-card"} title={translate("panel.items.title", "Month Items")} variant="borderless">
       <Space direction="vertical" size={12} wrap style={{ width: "100%" }}>
         <Form form={addForm} layout="inline" initialValues={INITIAL_FORM_VALUES}>
           <Form.Item data-testid={"itemType"} name="itemType">
@@ -264,18 +286,27 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
               value={autocompleteQuery}
               onChange={setAutocompleteQuery}
               options={autoCompleteOptions}
-              placeholder="Description"
+              placeholder={translate("panel.items.descriptionPlaceholder", "Description")}
               style={{ width: 250 }}
             />
           </Form.Item>
-          <Form.Item name="value" rules={[{ required: true, message: "Please input a value!" }, greaterThanZeroRule]}>
+          <Form.Item
+            name="value"
+            rules={[
+              {
+                required: true,
+                message: translate("panel.items.valueRequired", "Please input a value!"),
+              },
+              greaterThanZeroRule,
+            ]}
+          >
             <InputNumber
               data-testid={"value"}
               min={0}
               prefix={`${symbol} `}
               formatter={inputNumberFormatter}
               parser={inputNumberParser}
-              placeholder="Value"
+              placeholder={translate("panel.items.valuePlaceholder", "Value")}
               onKeyDown={(e) => {
                 if (e.key === "Enter") void addItem();
               }}
@@ -284,7 +315,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         </Form>
         <Space direction="horizontal" size={12} wrap style={{ width: "100%" }}>
           <Button data-testid={"add-item"} type="primary" onClick={() => addItem()}>
-            Add Item
+            {translate("panel.items.add", "Add Item")}
           </Button>
           <Button
             data-testid={"replicate-month"}
@@ -292,11 +323,14 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             disabled={selectedRows.keys.length === 0}
             onClick={() => copyNextMonth()}
           >
-            Replicate Next Month
+            {translate("panel.items.replicate", "Replicate Next Month")}
           </Button>
-          <Popconfirm title="Sure to delete all selected?" onConfirm={() => deleteSelected()}>
+          <Popconfirm
+            title={translate("panel.items.confirmDeleteSelected", "Sure to delete all selected?")}
+            onConfirm={() => deleteSelected()}
+          >
             <Button data-testid={"delete-selected"} type="primary" danger disabled={selectedRows.keys.length === 0}>
-              Delete Selected
+              {translate("panel.items.deleteSelected", "Delete Selected")}
             </Button>
           </Popconfirm>
         </Space>

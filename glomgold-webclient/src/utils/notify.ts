@@ -1,11 +1,14 @@
+import { getStoredLang } from "../i18n/locale";
+import { translateKey } from "../i18n/translations";
+
 export const successPayload = (description: string) => () => ({
-  message: "Successful Operation",
+  message: translateKey(getStoredLang(), "common.success", undefined, "Successful Operation"),
   description,
   type: "success" as const,
 });
 
 export const errorPayload = (description: string) => () => ({
-  message: "Operation Error",
+  message: translateKey(getStoredLang(), "common.error", undefined, "Operation Error"),
   description,
   type: "error" as const,
 });

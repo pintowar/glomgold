@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslate } from "@refinedev/core";
 import { Form, Input, InputNumber, Select } from "antd";
 import { ITEM_TYPES } from "../../../constants";
 import { ItemTypeIcon } from "../../common/ItemTypeIcon";
@@ -8,11 +9,14 @@ export type EditableInputType = "number" | "text" | "select";
 
 export const ITEM_TYPE_OPTIONS = ITEM_TYPES.map((value) => ({ value, label: <ItemTypeIcon type={value} /> }));
 
-export const greaterThanZeroRule = {
-  validator: (_: unknown, value: unknown) =>
-    value == null || value === "" || (value as number) > 0
-      ? Promise.resolve()
-      : Promise.reject(new Error("Value must be greater than zero!")),
+export const useGreaterThanZeroRule = () => {
+  const translate = useTranslate();
+  return {
+    validator: (_: unknown, value: unknown) =>
+      value == null || value === "" || (value as number) > 0
+        ? Promise.resolve()
+        : Promise.reject(new Error(translate("panel.items.valuePositive", "Value must be greater than zero!"))),
+  };
 };
 
 export interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
@@ -33,6 +37,8 @@ export const EditableCell: React.FC<EditableCellProps> = ({
   children,
   ...restProps
 }) => {
+  const translate = useTranslate();
+  const greaterThanZeroRule = useGreaterThanZeroRule();
   const { formatter, parser } = useLocaleNumberFormat(locale);
   const inputNode =
     inputType === "number" ? (
@@ -52,7 +58,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
           rules={[
             {
               required: true,
-              message: `Please Input ${title}!`,
+              message: translate("panel.items.inputRequired", { title }, `Please Input ${title}!`),
             },
             ...(inputType === "number" ? [greaterThanZeroRule] : []),
           ]}

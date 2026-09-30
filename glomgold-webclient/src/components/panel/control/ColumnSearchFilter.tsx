@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { useTranslate } from "@refinedev/core";
 import { Button, Input, type InputRef, Space, type TableColumnsType } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
@@ -22,14 +23,15 @@ export const useColumnSearch = ({
   valueHighlight,
   applyColumnFilter,
   resetColumnFilter,
-}: ColumnSearchDeps) =>
-  useCallback(
+}: ColumnSearchDeps) => {
+  const translate = useTranslate();
+  return useCallback(
     (dataIndex: string, format = false): TableColumnsType<PanelItem>[number] => ({
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
         <div style={{ padding: 8 }}>
           <Input
             ref={searchInput}
-            placeholder={`Search ${dataIndex}`}
+            placeholder={translate("panel.items.filter.searchPlaceholder", { dataIndex }, `Search ${dataIndex}`)}
             value={selectedKeys[0]}
             onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
             onPressEnter={() => applyColumnFilter(selectedKeys, confirm, dataIndex)}
@@ -43,17 +45,17 @@ export const useColumnSearch = ({
               size="small"
               style={{ width: 90 }}
             >
-              Search
+              {translate("panel.items.filter.search", "Search")}
             </Button>
             <Button onClick={() => resetColumnFilter(clearFilters, dataIndex)} size="small" style={{ width: 90 }}>
-              Reset
+              {translate("panel.items.filter.reset", "Reset")}
             </Button>
             <Button
               type="link"
               size="small"
               onClick={() => applyColumnFilter(selectedKeys, () => confirm({ closeDropdown: false }), dataIndex)}
             >
-              Filter
+              {translate("panel.items.filter.filter", "Filter")}
             </Button>
           </Space>
         </div>
@@ -86,5 +88,6 @@ export const useColumnSearch = ({
         );
       },
     }),
-    [searchInput, currencyFormat, descFilter, valueHighlight, applyColumnFilter, resetColumnFilter]
+    [searchInput, currencyFormat, descFilter, valueHighlight, applyColumnFilter, resetColumnFilter, translate]
   );
+};

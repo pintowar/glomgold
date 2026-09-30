@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 
 import { Card, Form, Input, Button, Select } from "antd";
 
+import { useTranslate } from "@refinedev/core";
 import { useForm } from "@refinedev/antd";
 
 import { PANEL_QUERY_KEYS } from "../../../constants";
@@ -16,6 +17,7 @@ interface ProfileInfoCardProps {
 
 export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ localeOptions, timezonesOptions }) => {
   const invalidatePanel = usePanelInvalidate();
+  const translate = useTranslate();
 
   const {
     form: profileForm,
@@ -27,11 +29,14 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ localeOptions,
     action: "edit",
     id: "profile",
     redirect: false,
-    successNotification: successPayload("Profile updated."),
+    successNotification: successPayload(translate("panel.profile.updated", "Profile updated.")),
     // 409 branch needs the server error — errorPayload can't express it, so it stays inline.
     errorNotification: (error) => ({
-      message: "Operation Error",
-      description: error?.statusCode === 409 ? "E-mail already in use." : "Could not update profile.",
+      message: translate("common.error", "Operation Error"),
+      description:
+        error?.statusCode === 409
+          ? translate("panel.profile.emailInUse", "E-mail already in use.")
+          : translate("panel.profile.updateError", "Could not update profile."),
       type: "error",
     }),
     onMutationSuccess: () => void invalidatePanel(PANEL_QUERY_KEYS.profile),
@@ -51,23 +56,31 @@ export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ localeOptions,
   }, [liveProfile, profileForm]);
 
   return (
-    <Card title={"Profile Information"} variant="borderless">
+    <Card title={translate("panel.profile.infoTitle", "Profile Information")} variant="borderless">
       <Form {...formProps} name="profile-form">
-        <Form.Item label="Name" name="name" rules={[{ required: true }]}>
+        <Form.Item label={translate("panel.profile.field.name", "Name")} name="name" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item label="E-mail" name="email" rules={[{ required: true, type: "email" }]}>
+        <Form.Item
+          label={translate("panel.profile.field.email", "E-mail")}
+          name="email"
+          rules={[{ required: true, type: "email" }]}
+        >
           <Input />
         </Form.Item>
-        <Form.Item label="Locale" name="locale" rules={[{ required: true }]}>
+        <Form.Item label={translate("panel.profile.field.locale", "Locale")} name="locale" rules={[{ required: true }]}>
           <Select options={localeOptions} showSearch />
         </Form.Item>
-        <Form.Item label="Timezone" name="timezone" rules={[{ required: true }]}>
+        <Form.Item
+          label={translate("panel.profile.field.timezone", "Timezone")}
+          name="timezone"
+          rules={[{ required: true }]}
+        >
           <Select options={timezonesOptions} showSearch />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" {...saveButtonProps}>
-            Save
+            {translate("panel.profile.save", "Save")}
           </Button>
         </Form.Item>
       </Form>

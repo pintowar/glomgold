@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useMemo } from "react";
+import { useTranslate } from "@refinedev/core";
 import { ColorModeContext } from "../../../contexts/color-mode";
 import { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts";
@@ -14,6 +15,7 @@ interface YearChartProps {
 
 export const YearChart: React.FC<YearChartProps> = ({ years, locale, currency }) => {
   const { mode } = useContext(ColorModeContext);
+  const translate = useTranslate();
 
   const formatCurrency = useCurrencyFormat(locale, currency);
   const currencyFormat = useCallback(
@@ -24,7 +26,7 @@ export const YearChart: React.FC<YearChartProps> = ({ years, locale, currency })
   const barChartConfig = useMemo(
     () => ({
       options: {
-        title: { text: "Yearly Evolution" },
+        title: { text: translate("panel.charts.yearlyEvolution", "Yearly Evolution") },
         chart: { id: "yearly", background: "transparent", animations: { enabled: false } },
         colors: [EXPENSE_COLOR, INCOME_COLOR],
         theme: { mode },
@@ -32,11 +34,17 @@ export const YearChart: React.FC<YearChartProps> = ({ years, locale, currency })
         xaxis: { categories: years.map((it) => String(it.year)) },
       } as ApexOptions,
       series: [
-        { name: "expense", data: years.map((it) => it.expense) },
-        { name: "income", data: years.map((it) => it.income) },
+        {
+          name: translate("panel.charts.series.expense", "expense"),
+          data: years.map((it) => it.expense),
+        },
+        {
+          name: translate("panel.charts.series.income", "income"),
+          data: years.map((it) => it.income),
+        },
       ],
     }),
-    [years, currencyFormat, mode]
+    [years, currencyFormat, mode, translate]
   );
 
   return <Chart options={barChartConfig.options} series={barChartConfig.series} type="bar" height={350} width="100%" />;

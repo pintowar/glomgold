@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTranslate } from "@refinedev/core";
 import { Card, Space, Statistic, Tabs } from "antd";
 import {
   FallOutlined,
@@ -19,15 +20,17 @@ interface PeriodSummaryTabProps {
 }
 
 const PeriodSummaryTab: React.FC<PeriodSummaryTabProps> = ({ desc, total, difference, locale, symbol }) => {
+  const translate = useTranslate();
   const color = desc === "Expense" ? EXPENSE_COLOR : desc === "Income" ? INCOME_COLOR : BALANCE_COLOR;
   const icon =
     desc === "Expense" ? <ShoppingCartOutlined /> : desc === "Income" ? <DollarOutlined /> : <CalculatorOutlined />;
+  const displayDesc = translate(`panel.periodSummary.${desc.toLowerCase()}`, desc);
 
   return (
     <Space direction="horizontal" size={32}>
       <div data-testid={"monthly-value"}>
         <Statistic
-          title={`Monthly ${desc}`}
+          title={translate("panel.periodSummary.monthly", { desc: displayDesc }, `Monthly ${displayDesc}`)}
           value={(total ?? 0).toLocaleString(locale, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
           valueStyle={{ color }}
           prefix={icon}
@@ -36,7 +39,7 @@ const PeriodSummaryTab: React.FC<PeriodSummaryTabProps> = ({ desc, total, differ
       </div>
       <div data-testid={"monthly-diff"}>
         <Statistic
-          title="Monthly Percent Diff"
+          title={translate("panel.periodSummary.monthlyDiff", "Monthly Percent Diff")}
           value={(100 * difference).toLocaleString(locale, {
             maximumFractionDigits: 2,
             minimumFractionDigits: 2,
@@ -58,10 +61,11 @@ interface PeriodSummaryCardProps {
 }
 
 export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({ total, difference, locale, symbol }) => {
+  const translate = useTranslate();
   const tabItems = useMemo(
     () => [
       {
-        label: "Balance",
+        label: translate("panel.periodSummary.balance", "Balance"),
         key: "balance",
         children: (
           <PeriodSummaryTab
@@ -74,7 +78,7 @@ export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({ total, dif
         ),
       },
       {
-        label: "Expense",
+        label: translate("panel.periodSummary.expense", "Expense"),
         key: "expense",
         children: (
           <PeriodSummaryTab
@@ -87,7 +91,7 @@ export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({ total, dif
         ),
       },
       {
-        label: "Income",
+        label: translate("panel.periodSummary.income", "Income"),
         key: "income",
         children: (
           <PeriodSummaryTab
@@ -100,11 +104,15 @@ export const PeriodSummaryCard: React.FC<PeriodSummaryCardProps> = ({ total, dif
         ),
       },
     ],
-    [total, difference, locale, symbol]
+    [total, difference, locale, symbol, translate]
   );
 
   return (
-    <Card data-testid={"period-summary-card"} title="Period Summary" variant="borderless">
+    <Card
+      data-testid={"period-summary-card"}
+      title={translate("panel.periodSummary.title", "Period Summary")}
+      variant="borderless"
+    >
       <Tabs type="line" items={tabItems} />
     </Card>
   );

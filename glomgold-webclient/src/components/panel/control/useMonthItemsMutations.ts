@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { type FormInstance } from "antd";
-import { useCreate, useCustomMutation, useDelete, useDeleteMany, useUpdate } from "@refinedev/core";
+import { useCreate, useCustomMutation, useDelete, useDeleteMany, useTranslate, useUpdate } from "@refinedev/core";
 import { PANEL_QUERY_KEYS, PANEL_URLS } from "../../../constants";
 import { usePanelInvalidate } from "../../../hooks/usePanelInvalidate";
 import { errorPayload, successPayload } from "../../../utils/notify";
@@ -28,6 +28,7 @@ export const useMonthItemsMutations = ({
   const { mutate: deleteOneItem } = useDelete();
   const { mutate: deleteManyItems } = useDeleteMany();
   const { mutate: onMonthItemCopy } = useCustomMutation<ItemBody[]>();
+  const translate = useTranslate();
 
   const invalidatePanel = usePanelInvalidate();
   const invalidatePeriod = useCallback(
@@ -63,8 +64,8 @@ export const useMonthItemsMutations = ({
         },
         onSettled: callbacks.onSettled,
       };
-      const successNotification = successPayload("Item saved.");
-      const errorNotification = errorPayload("Could not save item.");
+      const successNotification = successPayload(translate("panel.items.saved", "Item saved."));
+      const errorNotification = errorPayload(translate("panel.items.saveError", "Could not save item."));
       if (op === "create") {
         createItem(
           {
@@ -88,7 +89,7 @@ export const useMonthItemsMutations = ({
         );
       }
     },
-    [createItem, updateItem, formattedPeriod, invalidatePeriod]
+    [createItem, updateItem, formattedPeriod, invalidatePeriod, translate]
   );
 
   const addItem = useCallback(
@@ -121,8 +122,8 @@ export const useMonthItemsMutations = ({
         {
           resource: "panel-items",
           id: item.key,
-          successNotification: successPayload("Item removed."),
-          errorNotification: errorPayload("Could not remove item."),
+          successNotification: successPayload(translate("panel.items.removed", "Item removed.")),
+          errorNotification: errorPayload(translate("panel.items.removeError", "Could not remove item.")),
         },
         {
           onSuccess: () => {
@@ -132,7 +133,7 @@ export const useMonthItemsMutations = ({
         }
       );
     },
-    [deleteOneItem, invalidatePeriod, addForm]
+    [deleteOneItem, invalidatePeriod, addForm, translate]
   );
 
   const copyNextMonth = useCallback(() => {
@@ -145,10 +146,12 @@ export const useMonthItemsMutations = ({
         itemType: it.itemType,
         value: it.value,
       })),
-      successNotification: successPayload("Items were successfully replicated to the next month"),
-      errorNotification: errorPayload("Could not replicate items."),
+      successNotification: successPayload(
+        translate("panel.items.replicated", "Items were successfully replicated to the next month")
+      ),
+      errorNotification: errorPayload(translate("panel.items.replicateError", "Could not replicate items.")),
     });
-  }, [onMonthItemCopy, selectedRows.rows, formattedPeriod]);
+  }, [onMonthItemCopy, selectedRows.rows, formattedPeriod, translate]);
 
   const deleteSelected = useCallback(() => {
     deleteManyItems(
@@ -156,14 +159,14 @@ export const useMonthItemsMutations = ({
         resource: "panel-items",
         ids: selectedRows.rows.map((r) => r.key),
         meta: { period: formattedPeriod },
-        successNotification: successPayload("Item removed."),
-        errorNotification: errorPayload("Could not remove item."),
+        successNotification: successPayload(translate("panel.items.removed", "Item removed.")),
+        errorNotification: errorPayload(translate("panel.items.removeError", "Could not remove item.")),
       },
       {
         onSuccess: () => void invalidatePeriod(),
       }
     );
-  }, [deleteManyItems, selectedRows.rows, formattedPeriod, invalidatePeriod]);
+  }, [deleteManyItems, selectedRows.rows, formattedPeriod, invalidatePeriod, translate]);
 
   return { addItem, editItem, deleteItem, copyNextMonth, deleteSelected };
 };

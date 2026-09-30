@@ -39,19 +39,19 @@ describe("Panel Profile Tests", () => {
     cy.wait("@locales");
     cy.wait("@timezones");
 
-    cy.contains("Profile Information").should("exist");
-    cy.contains("Change Password").should("exist");
+    cy.contains("Informações do Perfil").should("exist");
+    cy.contains("Alterar Senha").should("exist");
 
     cy.get('form[id="profile-form"]').within(() => {
-      cy.contains("label", "Name").should("exist");
+      cy.contains("label", "Nome").should("exist");
       cy.contains("label", "E-mail").should("exist");
-      cy.contains("label", "Locale").should("exist");
-      cy.contains("label", "Timezone").should("exist");
+      cy.contains("label", "Idioma").should("exist");
+      cy.contains("label", "Fuso horário").should("exist");
     });
 
     cy.get('form[id="user-form"]').within(() => {
-      cy.contains("label", "Actual Password").should("exist");
-      cy.contains("label", "New Password").should("exist");
+      cy.contains("label", "Senha Atual").should("exist");
+      cy.contains("label", "Nova Senha").should("exist");
     });
 
     // Profile GET response populates the info form (antd prefixes input ids with the form name).
@@ -69,11 +69,11 @@ describe("Panel Profile Tests", () => {
     cy.get("#profile-form_name").type(`{selectall}{backspace}${newName}`);
 
     cy.get('form[id="profile-form"]').within(() => {
-      cy.contains("button", "Save").click();
+      cy.contains("button", "Salvar").click();
     });
 
     cy.wait("@updateProfile").its("request.body").should("include", { name: newName });
-    cy.get(".ant-notification-notice").should("contain", "Profile updated.");
+    cy.get(".ant-notification-notice").should("contain", "Perfil atualizado.");
   });
 
   it("Changing password logs the user out", () => {
@@ -83,7 +83,7 @@ describe("Panel Profile Tests", () => {
     cy.get("#user-form_newPassword").type("newpass123");
 
     cy.get('form[id="user-form"]').within(() => {
-      cy.contains("button", "Change").click();
+      cy.contains("button", "Alterar").click();
     });
 
     cy.wait("@changePassword")

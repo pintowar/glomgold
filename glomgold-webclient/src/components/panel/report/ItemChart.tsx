@@ -1,4 +1,5 @@
 import React, { useContext, useMemo } from "react";
+import { useTranslate } from "@refinedev/core";
 import { ColorModeContext } from "../../../contexts/color-mode";
 import { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts";
@@ -28,19 +29,24 @@ interface ItemChartProps {
 
 export const ItemChart: React.FC<ItemChartProps> = ({ cols, data, locale, currency }) => {
   const { mode } = useContext(ColorModeContext);
+  const translate = useTranslate();
 
   const currencyFormat = useCurrencyFormat(locale, currency);
 
   const groupedValues = useMemo(() => groupItemsByValue(data), [data]);
   const series = useMemo(
-    () => Array.from(groupedValues.keys()).map((key) => ({ name: key, data: groupedValues.get(key) || [] })),
-    [groupedValues]
+    () =>
+      Array.from(groupedValues.keys()).map((key) => ({
+        name: translate(`panel.charts.series.${key.toLowerCase()}`, key),
+        data: groupedValues.get(key) || [],
+      })),
+    [groupedValues, translate]
   );
 
   const barChartOptions = useMemo(
     () =>
       ({
-        title: { text: "Average Item Cost" },
+        title: { text: translate("panel.charts.averageItemCost", "Average Item Cost") },
         chart: { id: "bar", background: "transparent", stacked: true, animations: { enabled: false } },
         plotOptions: { bar: { borderRadius: 4 } },
         dataLabels: { enabled: false },
@@ -49,7 +55,7 @@ export const ItemChart: React.FC<ItemChartProps> = ({ cols, data, locale, curren
         tooltip: { y: { formatter: currencyFormat } },
         xaxis: { categories: cols },
       }) as ApexOptions,
-    [cols, currencyFormat, mode]
+    [cols, currencyFormat, mode, translate]
   );
 
   return <Chart options={barChartOptions} series={series} type="bar" height={350} width="100%" />;

@@ -5,7 +5,7 @@ import { CalculatorOutlined, DollarOutlined, ShoppingCartOutlined } from "@ant-d
 
 import { HeatMapChart, YearChart } from "../../../components/panel/report";
 import { IPanelOverallReport } from "../../../interfaces";
-import { useCustom } from "@refinedev/core";
+import { useCustom, useTranslate } from "@refinedev/core";
 import { BALANCE_COLOR, EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
 
@@ -31,6 +31,7 @@ const KpiCard: React.FC<KpiCardProps> = ({ title, value, color, icon, locale, sy
 
 export const OverallReportPanel: React.FC = () => {
   const { locale, currency, symbol } = useIdentityDefaults();
+  const translate = useTranslate();
 
   const {
     query: { isLoading },
@@ -52,7 +53,7 @@ export const OverallReportPanel: React.FC = () => {
         <Row gutter={[24, 24]}>
           <Col span={6}>
             <KpiCard
-              title="Total Spent"
+              title={translate("panel.overall.totalSpent", "Total Spent")}
               value={data?.totalExpense ?? 0}
               color={EXPENSE_COLOR}
               icon={<ShoppingCartOutlined />}
@@ -62,7 +63,7 @@ export const OverallReportPanel: React.FC = () => {
           </Col>
           <Col span={6}>
             <KpiCard
-              title="Total Earned"
+              title={translate("panel.overall.totalEarned", "Total Earned")}
               value={data?.totalIncome ?? 0}
               color={INCOME_COLOR}
               icon={<DollarOutlined />}
@@ -72,7 +73,7 @@ export const OverallReportPanel: React.FC = () => {
           </Col>
           <Col span={6}>
             <KpiCard
-              title="Net Balance"
+              title={translate("panel.overall.netBalance", "Net Balance")}
               value={data?.totalBalance ?? 0}
               color={BALANCE_COLOR}
               icon={<CalculatorOutlined />}
@@ -82,13 +83,17 @@ export const OverallReportPanel: React.FC = () => {
           </Col>
           <Col span={6}>
             <KpiCard
-              title="Avg Monthly Expense"
+              title={translate("panel.overall.avgMonthlyExpense", "Avg Monthly Expense")}
               value={data?.avgMonthlyExpense ?? 0}
               color={EXPENSE_COLOR}
               icon={<ShoppingCartOutlined />}
               locale={locale}
               symbol={symbol}
-              extra={`over ${data?.activeMonths ?? 0} months`}
+              extra={translate(
+                "panel.overall.overMonths",
+                { months: data?.activeMonths ?? 0 },
+                `over ${data?.activeMonths ?? 0} months`
+              )}
             />
           </Col>
         </Row>

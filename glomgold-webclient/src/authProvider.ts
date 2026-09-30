@@ -3,6 +3,8 @@ import { AuthProvider } from "@refinedev/core";
 import axios, { AxiosHeaders, AxiosInstance } from "axios";
 import { LocalStorage } from "./LocalStorage";
 import { buildLoginRedirect, decodeJwtPayload, getErrorStatus, isSessionExpired } from "./authUtils.ts";
+import { getStoredLang } from "./i18n/locale";
+import { translateKey } from "./i18n/translations";
 
 const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
   const axiosCli = axios.create();
@@ -55,7 +57,10 @@ export const authProvider: AuthProvider = {
     } catch {
       return {
         success: false,
-        error: { name: "LoginError", message: "Invalid username or password" },
+        error: {
+          name: "LoginError",
+          message: translateKey(getStoredLang(), "pages.login.invalidCredentials"),
+        },
       };
     }
   },
