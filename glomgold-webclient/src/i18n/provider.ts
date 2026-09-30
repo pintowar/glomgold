@@ -7,8 +7,15 @@ import { persistLang } from "./locale";
  * Recreate (via useMemo on lang) so translate() always reads the active locale.
  */
 export const buildI18nProvider = (lang: SupportedLang, setLang: (lang: SupportedLang) => void): I18nProvider => ({
-  translate: (key: string, options?: Record<string, unknown>, defaultMessage?: string) =>
-    translateKey(lang, key, options, defaultMessage),
+  // Mirrors useTranslate's overloads: (key, options?, defaultMessage?) and (key, defaultMessage?).
+  // A string 2nd arg with no 3rd arg is the default message (e.g. translate("buttons.save", "Save")).
+  translate: (key: string, options?: unknown, defaultMessage?: string) =>
+    translateKey(
+      lang,
+      key,
+      typeof options === "object" && options !== null ? (options as Record<string, unknown>) : undefined,
+      typeof options === "string" && typeof defaultMessage === "undefined" ? options : defaultMessage
+    ),
   changeLocale: (locale: string) => {
     const next: SupportedLang = locale.toLowerCase().startsWith("pt") ? "pt" : "en";
     setLang(next);
