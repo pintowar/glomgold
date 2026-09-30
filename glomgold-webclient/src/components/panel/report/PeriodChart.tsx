@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useMemo } from "react";
+import { useTranslate } from "@refinedev/core";
 import { ColorModeContext } from "../../../contexts/color-mode";
 import { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts";
@@ -15,6 +16,7 @@ interface PeriodChartProps {
 
 export const PeriodChart: React.FC<PeriodChartProps> = ({ cols, data, trend, locale, currency }) => {
   const { mode } = useContext(ColorModeContext);
+  const translate = useTranslate();
 
   const formatCurrency = useCurrencyFormat(locale, currency);
   const currencyFormat = useCallback(
@@ -25,7 +27,7 @@ export const PeriodChart: React.FC<PeriodChartProps> = ({ cols, data, trend, loc
   const lineChartConfig = useMemo(
     () => ({
       options: {
-        title: { text: "Month Evolution" },
+        title: { text: translate("panel.charts.monthEvolution", "Month Evolution") },
         chart: { id: "line", background: "transparent", animations: { enabled: false } },
         stroke: { dashArray: [0, 8], width: [3, 2] },
         colors: [BALANCE_COLOR, EXPENSE_COLOR],
@@ -34,11 +36,17 @@ export const PeriodChart: React.FC<PeriodChartProps> = ({ cols, data, trend, loc
         xaxis: { categories: cols },
       } as ApexOptions,
       series: [
-        { name: "value", data: data.map((it) => (it !== 0 ? it : null)) },
-        { name: "trend", data: (trend ?? []).map((it) => (it !== 0 ? it : null)) },
+        {
+          name: translate("panel.charts.series.value", "value"),
+          data: data.map((it) => (it !== 0 ? it : null)),
+        },
+        {
+          name: translate("panel.charts.series.trend", "trend"),
+          data: (trend ?? []).map((it) => (it !== 0 ? it : null)),
+        },
       ],
     }),
-    [cols, data, trend, currencyFormat, mode]
+    [cols, data, trend, currencyFormat, mode, translate]
   );
 
   return (

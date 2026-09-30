@@ -1,5 +1,6 @@
 import { IItem } from "../../../interfaces";
 import React, { useContext, useMemo } from "react";
+import { useTranslate } from "@refinedev/core";
 import { ColorModeContext } from "../../../contexts/color-mode";
 import { Card } from "antd";
 import Chart from "react-apexcharts";
@@ -31,6 +32,7 @@ const groupItemsByType = (items: Map<string, IItem[]>) => {
 };
 
 export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, locale, currency }) => {
+  const translate = useTranslate();
   const { mode } = useContext(ColorModeContext);
   const themeMode: "dark" | "light" = mode === "dark" ? "dark" : "light";
 
@@ -38,7 +40,14 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
 
   const nameGrouped = useMemo(() => groupItemsByDescription(tableData), [tableData]);
   const categories = useMemo(() => Array.from(nameGrouped.keys()), [nameGrouped]);
-  const series = useMemo(() => groupItemsByType(nameGrouped), [nameGrouped]);
+  const series = useMemo(
+    () =>
+      groupItemsByType(nameGrouped).map((entry) => ({
+        ...entry,
+        name: translate(`panel.charts.series.${entry.name.toLowerCase()}`, entry.name),
+      })),
+    [nameGrouped, translate]
+  );
 
   const barChartOptions = useMemo(
     () => ({
@@ -56,7 +65,7 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
   );
 
   return (
-    <Card title="Month Stats" variant="borderless">
+    <Card title={translate("panel.monthStats.title", "Month Stats")} variant="borderless">
       <Chart options={barChartOptions} series={series} type="bar" width="100%" />
     </Card>
   );

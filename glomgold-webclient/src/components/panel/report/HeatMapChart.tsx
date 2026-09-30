@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useMemo } from "react";
+import { useTranslate } from "@refinedev/core";
 import { ColorModeContext } from "../../../contexts/color-mode";
 import { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts";
@@ -6,7 +7,14 @@ import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 import { IMonthlyBalance, IYearlySummary } from "../../../interfaces";
 
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_COUNT = 12;
+
+/** Short month names in the user's locale (e.g. Jan/Feb… or jan./fev.…). */
+const useMonthLabels = (locale: string): string[] =>
+  useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(locale, { month: "short" });
+    return Array.from({ length: MONTH_COUNT }, (_, i) => formatter.format(new Date(2000, i, 1)));
+  }, [locale]);
 
 const STEPS = 5;
 const EPS = 1e-9;
@@ -58,6 +66,8 @@ interface HeatMapChartProps {
 
 export const HeatMapChart: React.FC<HeatMapChartProps> = ({ years, heatmap, locale, currency }) => {
   const { mode } = useContext(ColorModeContext);
+  const translate = useTranslate();
+  const monthLabels = useMonthLabels(locale);
 
   const formatCurrency = useCurrencyFormat(locale, currency);
   const currencyFormat = useCallback(
@@ -68,8 +78,8 @@ export const HeatMapChart: React.FC<HeatMapChartProps> = ({ years, heatmap, loca
   const yearLabels = useMemo(() => years.map((it) => String(it.year)), [years]);
 
   const heatMapConfig = useMemo(() => {
-    const series = [...MONTH_LABELS].reverse().map((label, idx) => {
-      const month = MONTH_LABELS.length - idx;
+    const series = [...monthLabels].reverse().map((label, idx) => {
+      const month = monthLabels.length - idx;
       return {
         name: label,
         data: yearLabels.map((year) => {
@@ -81,7 +91,7 @@ export const HeatMapChart: React.FC<HeatMapChartProps> = ({ years, heatmap, loca
 
     return {
       options: {
-        title: { text: "Monthly Balance Heatmap" },
+        title: { text: translate("panel.charts.monthlyHeatmap", "Monthly Balance Heatmap") },
         chart: { id: "heatmap", background: "transparent", animations: { enabled: false }, type: "heatmap" },
         colors: [EXPENSE_COLOR],
         theme: { mode },
@@ -101,14 +111,14 @@ export const HeatMapChart: React.FC<HeatMapChartProps> = ({ years, heatmap, loca
       } as ApexOptions,
       series,
     };
-  }, [years, heatmap, yearLabels, currencyFormat, mode]);
+  }, [years, heatmap, yearLabels, currencyFormat, mode, monthLabels, translate]);
 
   return (
     <Chart
       options={heatMapConfig.options}
       series={heatMapConfig.series}
       type="heatmap"
-      height={350 + MONTH_LABELS.length * 8}
+      height={350 + monthLabels.length * 8}
       width="100%"
     />
   );

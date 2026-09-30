@@ -1,5 +1,6 @@
 import * as dayjs from "dayjs";
 import React from "react";
+import { useTranslate } from "@refinedev/core";
 import { Card, DatePicker, Space, Typography } from "antd";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
@@ -11,12 +12,13 @@ interface PeriodNavigationCardProps {
 }
 
 export const PeriodNavigationCard: React.FC<PeriodNavigationCardProps> = ({ value, format, onValueChange }) => {
+  const translate = useTranslate();
   const onChangePeriod = (date: dayjs.Dayjs | null) => {
     if (date) onValueChange(date);
   };
 
   return (
-    <Card title={"Period Navigation"} variant="borderless">
+    <Card title={translate("panel.periodNavigation.title", "Period Navigation")} variant="borderless">
       <Space direction="horizontal" size={12}>
         <Typography.Link data-testid={"navigate-left"} onClick={() => onValueChange(value.clone().add(-1, "M"))}>
           <LeftOutlined />

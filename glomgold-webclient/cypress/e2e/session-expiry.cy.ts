@@ -48,6 +48,6 @@ describe("Session Expiry", () => {
     login("donald", "123123");
 
     cy.url().should("include", "/#/panel");
-    cy.get(".ant-layout-header").should("contain", "Panel");
+    cy.get(".ant-layout-header").should("contain", "Painel");
   });
 });

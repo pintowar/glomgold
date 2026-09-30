@@ -58,17 +58,27 @@ export const Login: React.FC = () => {
                 <Form.Item
                   name="username"
                   label={translate("pages.login.username", "Username")}
-                  rules={[{ required: true }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: translate("pages.login.usernameRequired", "Please input your username!"),
+                    },
+                  ]}
                 >
                   <Input size="large" placeholder={translate("pages.login.username", "Username")} />
                 </Form.Item>
                 <Form.Item
                   name="password"
                   label={translate("pages.login.password", "Password")}
-                  rules={[{ required: true }]}
+                  rules={[
+                    {
+                      required: true,
+                      message: translate("pages.login.passwordRequired", "Please input your password!"),
+                    },
+                  ]}
                   style={{ marginBottom: "12px" }}
                 >
-                  <Input.Password placeholder="●●●●●●●●" size="large" />
+                  <Input.Password placeholder={translate("pages.login.passwordPlaceholder", "●●●●●●●●")} size="large" />
                 </Form.Item>
                 <Button type="primary" size="large" htmlType="submit" loading={isLoading} block>
                   {translate("pages.login.signin", "Sign in")}
