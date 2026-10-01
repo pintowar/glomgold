@@ -8,17 +8,22 @@ import { Table, Select, Row, Col, Form, Input, Button, Tooltip } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 
 import { IItem, IUser } from "../../../interfaces";
+import { ITEM_ORIGINS } from "../../../constants";
 import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
 import { ResourceActions } from "../../../components/common/ResourceActions";
 import { useUserSelect } from "../../../hooks/useUserSelect";
 
 export const ItemList: React.FC<IResourceComponentsProps> = () => {
   const importProps = useImport<IItem>();
-  const { tableProps, searchFormProps } = useTable<IItem, HttpError, { description: string; userId: number }>({
+  const { tableProps, searchFormProps } = useTable<
+    IItem,
+    HttpError,
+    { description: string; userId: number; origin: string }
+  >({
     syncWithLocation: true,
-    onSearch: (params: { description: string; userId: number }) => {
+    onSearch: (params: { description: string; userId: number; origin: string }) => {
       const crudFilters: CrudFilters = [];
-      const { description, userId } = params;
+      const { description, userId, origin } = params;
 
       crudFilters.push({
         field: "description",
@@ -29,6 +34,11 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
         field: "userId",
         operator: "eq",
         value: userId,
+      });
+      crudFilters.push({
+        field: "origin",
+        operator: "eq",
+        value: origin,
       });
 
       return crudFilters;
@@ -64,6 +74,9 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
           <Form.Item label="User" name="userId">
             <Select {...userSelectProps} allowClear />
           </Form.Item>
+          <Form.Item label="Origin" name="origin">
+            <Select options={ITEM_ORIGINS.map((value) => ({ value, label: value }))} allowClear />
+          </Form.Item>
           <Form.Item>
             <Button htmlType="submit" type="primary">
               Filter
@@ -92,6 +105,7 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
             <Table.Column dataIndex="value" title="Value" />
             <Table.Column dataIndex="year" title="Year" />
             <Table.Column dataIndex="month" title="Month" />
+            <Table.Column dataIndex="origin" title="Origin" />
             <Table.Column
               dataIndex="userId"
               title="User"

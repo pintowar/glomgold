@@ -11,6 +11,8 @@ export const UP_COLOR = "#52C41A";
 export const DOWN_COLOR = "#FAAD14";
 export type ItemType = "EXPENSE" | "INCOME";
 export const ITEM_TYPES: ItemType[] = ["EXPENSE", "INCOME"];
+export type ItemOrigin = "MANUAL" | "CSV" | "OFX";
+export const ITEM_ORIGINS: ItemOrigin[] = ["MANUAL", "CSV", "OFX"];
 export const PERIOD_FORMAT = "YYYY-MM";
 export const PANEL_QUERY_KEYS = { control: "control-panel-key", profile: "panel-profile" } as const;
 export const PANEL_URLS = {
@@ -22,6 +24,8 @@ export const PANEL_URLS = {
   removeItems: (period: string, ids: string) => `/api/panel/remove-items/${period}?ids=${ids}`,
   copyItems: "/api/panel/copy-items",
   itemComplete: "/api/panel/item-complete",
+  importPreview: "/api/panel/import-preview",
+  importItems: "/api/panel/import-items",
 } as const;
 export type ReportType = "BALANCE" | "EXPENSE" | "INCOME";
 export const REPORT_TYPES: ReportType[] = ["BALANCE", "EXPENSE", "INCOME"];

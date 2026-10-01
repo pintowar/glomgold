@@ -14,7 +14,7 @@ import {
   Tooltip,
   Typography,
 } from "antd";
-import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, UploadOutlined } from "@ant-design/icons";
 
 import "./item-card.css";
 import { useCustom, useTranslate } from "@refinedev/core";
@@ -25,6 +25,7 @@ import { useLocaleNumberFormat } from "../../../hooks/useLocaleNumberFormat";
 import { EditableCell, type EditableInputType, ITEM_TYPE_OPTIONS, useGreaterThanZeroRule } from "./EditableCell";
 import { useColumnSearch } from "./ColumnSearchFilter";
 import { useMonthItemsMutations } from "./useMonthItemsMutations";
+import { ImportItemsModal } from "./ImportItemsModal";
 import type { PanelItem } from "./types";
 
 interface MonthItemsCardProps {
@@ -156,6 +157,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   // end of filter components
 
   const [autocompleteQuery, setAutocompleteQuery] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
 
   const { result: itemSearchData } = useCustom<string[]>({
     url: PANEL_URLS.itemComplete,
@@ -183,6 +185,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   const colDescription = translate("panel.items.column.description", "Description");
   const colType = translate("panel.items.column.type", "Type");
   const colValue = translate("panel.items.column.value", "Value");
+  const originManual = translate("panel.items.origin.manual", "Manual");
+  const originCsv = translate("panel.items.origin.csv", "CSV");
+  const originOfx = translate("panel.items.origin.ofx", "OFX");
 
   const columns = useMemo(
     () => [
@@ -190,7 +195,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         key: "description",
         title: colDescription,
         dataIndex: "description",
-        width: "60%",
+        width: "50%",
         sorter: (a: PanelItem, b: PanelItem) => a.description.localeCompare(b.description),
         onCell: (record: PanelItem) => cellProps("description", colDescription, "text", record),
         ...getColumnSearchProps("description"),
@@ -213,7 +218,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         key: "value",
         title: colValue,
         dataIndex: "value",
-        width: "20%",
+        width: "15%",
         onCell: (record: PanelItem) => cellProps("value", colValue, "number", record),
         sorter: (a: PanelItem, b: PanelItem) => a.value - b.value,
         ...getColumnSearchProps("value", true),
@@ -268,6 +273,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       colDescription,
       colType,
       colValue,
+      originManual,
+      originCsv,
+      originOfx,
       translate,
     ]
   );
@@ -317,6 +325,9 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           <Button data-testid={"add-item"} type="primary" onClick={() => addItem()}>
             {translate("panel.items.add", "Add Item")}
           </Button>
+          <Button data-testid={"import-items"} icon={<UploadOutlined />} onClick={() => setImportOpen(true)}>
+            {translate("panel.items.import", "Import")}
+          </Button>
           <Button
             data-testid={"replicate-month"}
             type="primary"
@@ -349,6 +360,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             onChange={handleTableChange}
           />
         </Form>
+        <ImportItemsModal open={importOpen} formattedPeriod={formattedPeriod} onClose={() => setImportOpen(false)} />
       </Space>
     </Card>
   );
