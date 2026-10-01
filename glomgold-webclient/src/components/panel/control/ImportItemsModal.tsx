@@ -343,19 +343,25 @@ export const ImportItemsModal: React.FC<ImportItemsModalProps> = ({ open, format
           pagination={{ pageSize: 8 }}
           rowKey={(_, i) => `${i}`}
           columns={[
-            { title: "Description", dataIndex: "description", ellipsis: true },
-            { title: "Value", dataIndex: "value", width: 100 },
-            { title: "Type", dataIndex: "itemType", width: 90 },
-            { title: "Period", dataIndex: "period", width: 90 },
             {
-              title: "Status",
+              title: translate("panel.items.column.description", "Description"),
+              dataIndex: "description",
+              ellipsis: true,
+            },
+            { title: translate("panel.items.column.value", "Value"), dataIndex: "value", width: 100 },
+            { title: translate("panel.items.column.type", "Type"), dataIndex: "itemType", width: 90 },
+            { title: translate("panel.items.importColumn.period", "Period"), dataIndex: "period", width: 90 },
+            {
+              title: translate("panel.items.importColumn.status", "Status"),
               width: 220,
               ellipsis: true,
               render: (row: { valid: boolean; error?: string | null }) =>
                 row.valid ? (
                   <Typography.Text type="success">OK</Typography.Text>
                 ) : (
-                  <Typography.Text type="danger">{row.error ?? "Invalid"}</Typography.Text>
+                  <Typography.Text type="danger">
+                    {row.error ?? translate("panel.items.importColumn.invalid", "Invalid")}
+                  </Typography.Text>
                 ),
             },
           ]}
