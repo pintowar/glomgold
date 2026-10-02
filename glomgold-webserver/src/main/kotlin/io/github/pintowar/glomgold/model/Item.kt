@@ -22,5 +22,6 @@ data class Item(
     var value: BigDecimal,
     var itemType: ItemType,
     @field:TypeDef(type = DataType.TIMESTAMP) var period: YearMonth,
-    @field:NotNull var userId: Long
+    @field:NotNull var userId: Long,
+    var origin: ItemOrigin = ItemOrigin.MANUAL
 ) : Entity()

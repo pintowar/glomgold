@@ -70,11 +70,12 @@ export const ControlPanel: React.FC = () => {
 
   const tableData = useMemo(
     () =>
-      (panelData?.data?.items ?? []).map(({ id, description, value, itemType }) => ({
+      (panelData?.data?.items ?? []).map(({ id, description, value, itemType, origin }) => ({
         key: id,
         description,
         itemType,
         value,
+        origin,
       })),
     [panelData?.data?.items]
   );
@@ -97,8 +98,8 @@ export const ControlPanel: React.FC = () => {
         </Row>
       </div>
       <div className="card-row">
-        <Row gutter={[24, 24]}>
-          <Col span={12}>
+        <Row gutter={[24, 24]} align="stretch">
+          <Col span={12} style={{ display: "flex" }}>
             <MonthItemsCard
               formattedPeriod={formattedPeriod}
               initialSearch={desc}
@@ -109,7 +110,7 @@ export const ControlPanel: React.FC = () => {
               symbol={symbol}
             />
           </Col>
-          <Col span={12}>
+          <Col span={12} style={{ display: "flex" }}>
             <MonthStatsCard tableData={panelData?.data.stats ?? []} locale={locale} currency={currency} />
           </Col>
         </Row>

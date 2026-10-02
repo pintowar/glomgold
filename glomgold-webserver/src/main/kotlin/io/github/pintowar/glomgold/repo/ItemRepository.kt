@@ -136,6 +136,14 @@ interface ItemRepository : EntityRepository<Item, Long> {
         description: String
     ): List<String>
 
+    suspend fun existsByUserIdAndPeriodAndDescriptionAndValueAndItemType(
+        userId: Long,
+        period: YearMonth,
+        description: String,
+        value: BigDecimal,
+        itemType: ItemType
+    ): Boolean
+
     suspend fun update(
         @Id id: Long,
         @Version version: Int,

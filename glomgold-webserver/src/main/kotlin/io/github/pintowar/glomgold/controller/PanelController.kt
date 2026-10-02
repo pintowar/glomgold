@@ -1,24 +1,33 @@
 package io.github.pintowar.glomgold.controller
 
 import io.github.pintowar.glomgold.dto.ChangePassword
+import io.github.pintowar.glomgold.dto.CsvColumnMapping
+import io.github.pintowar.glomgold.dto.ImportPreviewResponse
+import io.github.pintowar.glomgold.dto.ImportResult
 import io.github.pintowar.glomgold.dto.ItemBody
 import io.github.pintowar.glomgold.dto.PanelAnnualReport
 import io.github.pintowar.glomgold.dto.PanelOverallReport
 import io.github.pintowar.glomgold.dto.ProfileInfo
 import io.github.pintowar.glomgold.dto.UpdateProfile
+import io.github.pintowar.glomgold.model.ItemOrigin
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
+import io.github.pintowar.glomgold.service.ImportService
 import io.github.pintowar.glomgold.service.PanelService
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
+import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.Body
+import io.micronaut.http.annotation.Consumes
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Delete
 import io.micronaut.http.annotation.Get
+import io.micronaut.http.annotation.Part
 import io.micronaut.http.annotation.Patch
 import io.micronaut.http.annotation.PathVariable
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.QueryValue
+import io.micronaut.http.multipart.CompletedFileUpload
 import io.micronaut.security.authentication.Authentication
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -31,7 +40,8 @@ import java.util.Locale
 class PanelController(
     private val userRepository: UserRepository,
     private val itemRepository: ItemRepository,
-    private val panelService: PanelService
+    private val panelService: PanelService,
+    private val importService: ImportService
 ) {
     @Get("/{?period}")
     suspend fun panel(
@@ -176,6 +186,76 @@ class PanelController(
                 }
         if (itemsToCopy.isNotEmpty()) itemRepository.saveAll(itemsToCopy).toList()
         return HttpResponse.ok()
+    }
+
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Post("/import-preview")
+    suspend fun importPreview(
+        @Part file: CompletedFileUpload,
+        @Part("separator") separator: String?,
+        @Part("dateFormat") dateFormat: String?,
+        @Part("hasHeader") hasHeader: String?,
+        @Part("mapDescription") mapDescription: String?,
+        @Part("mapValue") mapValue: String?,
+        @Part("mapType") mapType: String?,
+        @Part("mapDate") mapDate: String?
+    ): ImportPreviewResponse {
+        val bytes = file.bytes
+        val origin = importService.detectOrigin(file.filename, bytes)
+        if (origin == ItemOrigin.OFX) return importService.previewOfx(bytes)
+        val sep = (separator?.ifEmpty { "," } ?: ",").first()
+        val fmt = dateFormat?.ifBlank { "yyyy-MM-dd" } ?: "yyyy-MM-dd"
+        val withHeader = hasHeader?.toBooleanStrictOrNull() ?: true
+        val mapping =
+            CsvColumnMapping(
+                mapDescription?.ifBlank { null },
+                mapValue?.ifBlank { null },
+                mapType?.ifBlank { null },
+                mapDate?.ifBlank { null }
+            )
+        if (mapping != CsvColumnMapping()) return importService.previewCsv(bytes, sep, fmt, withHeader, mapping)
+        val first = importService.previewCsv(bytes, sep, fmt, withHeader, mapping)
+        val defaults = importService.defaultMapping(first.headers)
+        return importService.previewCsv(bytes, sep, fmt, withHeader, defaults)
+    }
+
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Post("/import-items")
+    suspend fun importItems(
+        auth: Authentication,
+        @Part file: CompletedFileUpload,
+        @Part("separator") separator: String?,
+        @Part("dateFormat") dateFormat: String?,
+        @Part("hasHeader") hasHeader: String?,
+        @Part("mapDescription") mapDescription: String?,
+        @Part("mapValue") mapValue: String?,
+        @Part("mapType") mapType: String?,
+        @Part("mapDate") mapDate: String?
+    ): ImportResult {
+        val bytes = file.bytes
+        val origin = importService.detectOrigin(file.filename, bytes)
+        val preview =
+            if (origin == ItemOrigin.OFX) {
+                importService.previewOfx(bytes)
+            } else {
+                val sep = (separator?.ifEmpty { "," } ?: ",").first()
+                val fmt = dateFormat?.ifBlank { "yyyy-MM-dd" } ?: "yyyy-MM-dd"
+                val withHeader = hasHeader?.toBooleanStrictOrNull() ?: true
+                val mapping =
+                    CsvColumnMapping(
+                        mapDescription?.ifBlank { null },
+                        mapValue?.ifBlank { null },
+                        mapType?.ifBlank { null },
+                        mapDate?.ifBlank { null }
+                    )
+                if (mapping != CsvColumnMapping()) {
+                    importService.previewCsv(bytes, sep, fmt, withHeader, mapping)
+                } else {
+                    val first = importService.previewCsv(bytes, sep, fmt, withHeader, mapping)
+                    importService.previewCsv(bytes, sep, fmt, withHeader, importService.defaultMapping(first.headers))
+                }
+            }
+        return importService.importParsed(authId(auth), preview.rows, origin)
     }
 
     private fun authId(auth: Authentication): Long = auth.attributes["userId"] as Long

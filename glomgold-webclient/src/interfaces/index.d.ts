@@ -4,6 +4,7 @@ export interface IItem {
   description: string;
   value: number;
   itemType: "EXPENSE" | "INCOME";
+  origin?: "MANUAL" | "CSV" | "OFX";
   currency: string;
   year: number;
   month: number;

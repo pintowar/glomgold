@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.Nulls
 import io.github.pintowar.glomgold.model.Item
+import io.github.pintowar.glomgold.model.ItemOrigin
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
 import io.micronaut.core.annotation.Introspected
@@ -110,7 +111,8 @@ data class ItemBody(
             value,
             itemType,
             period,
-            userId
+            userId,
+            ItemOrigin.MANUAL
         )
 }
 
@@ -197,10 +199,11 @@ data class ItemCommand(
     @field:NotNull val itemType: ItemType,
     @field:NotNull val year: Int,
     @field:NotNull val month: Int,
-    @field:NotNull val userId: Long
+    @field:NotNull val userId: Long,
+    val origin: ItemOrigin = ItemOrigin.MANUAL
 ) {
     fun toItem() =
-        Item(description, BigDecimal.valueOf(value), itemType, YearMonth.of(year, month), userId)
+        Item(description, BigDecimal.valueOf(value), itemType, YearMonth.of(year, month), userId, origin)
             .apply {
                 id = this@ItemCommand.id
                 version = this@ItemCommand.version
@@ -216,7 +219,8 @@ fun Item.toCommand() =
         this.itemType,
         this.period.year,
         this.period.monthValue,
-        this.userId
+        this.userId,
+        this.origin
     )
 
 @ReflectiveAccess
