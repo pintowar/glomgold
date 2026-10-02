@@ -281,7 +281,12 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   );
 
   return (
-    <Card data-testid={"month-items-card"} title={translate("panel.items.title", "Month Items")} variant="borderless">
+    <Card
+      data-testid={"month-items-card"}
+      title={translate("panel.items.title", "Month Items")}
+      variant="borderless"
+      style={{ height: "100%", width: "100%" }}
+    >
       <Space direction="vertical" size={12} wrap style={{ width: "100%" }}>
         <Form form={addForm} layout="inline" initialValues={INITIAL_FORM_VALUES}>
           <Form.Item data-testid={"itemType"} name="itemType">

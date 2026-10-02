@@ -65,8 +65,15 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({ tableData, local
   );
 
   return (
-    <Card title={translate("panel.monthStats.title", "Month Stats")} variant="borderless">
-      <Chart options={barChartOptions} series={series} type="bar" width="100%" />
+    <Card
+      title={translate("panel.monthStats.title", "Month Stats")}
+      variant="borderless"
+      style={{ height: "100%", width: "100%", display: "flex", flexDirection: "column" }}
+      styles={{ body: { flex: 1, minHeight: 0, display: "flex" } }}
+    >
+      <div style={{ height: "100%", width: "100%" }}>
+        <Chart options={barChartOptions} series={series} type="bar" width="100%" height="100%" />
+      </div>
     </Card>
   );
 };
