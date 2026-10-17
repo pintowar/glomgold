@@ -13,7 +13,8 @@ describe("Route Guard Tests", () => {
   });
 
   it("Common user visiting /admin is redirected to /panel", () => {
-    cy.intercept("POST", "/api/login", { fixture: "login/common.user.json", statusCode: 200 });
+    cy.intercept("POST", "/api/login", { statusCode: 200 });
+    cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
     cy.intercept("GET", "/api/panel*", { fixture: "panel/control-empty.json", statusCode: 200 }).as("control");
 
     cy.visit("/#/admin/users");
@@ -29,7 +30,8 @@ describe("Route Guard Tests", () => {
   });
 
   it("Admin user visiting /admin stays and dashboard renders", () => {
-    cy.intercept("POST", "/api/login", { fixture: "login/admin.user.json", statusCode: 200 });
+    cy.intercept("POST", "/api/login", { statusCode: 200 });
+    cy.intercept("GET", "/api/auth/me", { fixture: "login/admin.user.json" });
     cy.intercept("GET", "/api/users*", { fixture: "admin/users.json", statusCode: 200 }).as("users");
     cy.intercept("GET", "/api/management/info*", { fixture: "admin/info.json", statusCode: 200 }).as("dashboardInfo");
 
@@ -43,7 +45,8 @@ describe("Route Guard Tests", () => {
   });
 
   it("Common user visiting /panel stays", () => {
-    cy.intercept("POST", "/api/login", { fixture: "login/common.user.json", statusCode: 200 });
+    cy.intercept("POST", "/api/login", { statusCode: 200 });
+    cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
     cy.intercept("GET", "/api/panel*", { fixture: "panel/control-empty.json", statusCode: 200 }).as("control");
 
     cy.visit("/#/panel");

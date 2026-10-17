@@ -11,7 +11,7 @@ import io.kotest.datatest.withData
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.provided.authHeader
+import io.kotest.provided.authCookie
 import io.kotest.provided.fakeItems
 import io.kotest.provided.fakeUsers
 import io.micronaut.http.HttpHeaders
@@ -53,7 +53,7 @@ class ItemControllerTest(
             itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
             val allItems = itemRepo.findAll().toList().sortedBy { it.id }
 
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
             val req = mock<HttpRequest<Any>>()
 
             data class Page(
@@ -76,7 +76,7 @@ class ItemControllerTest(
 
         describe("save item") {
             val userId = userRepo.findByUsername("admin")?.id!!
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
 
             fakeItems(userId, 5).forEach { item ->
                 val resp =
@@ -98,7 +98,7 @@ class ItemControllerTest(
             val totalItems = 5
             itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
             val allItems = itemRepo.findAll().toList()
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
 
             allItems.forEach { item ->
                 val resp =
@@ -120,7 +120,7 @@ class ItemControllerTest(
             val totalItems = 5
             itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
             val allItems = itemRepo.findAll().toList()
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
 
             allItems.forEach { item ->
                 val now = YearMonth.now()
@@ -150,7 +150,7 @@ class ItemControllerTest(
             val totalItems = 5
             itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
             val allItems = itemRepo.findAll().toList()
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
 
             allItems.forEach { item ->
                 val resp = itemClient.delete(token, item.id!!)
@@ -165,32 +165,32 @@ class ItemControllerTest(
 interface ItemClient {
     @Get("/{?_start,_end,_sort,_order}")
     suspend fun index(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @RequestBean bean: RefinePaginateQuery
     ): HttpResponse<List<ItemCommand>>
 
     @Post("/")
     suspend fun create(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @Body cmd: ItemCommand
     ): HttpResponse<ItemCommand>
 
     @Get("/{id}")
     suspend fun read(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @PathVariable id: Long
     ): HttpResponse<ItemCommand>
 
     @Patch("/{id}")
     suspend fun update(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @PathVariable id: Long,
         @Body item: ItemCommand
     ): HttpResponse<ItemCommand>
 
     @Delete("/{id}")
     suspend fun delete(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @PathVariable id: Long
     ): Int
 }

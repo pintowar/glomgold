@@ -7,7 +7,10 @@ describe("Login Tests", () => {
     });
 
     it("Common User Login", () => {
-      cy.intercept("POST", "/api/login", { fixture: "login/common.user.json" });
+      // POST returns an empty 200 (the JWT is set as an HttpOnly cookie);
+      // the SPA then reads non-sensitive metadata from /api/auth/me.
+      cy.intercept("POST", "/api/login", { statusCode: 200 });
+      cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
       cy.intercept("GET", "/api/panel*", { fixture: "panel/control.json" });
 
       const { username, password } = user;
@@ -19,17 +22,20 @@ describe("Login Tests", () => {
       cy.get("button.ant-btn").click();
 
       cy.url().should("include", "/panel");
-      cy.get(".ant-layout-header").contains("Panel");
-      cy.get(".ant-layout-header").contains("Report");
+      cy.get(".ant-layout-header").contains("Painel");
+      cy.get(".ant-layout-header").contains("Relatório Anual");
+      cy.get(".ant-layout-header").contains("Relatório Geral");
 
       cy.get(".ant-card").should("have.length", 4);
 
-      cy.getLocalStorage("glomgold-jwt-user").should("exist");
-      cy.getLocalStorage("glomgold-jwt-token").should("exist");
+      // Only non-sensitive session metadata is stored; the credential itself
+      // lives in an HttpOnly cookie the browser attaches automatically.
+      cy.getLocalStorage("glomgold-session").should("exist");
     });
 
     it("Admin User Login", () => {
-      cy.intercept("POST", "/api/login", { fixture: "login/admin.user.json" });
+      cy.intercept("POST", "/api/login", { statusCode: 200 });
+      cy.intercept("GET", "/api/auth/me", { fixture: "login/admin.user.json" });
       cy.intercept("GET", "/api/users*", { fixture: "admin/users.json" });
       cy.intercept("GET", "/api/management/info*", { fixture: "admin/info.json" });
 
@@ -44,8 +50,7 @@ describe("Login Tests", () => {
       cy.url().should("not.include", "/panel");
       cy.get(".ant-layout-sider").should("exist");
 
-      cy.getLocalStorage("glomgold-jwt-user").should("exist");
-      cy.getLocalStorage("glomgold-jwt-token").should("exist");
+      cy.getLocalStorage("glomgold-session").should("exist");
     });
   });
 

@@ -4,6 +4,12 @@ micronaut:
   views:
     thymeleaf:
       cacheable: false
+  security:
+    token:
+      cookie:
+        # Dev runs over plain HTTP (vite proxy -> :8080), so the auth cookie
+        # must not be Secure or the browser will drop it.
+        cookie-secure: false
 
 liquibase:
   enabled: true

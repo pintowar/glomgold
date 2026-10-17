@@ -4,7 +4,7 @@ import io.github.pintowar.glomgold.dto.ItemCommand
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.provided.authHeader
+import io.kotest.provided.authCookie
 import io.kotest.provided.fakeUsers
 import io.micronaut.http.HttpHeaders
 import io.micronaut.http.HttpResponse
@@ -34,7 +34,7 @@ class UserControllerTest(
         }
 
         describe("list locales") {
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
 
             val resp = userClient.locales(token)
             resp.status() shouldBe HttpStatus.OK
@@ -45,7 +45,7 @@ class UserControllerTest(
         }
 
         describe("list timezones") {
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
 
             val resp = userClient.timezones(token)
             resp.status() shouldBe HttpStatus.OK
@@ -54,7 +54,7 @@ class UserControllerTest(
 
         describe("successfully password update") {
             val userId = userRepo.findByUsername(testUsername)?.id!!
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
             val newPassword = "asdasd"
 
             val resp = userClient.password(token, userId, mapOf("password" to newPassword))
@@ -65,7 +65,7 @@ class UserControllerTest(
 
         describe("failed password update") {
             val userId = 9999L
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
 
             val resp = userClient.password(token, userId, mapOf("password" to "asdasd"))
             resp.status() shouldBe HttpStatus.NOT_FOUND
@@ -76,17 +76,17 @@ class UserControllerTest(
 interface UserClient {
     @Get("/locales")
     suspend fun locales(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String
+        @Header(HttpHeaders.COOKIE) auth: String
     ): HttpResponse<List<Locale>>
 
     @Get("/timezones")
     suspend fun timezones(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String
+        @Header(HttpHeaders.COOKIE) auth: String
     ): HttpResponse<List<String>>
 
     @Patch("/{id}/password")
     suspend fun password(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @PathVariable id: Long,
         @Body dto: Map<String, String>
     ): HttpResponse<ItemCommand>

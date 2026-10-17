@@ -1,17 +1,21 @@
-import { TOKEN_KEY, USER_KEY } from "./constants";
-import { decodeJwtPayload } from "./authUtils.ts";
+import { SESSION_KEY } from "./constants";
 
-interface StorageUser {
-  sub: string;
-  symbol: string;
-  nbf: number;
+/**
+ * Non-sensitive session metadata mirrored from `GET /api/auth/me`.
+ *
+ * The credential itself lives in an HttpOnly `Secure` cookie and is never
+ * readable from JavaScript; this object only carries display data (identity,
+ * roles, locale) so the UI can render without a round-trip.
+ */
+export interface SessionUser {
+  username: string;
+  name: string;
+  email: string;
   roles: string[];
-  iss: string;
-  currency: string;
-  exp: number;
-  locale: string;
-  iat: number;
   userId: number;
+  locale: string;
+  currency: string;
+  symbol: string;
 }
 
 export class LocalStorage {
@@ -36,42 +40,31 @@ export class LocalStorage {
     return LocalStorage.instance;
   }
 
-  public setUser(access_token: string): void {
-    this.storage.setItem(TOKEN_KEY, access_token);
-    const user = decodeJwtPayload(access_token);
-    if (user) {
-      this.storage.setItem(USER_KEY, JSON.stringify(user));
-    } else {
-      this.storage.removeItem(USER_KEY);
-    }
+  public setSession(user: SessionUser): void {
+    this.storage.setItem(SESSION_KEY, JSON.stringify(user));
   }
 
-  public clearUser(): void {
-    this.storage.removeItem(TOKEN_KEY);
-    this.storage.removeItem(USER_KEY);
+  public clearSession(): void {
+    this.storage.removeItem(SESSION_KEY);
   }
 
-  public getToken(): string {
+  public getSession(): SessionUser | null {
     try {
-      return this.storage.getItem(TOKEN_KEY) ?? "";
+      const raw = this.storage.getItem(SESSION_KEY);
+      if (!raw) return null;
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+      return parsed as SessionUser;
     } catch {
-      return "";
-    }
-  }
-
-  public getUser(): StorageUser {
-    try {
-      return JSON.parse(this.storage.getItem(USER_KEY) ?? "{}") as StorageUser;
-    } catch {
-      return {} as StorageUser;
+      return null;
     }
   }
 
   public isLoggedIn(): boolean {
-    return Object.keys(this.getUser()).length !== 0;
+    return this.getSession() !== null;
   }
 
   public getUserRoles(): string[] {
-    return this.getUser().roles || [];
+    return this.getSession()?.roles || [];
   }
 }

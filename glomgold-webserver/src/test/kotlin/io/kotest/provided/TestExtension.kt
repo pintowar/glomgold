@@ -4,6 +4,7 @@ import io.github.pintowar.glomgold.controller.AuthClient
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.User
 import io.github.serpro69.kfaker.faker
+import io.micronaut.http.HttpHeaders
 import io.micronaut.security.authentication.UsernamePasswordCredentials
 import java.math.RoundingMode
 import java.time.YearMonth
@@ -51,7 +52,13 @@ fun fakeUsers(): Map<String, User> =
         ).apply { applyPassword("donald") }
     ).associateBy { it.username }
 
-suspend fun authHeader(
+suspend fun authCookie(
     authClient: AuthClient,
     username: String
-): String = "Bearer ${authClient.login(UsernamePasswordCredentials(username, username)).accessToken}"
+): String {
+    val response = authClient.login(UsernamePasswordCredentials(username, username))
+    val setCookie =
+        response.headers.get(HttpHeaders.SET_COOKIE)
+            ?: error("Login did not return a Set-Cookie header")
+    return setCookie.substringBefore(";")
+}
