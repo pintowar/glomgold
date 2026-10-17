@@ -5,11 +5,13 @@ describe("Session Expiry", () => {
     cy.get("button.ant-btn").click();
   };
 
-  const seedSession = (token: string, user: object) => {
+  // The credential is an HttpOnly cookie validated by the server; the client
+  // only mirrors non-sensitive session metadata. Seeding it simulates a browser
+  // that still looks logged-in while the cookie is gone or expired server-side.
+  const seedSession = (user: object) => {
     cy.visit("/#/login", {
       onBeforeLoad: (win) => {
-        win.localStorage.setItem("glomgold-jwt-token", token);
-        win.localStorage.setItem("glomgold-jwt-user", JSON.stringify(user));
+        win.localStorage.setItem("glomgold-session", JSON.stringify(user));
       },
     });
   };
@@ -18,18 +20,20 @@ describe("Session Expiry", () => {
     cy.clearLocalStorage();
   });
 
-  it("Expired token in storage redirects to /login", () => {
-    seedSession("expired-token", { sub: "donald", roles: ["ROLE_USER"], exp: 1648866151 });
+  it("Stale session metadata is rejected by the server and redirects to /login", () => {
+    seedSession({ username: "donald", roles: ["ROLE_USER"] });
+    cy.intercept("GET", "/api/panel*", { statusCode: 401 }).as("expiredPanel");
 
     cy.visit("/#/panel");
+    cy.wait("@expiredPanel");
 
-    // check() rejects the expired token, Authenticated fallback bounces to /login.
+    // check() is presence-based; the server 401 is what ends the session.
     cy.url().should("include", "/login");
     cy.get("#username").should("exist");
   });
 
   it("Mid-session 401 redirects to /login and re-login returns to the prior page", () => {
-    seedSession("valid-token", { sub: "donald", roles: ["ROLE_USER"], exp: 1893456000 });
+    seedSession({ username: "donald", roles: ["ROLE_USER"] });
     cy.intercept("GET", "/api/panel*", { statusCode: 401 }).as("expiredPanel");
 
     cy.visit("/#/panel");
@@ -39,11 +43,12 @@ describe("Session Expiry", () => {
     cy.url().should("include", "/login");
     cy.url().should("include", "to=");
     cy.window().then((win) => {
-      expect(win.localStorage.getItem("glomgold-jwt-token")).to.be.null;
+      expect(win.localStorage.getItem("glomgold-session")).to.be.null;
     });
 
     // Re-login lands back on the page the user was on, not a modal.
-    cy.intercept("POST", "/api/login", { fixture: "login/common.user.json" });
+    cy.intercept("POST", "/api/login", { statusCode: 200 });
+    cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
     cy.intercept("GET", "/api/panel*", { fixture: "panel/control-empty.json" }).as("control");
     login("donald", "123123");
 

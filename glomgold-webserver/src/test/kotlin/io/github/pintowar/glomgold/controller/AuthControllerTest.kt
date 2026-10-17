@@ -6,18 +6,21 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.maps.shouldContainKey
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import io.kotest.provided.fakeUsers
 import io.micronaut.http.HttpHeaders
+import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
+import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.Body
+import io.micronaut.http.annotation.Consumes
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Header
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.client.annotation.Client
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.security.authentication.UsernamePasswordCredentials
-import io.micronaut.security.token.render.BearerAccessRefreshToken
 import io.micronaut.test.extensions.kotest5.annotation.MicronautTest
 
 @MicronautTest(transactional = false)
@@ -36,7 +39,7 @@ class JwtAuthenticationTest(
             it("test access for unauthorized user") {
                 val exception =
                     shouldThrow<HttpClientResponseException> {
-                        authClient.account("some auth header")
+                        authClient.account("glomgold-auth=some-invalid-token")
                     }
 
                 exception.status shouldBe HttpStatus.UNAUTHORIZED
@@ -53,21 +56,46 @@ class JwtAuthenticationTest(
                     }
 
                 exception.status shouldBe HttpStatus.UNAUTHORIZED
-                exception.message shouldBe "Invalid password."
             }
 
             it("test access for authorized user") {
                 val creds = UsernamePasswordCredentials("admin", "admin")
-                val bearerAccessRefreshToken = authClient.login(creds)
+                val loginResponse = authClient.login(creds)
 
-                bearerAccessRefreshToken.username shouldBe "admin"
-                bearerAccessRefreshToken.accessToken.shouldNotBeNull()
-                // JWTParser.parse(bearerAccessRefreshToken.accessToken) shouldBeType
+                loginResponse.status shouldBe HttpStatus.OK
+                val setCookie =
+                    loginResponse.headers
+                        .get(HttpHeaders.SET_COOKIE)
+                        .shouldNotBeNull()
+                setCookie shouldContain "glomgold-auth="
+                // The token must not be reachable from JavaScript nor cross-site.
+                setCookie shouldContain "HTTPOnly"
+                setCookie shouldContain "SameSite=Strict"
 
-                val result = authClient.account("Bearer ${bearerAccessRefreshToken.accessToken}")
+                val result = authClient.account(setCookie.substringBefore(";"))
 
                 result shouldContainKey "username"
                 result["username"] shouldBe "admin"
+            }
+
+            it("test logout clears the auth cookie") {
+                val creds = UsernamePasswordCredentials("admin", "admin")
+                val loginResponse = authClient.login(creds)
+                val cookie =
+                    loginResponse.headers
+                        .get(HttpHeaders.SET_COOKIE)
+                        .shouldNotBeNull()
+                        .substringBefore(";")
+
+                val logoutResponse = authClient.logout(cookie, emptyMap<String, Any>())
+
+                logoutResponse.status shouldBe HttpStatus.OK
+                val clearedCookie =
+                    logoutResponse.headers
+                        .get(HttpHeaders.SET_COOKIE)
+                        .shouldNotBeNull()
+                clearedCookie shouldContain "glomgold-auth="
+                clearedCookie shouldContain "Max-Age=0"
             }
         }
     })
@@ -77,10 +105,17 @@ interface AuthClient {
     @Post("/api/login")
     suspend fun login(
         @Body credentials: UsernamePasswordCredentials
-    ): BearerAccessRefreshToken
+    ): HttpResponse<Unit>
 
     @Get("/api/auth/me")
     fun account(
-        @Header(HttpHeaders.AUTHORIZATION) authorization: String
-    ): Map<String, String>
+        @Header(HttpHeaders.COOKIE) cookie: String
+    ): Map<String, Any>
+
+    @Post("/api/logout")
+    @Consumes(MediaType.APPLICATION_JSON)
+    suspend fun logout(
+        @Header(HttpHeaders.COOKIE) cookie: String,
+        @Body body: Map<String, Any>
+    ): HttpResponse<Unit>
 }

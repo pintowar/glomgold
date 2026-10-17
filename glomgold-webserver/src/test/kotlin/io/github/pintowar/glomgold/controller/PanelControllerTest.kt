@@ -15,7 +15,7 @@ import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.provided.authHeader
+import io.kotest.provided.authCookie
 import io.kotest.provided.fakeItems
 import io.kotest.provided.fakeUsers
 import io.micronaut.http.HttpHeaders
@@ -63,7 +63,7 @@ class PanelControllerTest(
         describe("panel operations - show panel") {
             val testUsername = "admin"
             val userId = users.getValue(testUsername).id!!
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
             val totalItems = 10
             val actualPeriod = YearMonth.now()
             val periodFmt = DateTimeFormatter.ofPattern("yyyy-MM")
@@ -109,7 +109,7 @@ class PanelControllerTest(
         describe("panel operations - edit panel") {
             val testUsername = "admin"
             val userId = users.getValue(testUsername).id!!
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
             val actualPeriod = YearMonth.now()
 
             afterEach { itemRepo.deleteAll() }
@@ -212,7 +212,7 @@ class PanelControllerTest(
         describe("panel operations - show report") {
             val testUsername = "admin"
             val userId = users.getValue(testUsername).id!!
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
             val totalItems = 5
             val expectedCols = 12
             val actualPeriod = YearMonth.now().withMonth(6)
@@ -268,7 +268,7 @@ class PanelControllerTest(
 
         describe("panel operations - profile") {
             val testUsername = "donald"
-            val token = authHeader(authClient, testUsername)
+            val token = authCookie(authClient, testUsername)
 
             it("show profile") {
                 val result = panelClient.profile(token)
@@ -324,59 +324,59 @@ class PanelControllerTest(
 interface PanelClient {
     @Get("/{?period}")
     suspend fun panel(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @QueryValue period: String? = null
     ): HttpResponse<PanelInfo>
 
     @Get("/yearly-report{?year}")
     suspend fun report(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @QueryValue year: Int? = null
     ): HttpResponse<PanelAnnualReport>
 
     @Post("/add-item")
     suspend fun addItem(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @Body item: ItemBody
     ): HttpResponse<Unit>
 
     @Patch("/edit-item/{id}")
     suspend fun editItem(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @PathVariable id: Long,
         @Body item: ItemBody
     ): HttpResponse<Unit>
 
     @Delete("/remove-item/{id}")
     suspend fun removeItem(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @PathVariable id: Long
     ): HttpResponse<Unit>
 
     @Post("/copy-items")
     suspend fun copyItems(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @Body items: List<ItemBody>
     ): HttpResponse<Unit>
 
     @Get("/profile")
     suspend fun profile(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String
+        @Header(HttpHeaders.COOKIE) auth: String
     ): HttpResponse<ProfileInfo>
 
     @Patch("/profile")
     suspend fun updateProfile(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @Body dto: UpdateProfile
     ): HttpResponse<Unit>
 
     @Get("/locales")
     suspend fun locales(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String
+        @Header(HttpHeaders.COOKIE) auth: String
     ): HttpResponse<List<String>>
 
     @Get("/timezones")
     suspend fun timezones(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String
+        @Header(HttpHeaders.COOKIE) auth: String
     ): HttpResponse<List<String>>
 }

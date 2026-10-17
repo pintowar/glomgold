@@ -7,7 +7,7 @@ import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.kotest.provided.authHeader
+import io.kotest.provided.authCookie
 import io.kotest.provided.fakeUsers
 import io.micronaut.core.type.Argument
 import io.micronaut.http.HttpHeaders
@@ -36,7 +36,7 @@ class UserControllerIndexTest(
         }
 
         describe("list users with id filter") {
-            val token = authHeader(authClient, "admin")
+            val token = authCookie(authClient, "admin")
 
             fun page() = RefinePaginateQuery(mock<HttpRequest<Any>>(), 0, 25, "id", "ASC")
 
@@ -67,7 +67,7 @@ class UserControllerIndexTest(
                 val req =
                     HttpRequest
                         .GET<Any>("/api/users?$query")
-                        .header(HttpHeaders.AUTHORIZATION, token)
+                        .header(HttpHeaders.COOKIE, token)
                 val resp =
                     httpClient
                         .toBlocking()
@@ -93,7 +93,7 @@ class UserControllerIndexTest(
 interface UserIndexClient {
     @Get("/{?_start,_end,_sort,_order}")
     suspend fun index(
-        @Header(HttpHeaders.AUTHORIZATION) auth: String,
+        @Header(HttpHeaders.COOKIE) auth: String,
         @RequestBean bean: RefinePaginateQuery,
         @QueryValue("id") id: List<Long>? = null
     ): HttpResponse<List<UserCommand>>

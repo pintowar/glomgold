@@ -10,7 +10,8 @@ describe("Panel Profile Tests", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
 
-    cy.intercept("POST", "/api/login", { fixture: "login/common.user.json", statusCode: 200 }).as("login");
+    cy.intercept("POST", "/api/login", { statusCode: 200 }).as("login");
+    cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
     // Control panel is the post-login landing page for common users (authProvider redirectTo "/panel").
     cy.intercept("GET", "/api/panel*", { fixture: "panel/control-empty.json", statusCode: 200 }).as("control");
     cy.intercept("GET", "/api/panel/profile*", { body: profile, statusCode: 200 }).as("profile");

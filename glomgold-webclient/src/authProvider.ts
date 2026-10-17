@@ -1,38 +1,19 @@
 import { AuthProvider } from "@refinedev/core";
 
-import axios, { AxiosHeaders, AxiosInstance } from "axios";
-import { LocalStorage } from "./LocalStorage";
-import { buildLoginRedirect, decodeJwtPayload, getErrorStatus, isSessionExpired } from "./authUtils.ts";
+import axios, { AxiosInstance } from "axios";
+import { LocalStorage, type SessionUser } from "./LocalStorage";
+import { buildLoginRedirect, getErrorStatus } from "./authUtils.ts";
 import { getStoredLang } from "./i18n/locale";
 import { translateKey } from "./i18n/translations";
 
 const generateAxiosInstance = (storage: LocalStorage): AxiosInstance => {
-  const axiosCli = axios.create();
-
-  axiosCli.interceptors.request.use(
-    (config) => {
-      const tokenKey = storage.getToken();
-      if (tokenKey) {
-        const headers = AxiosHeaders.from(config.headers ?? {});
-        if (!headers.getAuthorization()) {
-          headers.setAuthorization(`Bearer ${tokenKey}`);
-        } else {
-          headers.setAuthorization("");
-        }
-        config.headers = headers;
-      }
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
-    }
-  );
+  const axiosCli = axios.create({ withCredentials: true });
 
   axiosCli.interceptors.response.use(
     (response) => response,
     (error) => {
       if (error?.response?.status === 401) {
-        storage.clearUser();
+        storage.clearSession();
       }
       return Promise.reject(error);
     }
@@ -48,13 +29,16 @@ export const axiosInstance: AxiosInstance = generateAxiosInstance(storage);
 export const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
     try {
-      const { data } = await axios.post("/api/login", { username, password });
-      storage.setUser(data.access_token);
+      // Credentials are exchanged for an HttpOnly cookie; nothing is stored here.
+      await axiosInstance.post("/api/login", { username, password });
+      const { data } = await axiosInstance.get<SessionUser>("/api/auth/me");
+      storage.setSession(data);
       return {
         success: true,
-        redirectTo: data.roles.includes("ROLE_ADMIN") ? "/admin" : "/panel",
+        redirectTo: (data.roles ?? []).includes("ROLE_ADMIN") ? "/admin" : "/panel",
       };
     } catch {
+      storage.clearSession();
       return {
         success: false,
         error: {
@@ -65,15 +49,21 @@ export const authProvider: AuthProvider = {
     }
   },
   logout: async () => {
-    storage.clearUser();
+    try {
+      // Ask the server to clear the auth cookie; the response body is empty.
+      await axiosInstance.post("/api/logout", {});
+    } catch {
+      // Ignore server errors: drop the client session regardless.
+    } finally {
+      storage.clearSession();
+    }
     return {
       success: true,
       redirectTo: "/login",
     };
   },
   check: async () => {
-    const token = storage.getToken();
-    if (token.length > 0 && !isSessionExpired(decodeJwtPayload(token) ?? storage.getUser())) {
+    if (storage.isLoggedIn()) {
       return {
         authenticated: true,
       };
@@ -88,11 +78,12 @@ export const authProvider: AuthProvider = {
     return storage.getUserRoles();
   },
   getIdentity: async () => {
-    return storage.getUser();
+    return storage.getSession();
   },
   onError: async (error) => {
     if (getErrorStatus(error) === 401) {
       const hash = typeof window !== "undefined" ? window.location.hash : "";
+      storage.clearSession();
       return {
         logout: true,
         redirectTo: buildLoginRedirect(hash),

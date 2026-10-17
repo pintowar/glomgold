@@ -10,7 +10,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
-import io.kotest.provided.authHeader
+import io.kotest.provided.authCookie
 import io.kotest.provided.fakeUsers
 import io.micronaut.http.HttpHeaders
 import io.micronaut.http.HttpRequest
@@ -40,7 +40,7 @@ class ImportPanelControllerTest(
         beforeContainer { itemRepo.deleteAll() }
 
         describe("panel import operations") {
-            val token = authHeader(authClient, "admin")
+            val token = authCookie(authClient, "admin")
 
             fun previewRequest(
                 filename: String,
@@ -54,7 +54,7 @@ class ImportPanelControllerTest(
                 parts.forEach { (k, v) -> builder.addPart(k, v) }
                 return HttpRequest
                     .POST("/api/panel/import-preview", builder.build())
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.COOKIE, token)
                     .contentType(MediaType.MULTIPART_FORM_DATA_TYPE)
             }
 
@@ -71,7 +71,7 @@ class ImportPanelControllerTest(
                             .addPart("file", filename, MediaType.TEXT_PLAIN_TYPE, content)
                             .apply { parts.forEach { (k, v) -> addPart(k, v) } }
                             .build()
-                    ).header(HttpHeaders.AUTHORIZATION, token)
+                    ).header(HttpHeaders.COOKIE, token)
                     .contentType(MediaType.MULTIPART_FORM_DATA_TYPE)
 
             it("previews and imports a csv file, skipping duplicates on re-import") {

@@ -10,15 +10,33 @@ micronaut:
         mapping: "/**"
         paths: "classpath:public"
   security:
-    authentication: bearer
+    authentication: cookie
     basic-auth:
       www-authenticate: false
+    redirect:
+      # JSON API: return 200 + Set-Cookie on login instead of a 303 redirect.
+      enabled: false
     endpoints:
       login:
         path: /api/login
+        enabled: true
       logout:
         path: /api/logout
+        enabled: true
+        get-allowed: false
     token:
+      bearer:
+        enabled: false
+      cookie:
+        enabled: true
+        cookie-name: glomgold-auth
+        cookie-path: /
+        cookie-http-only: true
+        cookie-secure: ${COOKIE_SECURE:true}
+        cookie-same-site: Strict
+      generator:
+        access-token:
+          expiration: ${JWT_EXPIRATION_SECONDS:900}
       jwt:
         signatures:
           secret:

@@ -7,7 +7,8 @@ describe("Panel Tests", () => {
     beforeEach(() => {
       cy.clearLocalStorage();
 
-      cy.intercept("POST", "/api/login", { fixture: "login/common.user.json", statusCode: 200 });
+      cy.intercept("POST", "/api/login", { statusCode: 200 });
+      cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
       cy.intercept("GET", `/api/panel?&period=${period}`, { fixture: "panel/control.json", statusCode: 200 }).as(
         "currentPeriod"
       );

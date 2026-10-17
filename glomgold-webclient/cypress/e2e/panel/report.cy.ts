@@ -7,7 +7,8 @@ describe("Panel Report Tests", () => {
     });
 
     it("Report: BALANCE / 2023", () => {
-      cy.intercept("POST", "/api/login", { fixture: "login/common.user.json" });
+      cy.intercept("POST", "/api/login", { statusCode: 200 });
+      cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
       cy.intercept("GET", "/api/panel/yearly-report?&type=BALANCE&year=2023", { fixture: "panel/report.json" }).as(
         "currentReport"
       );

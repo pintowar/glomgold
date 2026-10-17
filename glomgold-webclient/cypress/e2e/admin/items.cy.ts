@@ -29,7 +29,8 @@ describe("Admin Items Tests", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
 
-    cy.intercept("POST", "/api/login", { fixture: "login/admin.user.json", statusCode: 200 }).as("login");
+    cy.intercept("POST", "/api/login", { statusCode: 200 }).as("login");
+    cy.intercept("GET", "/api/auth/me", { fixture: "login/admin.user.json" });
     cy.intercept("GET", "/api/items*", { body: items, statusCode: 200 }).as("items");
     cy.intercept("GET", "/api/users*", { fixture: "admin/users.json", statusCode: 200 }).as("users");
 

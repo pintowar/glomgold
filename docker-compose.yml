@@ -21,6 +21,7 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       JWT_GENERATOR_SIGNATURE_SECRET: pleaseChangeThisSecretForANewOneInProduction
+      JWT_EXPIRATION_SECONDS: "900"
       MICRONAUT_ENVIRONMENTS: prod,sample
     depends_on:
       - database
