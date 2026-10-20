@@ -12,11 +12,19 @@ export type ItemType = "EXPENSE" | "INCOME";
 export const ITEM_TYPES: ItemType[] = ["EXPENSE", "INCOME"];
 export type ItemOrigin = "MANUAL" | "CSV" | "OFX";
 export const ITEM_ORIGINS: ItemOrigin[] = ["MANUAL", "CSV", "OFX"];
+export type AccountType = "CHECKING" | "CREDIT_CARD";
+export const ACCOUNT_TYPES: AccountType[] = ["CHECKING", "CREDIT_CARD"];
 export const PERIOD_FORMAT = "YYYY-MM";
-export const PANEL_QUERY_KEYS = { control: "control-panel-key", profile: "panel-profile" } as const;
+export const PANEL_QUERY_KEYS = {
+  control: "control-panel-key",
+  profile: "panel-profile",
+  accounts: "panel-accounts",
+} as const;
 export const PANEL_URLS = {
   panel: "/api/panel",
   profile: "/api/panel/profile",
+  accounts: "/api/panel/accounts",
+  account: (key: number | string) => `/api/panel/accounts/${key}`,
   addItem: "/api/panel/add-item",
   editItem: (key: number | string) => `/api/panel/edit-item/${key}`,
   removeItem: (key: number | string) => `/api/panel/remove-item/${key}`,

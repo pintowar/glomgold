@@ -8,6 +8,7 @@ import type { ItemBody, PanelItem } from "./types";
 
 interface MonthItemsMutationsDeps {
   formattedPeriod: string;
+  accountId?: number;
   addForm: FormInstance;
   editForm: FormInstance;
   selectedRows: { keys: React.Key[]; rows: PanelItem[] };
@@ -17,6 +18,7 @@ interface MonthItemsMutationsDeps {
 
 export const useMonthItemsMutations = ({
   formattedPeriod,
+  accountId,
   addForm,
   editForm,
   selectedRows,
@@ -51,7 +53,7 @@ export const useMonthItemsMutations = ({
         callbacks.onValidationError?.();
         return;
       }
-      const values = {
+      const values: ItemBody = {
         period: formattedPeriod,
         description: row.description,
         value: row.value,
@@ -70,7 +72,7 @@ export const useMonthItemsMutations = ({
         createItem(
           {
             resource: "panel-items",
-            values,
+            values: { ...values, accountId },
             successNotification,
             errorNotification,
           },
@@ -89,7 +91,7 @@ export const useMonthItemsMutations = ({
         );
       }
     },
-    [createItem, updateItem, formattedPeriod, invalidatePeriod, translate]
+    [createItem, updateItem, formattedPeriod, accountId, invalidatePeriod, translate]
   );
 
   const addItem = useCallback(
@@ -145,13 +147,14 @@ export const useMonthItemsMutations = ({
         description: it.description,
         itemType: it.itemType,
         value: it.value,
+        accountId,
       })),
       successNotification: successPayload(
         translate("panel.items.replicated", "Items were successfully replicated to the next month")
       ),
       errorNotification: errorPayload(translate("panel.items.replicateError", "Could not replicate items.")),
     });
-  }, [onMonthItemCopy, selectedRows.rows, formattedPeriod, translate]);
+  }, [onMonthItemCopy, selectedRows.rows, formattedPeriod, accountId, translate]);
 
   const deleteSelected = useCallback(() => {
     deleteManyItems(

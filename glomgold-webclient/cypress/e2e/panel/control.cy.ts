@@ -9,10 +9,14 @@ describe("Panel Tests", () => {
 
       cy.intercept("POST", "/api/login", { statusCode: 200 });
       cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
-      cy.intercept("GET", `/api/panel?&period=${period}`, { fixture: "panel/control.json", statusCode: 200 }).as(
-        "currentPeriod"
+      cy.intercept("GET", /\/api\/panel\/accounts$/, { fixture: "panel/accounts.json", statusCode: 200 }).as(
+        "panelAccounts"
       );
-      cy.intercept("GET", `/api/panel?&period=${previous}`, {
+      cy.intercept("GET", new RegExp(`/api/panel\\?.*period=${period}`), {
+        fixture: "panel/control.json",
+        statusCode: 200,
+      }).as("currentPeriod");
+      cy.intercept("GET", new RegExp(`/api/panel\\?.*period=${previous}`), {
         fixture: "panel/control-empty.json",
         statusCode: 200,
       }).as("previousPeriod");
@@ -35,6 +39,20 @@ describe("Panel Tests", () => {
 
       cy.get("[data-testid='navigate-right']").should("exist").click();
       cy.wait("@currentPeriod");
+    });
+
+    it("Account Filter", () => {
+      // Default selection is the first account (id asc).
+      cy.get("[data-testid='account-filter']").should("contain", "Conta Corrente");
+
+      cy.intercept("GET", /\/api\/panel\?.*accountId=2/, {
+        fixture: "panel/control-empty.json",
+        statusCode: 200,
+      }).as("creditCardPeriod");
+
+      cy.get("[data-testid='account-filter']").click();
+      cy.get(".ant-select-item-option").contains("Cartão de Crédito").click();
+      cy.wait("@creditCardPeriod");
     });
 
     it("Period Summary", () => {
@@ -100,6 +118,7 @@ describe("Panel Tests", () => {
             description: itemDesc,
             value: itemValue,
             itemType: "EXPENSE",
+            accountId: 1,
           });
         });
       });
@@ -164,12 +183,14 @@ describe("Panel Tests", () => {
               description: "Gym",
               itemType: "EXPENSE",
               value: 100,
+              accountId: 1,
             },
             {
               period: "2023-09",
               description: "Condominium",
               itemType: "EXPENSE",
               value: 4000,
+              accountId: 1,
             },
           ]);
       });
