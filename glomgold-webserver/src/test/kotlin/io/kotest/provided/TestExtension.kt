@@ -1,6 +1,8 @@
 package io.kotest.provided
 
 import io.github.pintowar.glomgold.controller.AuthClient
+import io.github.pintowar.glomgold.model.Account
+import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.User
 import io.github.serpro69.kfaker.faker
@@ -13,16 +15,18 @@ import java.util.*
 
 fun fakeItems(
     userId: Long,
+    accountId: Long,
     numItems: Int = 25
 ): List<Item> {
     val faker = faker { fakerConfig { randomSeed = 42 } }
     return (0 until numItems).map {
-        faker.randomProvider.randomClassInstance {
-            typeGenerator { faker.coffee.blendName() }
-            typeGenerator { (faker.random.nextDouble() * 100).toBigDecimal().setScale(2, RoundingMode.HALF_UP) }
-            typeGenerator { YearMonth.now().plusMonths(faker.random.nextLong(24)) }
-            typeGenerator { userId }
-        }
+        faker.randomProvider
+            .randomClassInstance<Item> {
+                typeGenerator { faker.coffee.blendName() }
+                typeGenerator { (faker.random.nextDouble() * 100).toBigDecimal().setScale(2, RoundingMode.HALF_UP) }
+                typeGenerator { YearMonth.now().plusMonths(faker.random.nextLong(24)) }
+                typeGenerator { userId }
+            }.copy(userId = userId, accountId = accountId)
     }
 }
 

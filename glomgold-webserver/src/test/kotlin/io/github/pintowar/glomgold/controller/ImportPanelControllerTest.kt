@@ -2,8 +2,11 @@ package io.github.pintowar.glomgold.controller
 
 import io.github.pintowar.glomgold.dto.ImportPreviewResponse
 import io.github.pintowar.glomgold.dto.ImportResult
+import io.github.pintowar.glomgold.model.Account
+import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.ItemOrigin
 import io.github.pintowar.glomgold.model.ItemType
+import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.assertions.throwables.shouldThrow
@@ -27,14 +30,20 @@ import java.time.YearMonth
 @MicronautTest(transactional = false)
 class ImportPanelControllerTest(
     private val userRepo: UserRepository,
+    private val accountRepo: AccountRepository,
     private val itemRepo: ItemRepository,
     private val authClient: AuthClient,
     @Client("/") private val httpClient: HttpClient
 ) : DescribeSpec({
 
+        var adminAccountId = 0L
+
         beforeSpec {
+            itemRepo.deleteAll()
+            accountRepo.deleteAll()
             userRepo.deleteAll()
-            fakeUsers().values.forEach { userRepo.save(it) }
+            val admin = userRepo.save(fakeUsers().getValue("admin"))
+            adminAccountId = accountRepo.save(Account("Checking", "USD", AccountType.CHECKING, admin.id!!)).id!!
         }
 
         beforeContainer { itemRepo.deleteAll() }
@@ -69,6 +78,7 @@ class ImportPanelControllerTest(
                         MultipartBody
                             .builder()
                             .addPart("file", filename, MediaType.TEXT_PLAIN_TYPE, content)
+                            .addPart("accountId", "$adminAccountId")
                             .apply { parts.forEach { (k, v) -> addPart(k, v) } }
                             .build()
                     ).header(HttpHeaders.COOKIE, token)
@@ -108,7 +118,13 @@ class ImportPanelControllerTest(
                 first.skipped shouldBe 0
                 first.periods shouldBe listOf(YearMonth.of(2026, 9))
 
-                val saved = itemRepo.findByUserIdAndPeriod(adminId, YearMonth.of(2026, 9)).toList()
+                val saved =
+                    itemRepo
+                        .findByUserIdAndAccountIdAndPeriod(
+                            adminId,
+                            adminAccountId,
+                            YearMonth.of(2026, 9)
+                        ).toList()
                 saved.size shouldBe 2
                 saved.all { it.origin == ItemOrigin.CSV } shouldBe true
 
@@ -159,7 +175,7 @@ class ImportPanelControllerTest(
 
                 val items =
                     itemRepo
-                        .listByPeriodAndUserIdOrderByCreatedAtAndDescription(YearMonth.of(2026, 9), adminId)
+                        .listByPeriodAndAccount(YearMonth.of(2026, 9), adminId, adminAccountId)
                         .toList()
                 items.any { it.origin == ItemOrigin.OFX && it.description == "Bakery" } shouldBe true
             }
@@ -208,7 +224,7 @@ class ImportPanelControllerTest(
 
                 val items =
                     itemRepo
-                        .listByPeriodAndUserIdOrderByCreatedAtAndDescription(YearMonth.of(2026, 9), adminId)
+                        .listByPeriodAndAccount(YearMonth.of(2026, 9), adminId, adminAccountId)
                         .toList()
                         .filter { it.origin == ItemOrigin.OFX }
                         .map { it.description to it.itemType }

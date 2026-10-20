@@ -1,10 +1,13 @@
 package io.github.pintowar.glomgold.conf
 
+import io.github.pintowar.glomgold.dto.AccountCommand
+import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
+import io.github.pintowar.glomgold.service.AccountService
 import io.micronaut.context.annotation.Value
 import io.micronaut.context.env.Environment
 import io.micronaut.runtime.event.annotation.EventListener
@@ -17,19 +20,21 @@ import java.math.BigDecimal
 import java.security.SecureRandom
 import java.time.YearMonth
 import java.time.ZoneId
-import java.util.*
+import java.util.Locale
 
 @Singleton
 class SeedInitializer(
     @Value("glomgold.random.seed") randomSeed: String,
     env: Environment,
     private val userRepo: UserRepository,
-    private val itemRepo: ItemRepository
+    private val itemRepo: ItemRepository,
+    private val accountService: AccountService
 ) : KLogging() {
     private val random = SecureRandom(randomSeed.toByteArray())
     private val isProd = env.activeNames.contains("prod")
     private val isDev = env.activeNames.contains("dev")
     private val withSample = env.activeNames.contains("sample")
+    private val creditCardDescriptions = setOf("Clothing", "Nightlife", "Presents")
 
     @EventListener // does not support `suspend`
     fun onStartUp(e: ServerStartupEvent) {
@@ -43,13 +48,21 @@ class SeedInitializer(
                         .map { userRepo.save(it) }
                         .filterNot { it.admin }
                         .flatMap { user ->
-                            val items = genItems(user)
-                            itemRepo.saveAll(items).toList()
+                            val checking = accountService.ensureDefaultChecking(user)!!
+                            val creditCard =
+                                accountService.create(
+                                    user.id!!,
+                                    AccountCommand(name = creditCardName(user.locale), type = AccountType.CREDIT_CARD)
+                                )!!
+                            itemRepo.saveAll(genItems(user, checking.id!!, creditCard.id!!)).toList()
                         }
                 logger.info("Data initialization is done!! Generated ${allItems.size} items.")
             }
         }
     }
+
+    private fun creditCardName(locale: Locale): String =
+        if (locale.language.lowercase() == "pt") "Cartão de Crédito" else "Credit Card"
 
     private fun genUsers() =
         listOf(
@@ -73,7 +86,11 @@ class SeedInitializer(
             ).apply { applyPassword("123123") }
         )
 
-    private fun genItems(user: User): List<Item> {
+    private fun genItems(
+        user: User,
+        checkingId: Long,
+        creditCardId: Long
+    ): List<Item> {
         val expenses =
             listOf(
                 Pair("Furniture", 10),
@@ -95,14 +112,16 @@ class SeedInitializer(
                 Pair("Investments", 2000),
                 Pair("Rent", 1000)
             )
+
+        fun accountIdFor(description: String) = if (description in creditCardDescriptions) creditCardId else checkingId
         return (0..3).flatMap { extraMonth ->
             expenses.filter { random.nextDouble() >= 0.3 }.map { (desc, value) ->
                 val period = YearMonth.now().plusMonths(extraMonth.toLong())
-                Item(desc, BigDecimal(value), ItemType.EXPENSE, period, user.id!!)
+                Item(desc, BigDecimal(value), ItemType.EXPENSE, period, user.id!!, accountIdFor(desc))
             } +
                 incomes.filter { random.nextDouble() >= 0.05 }.map { (desc, value) ->
                     val period = YearMonth.now().plusMonths(extraMonth.toLong())
-                    Item(desc, BigDecimal(value), ItemType.INCOME, period, user.id!!)
+                    Item(desc, BigDecimal(value), ItemType.INCOME, period, user.id!!, accountIdFor(desc))
                 }
         }
     }

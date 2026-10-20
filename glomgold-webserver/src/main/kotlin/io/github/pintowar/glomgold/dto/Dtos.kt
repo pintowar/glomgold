@@ -3,6 +3,8 @@ package io.github.pintowar.glomgold.dto
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.Nulls
+import io.github.pintowar.glomgold.model.Account
+import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemOrigin
 import io.github.pintowar.glomgold.model.ItemType
@@ -99,21 +101,53 @@ data class UpdateProfile(
 
 @ReflectiveAccess
 @Introspected
+data class AccountCommand(
+    val id: Long? = null,
+    val version: Int? = null,
+    @field:NotBlank var name: String,
+    var currency: String = "",
+    var type: AccountType = AccountType.CHECKING,
+    var userId: Long? = null
+) {
+    fun toAccount(userId: Long) =
+        Account(name.trim(), currency.trim(), type, userId)
+            .apply {
+                id = this@AccountCommand.id
+                version = this@AccountCommand.version
+            }
+}
+
+fun Account.toCommand() =
+    AccountCommand(
+        this.id,
+        this.version,
+        this.name,
+        this.currency,
+        this.type,
+        this.userId
+    )
+
+@ReflectiveAccess
+@Introspected
 data class ItemBody(
     val period: YearMonth,
     val description: String,
     val value: BigDecimal,
-    val itemType: ItemType
+    val itemType: ItemType,
+    val accountId: Long? = null
 ) {
-    fun toItem(userId: Long) =
-        Item(
-            description,
-            value,
-            itemType,
-            period,
-            userId,
-            ItemOrigin.MANUAL
-        )
+    fun toItem(
+        userId: Long,
+        accountId: Long
+    ) = Item(
+        description,
+        value,
+        itemType,
+        period,
+        userId,
+        accountId,
+        ItemOrigin.MANUAL
+    )
 }
 
 @ReflectiveAccess
@@ -200,10 +234,11 @@ data class ItemCommand(
     @field:NotNull val year: Int,
     @field:NotNull val month: Int,
     @field:NotNull val userId: Long,
+    @field:NotNull val accountId: Long,
     val origin: ItemOrigin = ItemOrigin.MANUAL
 ) {
     fun toItem() =
-        Item(description, BigDecimal.valueOf(value), itemType, YearMonth.of(year, month), userId, origin)
+        Item(description, BigDecimal.valueOf(value), itemType, YearMonth.of(year, month), userId, accountId, origin)
             .apply {
                 id = this@ItemCommand.id
                 version = this@ItemCommand.version
@@ -220,6 +255,7 @@ fun Item.toCommand() =
         this.period.year,
         this.period.monthValue,
         this.userId,
+        this.accountId,
         this.origin
     )
 
