@@ -106,10 +106,7 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
             <Select {...accountSelectProps} allowClear />
           </Form.Item>
           <Form.Item label="Origin" name="origin">
-            <Select
-              options={ITEM_ORIGINS.map((value) => ({ value, label: value }))}
-              allowClear
-            />
+            <Select options={ITEM_ORIGINS.map((value) => ({ value, label: value }))} allowClear />
           </Form.Item>
           <Form.Item>
             <Button htmlType="submit" type="primary">

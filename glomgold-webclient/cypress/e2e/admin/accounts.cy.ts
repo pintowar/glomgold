@@ -46,6 +46,23 @@ describe("Admin Accounts Tests", () => {
     cy.get(".ant-table-thead").should("contain", "Actions");
   });
 
+  it("Filters by type and currency", () => {
+    cy.visit("/#/admin/accounts");
+    cy.wait("@accounts");
+
+    cy.get("form").within(() => {
+      cy.contains("label", "Type").should("exist");
+      cy.contains("label", "Currency").should("exist");
+    });
+
+    cy.get("#type").click();
+    cy.get(".ant-select-dropdown:visible .ant-select-item-option").contains("Credit Card").click();
+    cy.get("#currency").type("usd");
+    cy.get("button.ant-btn-primary").click();
+
+    cy.wait("@accounts").its("request.query").should("include", { type: "CREDIT_CARD", currency: "USD" });
+  });
+
   it("Create form renders fields and submits", () => {
     cy.intercept("POST", "/api/accounts", { statusCode: 201 }).as("createAccount");
 

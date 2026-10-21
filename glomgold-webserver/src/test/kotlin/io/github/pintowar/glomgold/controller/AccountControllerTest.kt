@@ -285,6 +285,22 @@ class AccountControllerTest(
                 donaldAccounts.map { it.userId }.distinct() shouldBe listOf(donaldId)
             }
 
+            it("filters accounts by type and currency") {
+                val donaldId = users.getValue("donald").id!!
+                val adminId = users.getValue("admin").id!!
+                accountRepo.save(Account("Carteira", "BRL", AccountType.CHECKING, donaldId))
+                accountRepo.save(Account("Card", "USD", AccountType.CREDIT_CARD, adminId))
+                accountRepo.save(Account("Wallet", "USD", AccountType.CHECKING, adminId))
+
+                val listed =
+                    adminAccountClient
+                        .listFiltered(token, type = AccountType.CREDIT_CARD, currency = "USD")
+                        .body
+                        .get()
+
+                listed.map { it.name } shouldBe listOf("Card")
+            }
+
             it("is restricted to admins") {
                 val donaldToken = authCookie(authClient, "donald")
                 shouldThrow<HttpClientResponseException> {
@@ -338,10 +354,12 @@ interface AdminAccountClient {
         @RequestBean pagination: RefinePaginateQuery
     ): HttpResponse<List<AccountCommand>>
 
-    @Get("/{?userId,_start,_end,_sort,_order}")
+    @Get("/{?userId,type,currency,_start,_end,_sort,_order}")
     suspend fun listFiltered(
         @Header(HttpHeaders.COOKIE) auth: String,
-        @QueryValue userId: Long,
+        @QueryValue userId: Long? = null,
+        @QueryValue type: AccountType? = null,
+        @QueryValue currency: String? = null,
         @QueryValue("_start") start: Int = 0,
         @QueryValue("_end") end: Int = 25,
         @QueryValue("_sort") sort: String = "id",
