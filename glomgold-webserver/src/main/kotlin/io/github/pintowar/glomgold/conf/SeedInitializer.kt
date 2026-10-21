@@ -1,11 +1,11 @@
 package io.github.pintowar.glomgold.conf
 
 import io.github.pintowar.glomgold.model.Account
+import io.github.pintowar.glomgold.model.AccountDefaults
 import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
-import io.github.pintowar.glomgold.model.AccountDefaults
 import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository

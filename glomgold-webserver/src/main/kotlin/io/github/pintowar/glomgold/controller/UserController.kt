@@ -2,9 +2,9 @@ package io.github.pintowar.glomgold.controller
 
 import io.github.pintowar.glomgold.dto.UserCommand
 import io.github.pintowar.glomgold.dto.toCommand
+import io.github.pintowar.glomgold.model.AccountDefaults
 import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.User
-import io.github.pintowar.glomgold.model.AccountDefaults
 import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.micronaut.http.HttpResponse
