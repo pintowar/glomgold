@@ -23,7 +23,7 @@ describe("Session Expiry", () => {
   it("Stale session metadata is rejected by the server and redirects to /login", () => {
     seedSession({ username: "donald", roles: ["ROLE_USER"] });
     cy.intercept("GET", /\/api\/panel\/accounts$/, { statusCode: 401 });
-    cy.intercept("GET", /\/api\/panel(\\?|$)/, { statusCode: 401 }).as("expiredPanel");
+    cy.intercept("GET", /\/api\/panel(\?|$)/, { statusCode: 401 }).as("expiredPanel");
 
     cy.visit("/#/panel");
     cy.wait("@expiredPanel");
@@ -35,11 +35,17 @@ describe("Session Expiry", () => {
 
   it("Mid-session 401 redirects to /login and re-login returns to the prior page", () => {
     seedSession({ username: "donald", roles: ["ROLE_USER"] });
-    cy.intercept("GET", /\/api\/panel\/accounts$/, { statusCode: 401 });
-    cy.intercept("GET", /\/api\/panel(\\?|$)/, { statusCode: 401 }).as("expiredPanel");
+    // Accounts still load, so exactly one request (the panel data call) is
+    // expired: one 401 means one logout, and no error can land twice.
+    cy.intercept("GET", /\/api\/panel\/accounts$/, { fixture: "panel/accounts.json" });
+    cy.intercept("GET", /\/api\/panel(\?|$)/, { statusCode: 401 }).as("expiredPanel");
+    cy.intercept("POST", "/api/logout", { statusCode: 200 }).as("logout");
 
     cy.visit("/#/panel");
     cy.wait("@expiredPanel");
+    // Let the 401 finish turning into a logout before re-logging in, or its
+    // redirect lands after the new session and bounces us back to /login.
+    cy.wait("@logout");
 
     // onError turns the 401 into logout + redirect, preserving the return page.
     cy.url().should("include", "/login");
@@ -51,10 +57,9 @@ describe("Session Expiry", () => {
     // Re-login lands back on the page the user was on, not a modal.
     cy.intercept("POST", "/api/login", { statusCode: 200 });
     cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
-    cy.intercept("GET", /\/api\/panel\/accounts$/, { fixture: "panel/accounts.json" });
-    cy.intercept("GET", "/api/panel/accounts", { fixture: "panel/accounts.json" });
-    cy.intercept("GET", /\/api\/panel(\\?|$)/, { fixture: "panel/control-empty.json" }).as("control");
-    cy.intercept("GET", "/api/panel", { fixture: "panel/control-empty.json" });
+    // Shadow every panel call once logged in, so no stale 401 can fire again.
+    cy.intercept("GET", /\/api\/panel/, { fixture: "panel/control-empty.json" });
+    cy.intercept("GET", /\/api\/panel\/accounts/, { fixture: "panel/accounts.json" });
     login("donald", "123123");
 
     cy.url().should("include", "/#/panel");
