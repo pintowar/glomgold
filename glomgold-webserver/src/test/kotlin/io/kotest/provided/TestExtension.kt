@@ -1,8 +1,6 @@
 package io.kotest.provided
 
 import io.github.pintowar.glomgold.controller.AuthClient
-import io.github.pintowar.glomgold.model.Account
-import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.User
 import io.github.serpro69.kfaker.faker

@@ -1,18 +1,20 @@
 package io.github.pintowar.glomgold.conf
 
-import io.github.pintowar.glomgold.dto.AccountCommand
+import io.github.pintowar.glomgold.model.Account
 import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
+import io.github.pintowar.glomgold.model.AccountDefaults
+import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
-import io.github.pintowar.glomgold.service.AccountService
 import io.micronaut.context.annotation.Value
 import io.micronaut.context.env.Environment
 import io.micronaut.runtime.event.annotation.EventListener
 import io.micronaut.runtime.server.event.ServerStartupEvent
 import jakarta.inject.Singleton
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import mu.KLogging
@@ -28,7 +30,7 @@ class SeedInitializer(
     env: Environment,
     private val userRepo: UserRepository,
     private val itemRepo: ItemRepository,
-    private val accountService: AccountService
+    private val accountRepo: AccountRepository
 ) : KLogging() {
     private val random = SecureRandom(randomSeed.toByteArray())
     private val isProd = env.activeNames.contains("prod")
@@ -48,12 +50,21 @@ class SeedInitializer(
                         .map { userRepo.save(it) }
                         .filterNot { it.admin }
                         .flatMap { user ->
-                            val checking = accountService.ensureDefaultChecking(user)!!
+                            val userId = user.id!!
+                            val checking =
+                                accountRepo.findByUserIdAndTypeOrderByIdAsc(userId, AccountType.CHECKING).firstOrNull()
+                                    ?: accountRepo.save(
+                                        AccountDefaults.checking(user.locale, userId)
+                                    )
                             val creditCard =
-                                accountService.create(
-                                    user.id!!,
-                                    AccountCommand(name = creditCardName(user.locale), type = AccountType.CREDIT_CARD)
-                                )!!
+                                accountRepo.save(
+                                    Account(
+                                        creditCardName(user.locale),
+                                        AccountDefaults.defaultCurrency(user.locale),
+                                        AccountType.CREDIT_CARD,
+                                        userId
+                                    )
+                                )
                             itemRepo.saveAll(genItems(user, checking.id!!, creditCard.id!!)).toList()
                         }
                 logger.info("Data initialization is done!! Generated ${allItems.size} items.")
