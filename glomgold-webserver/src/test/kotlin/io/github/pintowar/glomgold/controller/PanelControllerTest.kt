@@ -7,9 +7,12 @@ import io.github.pintowar.glomgold.dto.PanelAnnualReport
 import io.github.pintowar.glomgold.dto.PanelInfo
 import io.github.pintowar.glomgold.dto.ProfileInfo
 import io.github.pintowar.glomgold.dto.UpdateProfile
+import io.github.pintowar.glomgold.model.Account
+import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
+import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.assertions.throwables.shouldThrow
@@ -43,19 +46,26 @@ import java.util.Locale
 @MicronautTest(transactional = false)
 class PanelControllerTest(
     private val userRepo: UserRepository,
+    private val accountRepo: AccountRepository,
     private val itemRepo: ItemRepository,
     private val authClient: AuthClient,
     private val panelClient: PanelClient
 ) : DescribeSpec({
 
         val users = HashMap<String, User>()
+        val accounts = HashMap<String, Account>()
 
         beforeSpec {
+            itemRepo.deleteAll()
+            accountRepo.deleteAll()
             userRepo.deleteAll()
             val userList =
                 listOf("admin", "donald")
                     .associateWith { userRepo.save(fakeUsers().getValue(it)) }
             users.putAll(userList)
+            userList.forEach { (username, user) ->
+                accounts[username] = accountRepo.save(Account("Checking", "USD", AccountType.CHECKING, user.id!!))
+            }
         }
 
         beforeContainer { itemRepo.deleteAll() }
@@ -63,12 +73,13 @@ class PanelControllerTest(
         describe("panel operations - show panel") {
             val testUsername = "admin"
             val userId = users.getValue(testUsername).id!!
+            val accountId = accounts.getValue(testUsername).id!!
             val token = authCookie(authClient, testUsername)
             val totalItems = 10
             val actualPeriod = YearMonth.now()
             val periodFmt = DateTimeFormatter.ofPattern("yyyy-MM")
 
-            fakeItems(userId, totalItems / 2)
+            fakeItems(userId, accountId, totalItems / 2)
                 .mapIndexed { idx, item ->
                     item.apply {
                         value = BigDecimal(if (idx % 2 == 0) 500 else 300)
@@ -109,6 +120,7 @@ class PanelControllerTest(
         describe("panel operations - edit panel") {
             val testUsername = "admin"
             val userId = users.getValue(testUsername).id!!
+            val accountId = accounts.getValue(testUsername).id!!
             val token = authCookie(authClient, testUsername)
             val actualPeriod = YearMonth.now()
 
@@ -116,7 +128,7 @@ class PanelControllerTest(
 
             it("adding item") {
                 val desc = "Some Item"
-                val addedItem = ItemBody(actualPeriod, desc, BigDecimal("9.99"), ItemType.EXPENSE)
+                val addedItem = ItemBody(actualPeriod, desc, BigDecimal("9.99"), ItemType.EXPENSE, accountId)
                 val result = panelClient.addItem(token, addedItem)
 
                 result.status shouldBe HttpStatus.OK
@@ -132,8 +144,11 @@ class PanelControllerTest(
 
             it("edit item") {
                 val newDesc = "Other description"
-                val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId))
-                val editedItem = ItemBody(actualPeriod, newDesc, BigDecimal("19.99"), ItemType.EXPENSE)
+                val item =
+                    itemRepo.save(
+                        Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId, accountId)
+                    )
+                val editedItem = ItemBody(actualPeriod, newDesc, BigDecimal("19.99"), ItemType.EXPENSE, accountId)
                 val result = panelClient.editItem(token, item.id!!, editedItem)
 
                 result.status shouldBe HttpStatus.OK
@@ -148,15 +163,22 @@ class PanelControllerTest(
             }
 
             it("invalid edit item") {
-                val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId))
-                val editedItem = ItemBody(actualPeriod, "Other description", BigDecimal("19.99"), ItemType.EXPENSE)
+                val item =
+                    itemRepo.save(
+                        Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId, accountId)
+                    )
+                val editedItem =
+                    ItemBody(actualPeriod, "Other description", BigDecimal("19.99"), ItemType.EXPENSE, accountId)
                 val result = panelClient.editItem(token, item.id!! + 1, editedItem) // non existent id
 
                 result.status shouldBe HttpStatus.NOT_FOUND
             }
 
             it("remove item") {
-                val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId))
+                val item =
+                    itemRepo.save(
+                        Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId, accountId)
+                    )
                 val result = panelClient.removeItem(token, item.id!!)
 
                 result.status shouldBe HttpStatus.OK
@@ -165,7 +187,10 @@ class PanelControllerTest(
             }
 
             it("invalid remove item") {
-                val item = itemRepo.save(Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId))
+                val item =
+                    itemRepo.save(
+                        Item("Some Item", BigDecimal("9.99"), ItemType.EXPENSE, actualPeriod, userId, accountId)
+                    )
                 val result = panelClient.removeItem(token, item.id!! + 1) // non existent id
 
                 result.status shouldBe HttpStatus.NOT_FOUND
@@ -175,7 +200,7 @@ class PanelControllerTest(
                 val totalItems = 5
                 val totalItemsNextMonth = 2
                 val actualItems =
-                    fakeItems(userId, totalItems).map { item ->
+                    fakeItems(userId, accountId, totalItems).map { item ->
                         item.apply {
                             value = BigDecimal(500)
                             period = actualPeriod
@@ -191,7 +216,7 @@ class PanelControllerTest(
                     panelClient.copyItems(
                         token,
                         actualItems.map {
-                            ItemBody(it.period, it.description, it.value, ItemType.EXPENSE)
+                            ItemBody(it.period, it.description, it.value, ItemType.EXPENSE, it.accountId)
                         }
                     )
 
@@ -212,12 +237,13 @@ class PanelControllerTest(
         describe("panel operations - show report") {
             val testUsername = "admin"
             val userId = users.getValue(testUsername).id!!
+            val accountId = accounts.getValue(testUsername).id!!
             val token = authCookie(authClient, testUsername)
             val totalItems = 5
             val expectedCols = 12
             val actualPeriod = YearMonth.now().withMonth(6)
 
-            fakeItems(userId, totalItems)
+            fakeItems(userId, accountId, totalItems)
                 .mapIndexed { idx, item ->
                     item.apply {
                         value = BigDecimal(if (idx % 2 == 0) 500 else 300)

@@ -22,14 +22,15 @@ class PanelService(
     suspend fun annualReport(
         userId: Long,
         year: Int,
-        itemType: String
+        itemType: String,
+        accountId: Long? = null
     ): PanelAnnualReport {
         val summary =
             (
                 if (itemType.trim().isEmpty()) {
-                    itemRepository.yearSummary(year, userId)
+                    itemRepository.yearSummary(year, userId, accountId)
                 } else {
-                    itemRepository.yearSummary(year, itemType, userId)
+                    itemRepository.yearSummary(year, itemType, userId, accountId)
                 }
             ).toList()
 
@@ -64,9 +65,12 @@ class PanelService(
         )
     }
 
-    suspend fun overallReport(userId: Long): PanelOverallReport {
-        val years = itemRepository.overallSummary(userId).toList()
-        val heatmap = itemRepository.balanceHeatmap(userId).toList()
+    suspend fun overallReport(
+        userId: Long,
+        accountId: Long? = null
+    ): PanelOverallReport {
+        val years = itemRepository.overallSummary(userId, accountId).toList()
+        val heatmap = itemRepository.balanceHeatmap(userId, accountId).toList()
 
         val totalExpense = years.fold(BigDecimal.ZERO) { acc, it -> acc + it.expense }
         val totalIncome = years.fold(BigDecimal.ZERO) { acc, it -> acc + it.income }
@@ -91,16 +95,17 @@ class PanelService(
 
     suspend fun panelInfo(
         userId: Long,
-        period: YearMonth
+        period: YearMonth,
+        accountId: Long? = null
     ): PanelInfo {
-        val periodSummary = itemRepository.periodSummary(period, userId)
-        val lastPeriodSummary = itemRepository.periodSummary(period.minusMonths(1), userId)
+        val periodSummary = itemRepository.periodSummary(period, userId, accountId)
+        val lastPeriodSummary = itemRepository.periodSummary(period.minusMonths(1), userId, accountId)
         val diffPercent = periodSummary.percentDiff(lastPeriodSummary)
 
         return PanelInfo(
             period,
-            itemRepository.listByPeriodAndUserIdOrderByCreatedAtAndDescription(period, userId).toList(),
-            itemRepository.monthSummary(period, userId).toList(),
+            itemRepository.listByPeriodAndAccount(period, userId, accountId).toList(),
+            itemRepository.monthSummary(period, userId, accountId).toList(),
             periodSummary,
             diffPercent
         )

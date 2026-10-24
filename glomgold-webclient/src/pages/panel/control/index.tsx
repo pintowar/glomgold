@@ -16,6 +16,7 @@ import {
 
 import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
 import { usePanelSearchParams } from "../../../hooks/usePanelSearchParams";
+import { usePanelAccounts } from "../../../hooks/usePanelAccounts";
 
 interface ControlPanelData {
   items: IItem[];
@@ -27,15 +28,24 @@ interface ControlPanelData {
 const PERIOD_FORMAT = "YYYY-MM";
 const PERIOD_PARAM = "period";
 const DESC_PARAM = "desc";
+const ACCOUNT_PARAM = "account";
 
 const EMPTY_SUMMARY: ISummary = { expense: 0, income: 0, balance: 0 };
 
 export const ControlPanel: React.FC = () => {
   const { locale, currency, symbol } = useIdentityDefaults();
+  const { accounts, isLoading: isLoadingAccounts } = usePanelAccounts();
 
   const { searchParams, updateSearchParams } = usePanelSearchParams();
   const period = searchParams.get(PERIOD_PARAM) ?? dayjs().format(PERIOD_FORMAT);
   const desc = searchParams.get(DESC_PARAM) ?? "";
+  const accountParam = searchParams.get(ACCOUNT_PARAM);
+
+  // Default selection is the first account (backend returns them ordered by id asc).
+  const accountId = useMemo(() => {
+    if (accountParam) return Number(accountParam);
+    return accounts.length > 0 ? accounts[0].id : undefined;
+  }, [accountParam, accounts]);
 
   const onCurrentPeriodChange = useCallback(
     (value: dayjs.Dayjs | null) => {
@@ -53,6 +63,13 @@ export const ControlPanel: React.FC = () => {
     [updateSearchParams]
   );
 
+  const onAccountChange = useCallback(
+    (value: number) => {
+      updateSearchParams({ [ACCOUNT_PARAM]: `${value}` });
+    },
+    [updateSearchParams]
+  );
+
   const currentPeriod = useMemo(() => dayjs(period, PERIOD_FORMAT), [period]);
   const formattedPeriod = currentPeriod.format(PERIOD_FORMAT);
 
@@ -62,9 +79,10 @@ export const ControlPanel: React.FC = () => {
   } = useCustom<ControlPanelData>({
     url: "/api/panel",
     method: "get",
-    config: { query: { period: formattedPeriod } },
+    config: { query: { period: formattedPeriod, accountId } },
     queryOptions: {
-      queryKey: [PANEL_QUERY_KEYS.control, formattedPeriod],
+      enabled: !isLoadingAccounts,
+      queryKey: [PANEL_QUERY_KEYS.control, formattedPeriod, accountId],
     },
   });
 
@@ -85,7 +103,14 @@ export const ControlPanel: React.FC = () => {
       <div className="card-row">
         <Row gutter={[24, 24]}>
           <Col span={12}>
-            <PeriodNavigationCard value={currentPeriod} onValueChange={onCurrentPeriodChange} format={PERIOD_FORMAT} />
+            <PeriodNavigationCard
+              value={currentPeriod}
+              onValueChange={onCurrentPeriodChange}
+              format={PERIOD_FORMAT}
+              accounts={accounts}
+              accountId={accountId}
+              onAccountChange={onAccountChange}
+            />
           </Col>
           <Col span={12}>
             <PeriodSummaryCard
@@ -102,6 +127,7 @@ export const ControlPanel: React.FC = () => {
           <Col span={12} style={{ display: "flex" }}>
             <MonthItemsCard
               formattedPeriod={formattedPeriod}
+              accountId={accountId}
               initialSearch={desc}
               onSearchChange={onDescChange}
               tableData={tableData}

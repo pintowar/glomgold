@@ -13,6 +13,7 @@ export interface ItemBody {
   description: string;
   value: number;
   itemType?: ItemType;
+  accountId?: number;
 }
 
 export interface CsvColumnMapping {

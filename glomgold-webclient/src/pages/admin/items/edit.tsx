@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { IResourceComponentsProps } from "@refinedev/core";
 
 import { Edit, useForm } from "@refinedev/antd";
@@ -8,14 +8,17 @@ import { IItem } from "../../../interfaces";
 import { ITEM_TYPES } from "../../../constants";
 import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
 import { useUserSelect } from "../../../hooks/useUserSelect";
+import { useAccountSelect } from "../../../hooks/useAccountSelect";
 
 export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
-  const { formProps, saveButtonProps, query } = useForm<IItem>({
+  const { form, formProps, saveButtonProps, query } = useForm<IItem>({
     warnWhenUnsavedChanges: true,
   });
 
   const postData = query?.data?.data;
+  const [userId, setUserId] = useState<number | undefined>();
   const { selectProps: userSelectProps } = useUserSelect(postData?.userId);
+  const { selectProps: accountSelectProps } = useAccountSelect(userId ?? postData?.userId);
 
   return (
     <Edit saveButtonProps={saveButtonProps}>
@@ -90,7 +93,24 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
             },
           ]}
         >
-          <Select {...userSelectProps} />
+          <Select
+            {...userSelectProps}
+            onChange={(value) => {
+              setUserId(value as unknown as number);
+              form.setFieldValue("accountId", undefined);
+            }}
+          />
+        </Form.Item>
+        <Form.Item
+          label="Account"
+          name="accountId"
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+        >
+          <Select {...accountSelectProps} />
         </Form.Item>
       </Form>
     </Edit>

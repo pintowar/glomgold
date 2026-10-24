@@ -1,8 +1,11 @@
 package io.github.pintowar.glomgold.repository
 
+import io.github.pintowar.glomgold.model.Account
+import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
+import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.assertions.throwables.shouldThrow
@@ -18,11 +21,13 @@ import java.time.YearMonth
 @MicronautTest(transactional = false)
 class UserRepositoryTest(
     private val userRepo: UserRepository,
+    private val accountRepo: AccountRepository,
     private val itemRepo: ItemRepository
 ) : DescribeSpec({
 
         beforeEach {
             itemRepo.deleteAll()
+            accountRepo.deleteAll()
             userRepo.deleteAll()
         }
 
@@ -64,6 +69,7 @@ class UserRepositoryTest(
                         email = "admin@glomgold.com"
                     ).apply { applyPassword("admin") }
                 )
+            val account = accountRepo.save(Account("Checking", "USD", AccountType.CHECKING, user.id!!))
 
             it("successful persist item") {
                 val item =
@@ -72,7 +78,8 @@ class UserRepositoryTest(
                         value = BigDecimal(10),
                         ItemType.EXPENSE,
                         period = YearMonth.now(),
-                        userId = user.id!!
+                        userId = user.id!!,
+                        accountId = account.id!!
                     )
 
                 val savedItem = itemRepo.save(item)

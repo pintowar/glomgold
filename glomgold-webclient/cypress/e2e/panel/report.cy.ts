@@ -9,9 +9,8 @@ describe("Panel Report Tests", () => {
     it("Report: BALANCE / 2023", () => {
       cy.intercept("POST", "/api/login", { statusCode: 200 });
       cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
-      cy.intercept("GET", "/api/panel/yearly-report?&type=BALANCE&year=2023", { fixture: "panel/report.json" }).as(
-        "currentReport"
-      );
+      cy.intercept("GET", /\/api\/panel\/accounts$/, { fixture: "panel/accounts.json" });
+      cy.intercept("GET", /\/api\/panel\/yearly-report\?/, { fixture: "panel/report.json" }).as("currentReport");
 
       const { username, password } = user;
 

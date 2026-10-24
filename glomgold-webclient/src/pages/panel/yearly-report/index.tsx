@@ -12,6 +12,7 @@ import { REPORT_TYPES, type ReportType } from "../../../constants";
 import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
 import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
 import { usePanelSearchParams } from "../../../hooks/usePanelSearchParams";
+import { usePanelAccounts } from "../../../hooks/usePanelAccounts";
 
 export const ReportPanel: React.FC = () => {
   const { locale, currency } = useIdentityDefaults();
@@ -19,10 +20,14 @@ export const ReportPanel: React.FC = () => {
   const periodFormat = "YYYY";
   const periodParam = "period";
   const typeParam = "type";
+  const accountParam = "account";
 
+  const { accounts } = usePanelAccounts();
   const { searchParams, updateSearchParams } = usePanelSearchParams();
   const period = searchParams.get(periodParam) ?? dayjs().format(periodFormat);
   const type = (searchParams.get(typeParam) ?? "BALANCE") as ReportType;
+  const accountValue = searchParams.get(accountParam);
+  const accountId = accountValue ? Number(accountValue) : undefined;
 
   const currentPeriod = useMemo(() => dayjs(period, periodFormat), [period, periodFormat]);
 
@@ -33,7 +38,7 @@ export const ReportPanel: React.FC = () => {
   } = useCustom<IPanelAnnualReport>({
     url: `/api/panel/yearly-report`,
     method: "get",
-    config: { query: { year: currentPeriod.year(), type } },
+    config: { query: { year: currentPeriod.year(), type, accountId } },
   });
 
   const onChangePeriod = (date: dayjs.Dayjs | null) => {
@@ -46,6 +51,10 @@ export const ReportPanel: React.FC = () => {
     if (value) {
       updateSearchParams({ [typeParam]: value });
     }
+  };
+
+  const onAccountChange = (value?: number) => {
+    updateSearchParams({ account: value !== undefined ? `${value}` : undefined });
   };
 
   const tabsItems = useMemo(
@@ -128,6 +137,17 @@ export const ReportPanel: React.FC = () => {
                 </Col>
                 <Col>
                   <Select value={type} onChange={onTypeChange} style={{ width: 160 }} options={typeOptions} />
+                </Col>
+                <Col>
+                  <Select
+                    data-testid="report-account"
+                    allowClear
+                    value={accountId}
+                    onChange={onAccountChange}
+                    style={{ minWidth: 160 }}
+                    placeholder={translate("panel.account.all", "All accounts")}
+                    options={accounts.map((account) => ({ value: account.id, label: account.name }))}
+                  />
                 </Col>
                 <Col span={14} />
               </Row>

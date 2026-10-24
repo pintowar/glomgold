@@ -10,6 +10,7 @@ import io.github.pintowar.glomgold.dto.PanelOverallReport
 import io.github.pintowar.glomgold.dto.ProfileInfo
 import io.github.pintowar.glomgold.dto.UpdateProfile
 import io.github.pintowar.glomgold.model.ItemOrigin
+import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.github.pintowar.glomgold.service.ImportService
@@ -40,28 +41,34 @@ import java.util.Locale
 class PanelController(
     private val userRepository: UserRepository,
     private val itemRepository: ItemRepository,
+    private val accountRepository: AccountRepository,
     private val panelService: PanelService,
     private val importService: ImportService
 ) {
-    @Get("/{?period}")
+    @Get("/{?period,accountId}")
     suspend fun panel(
         auth: Authentication,
-        @QueryValue period: YearMonth?
-    ) = panelService.panelInfo(authId(auth), period ?: YearMonth.now())
+        @QueryValue period: YearMonth?,
+        @QueryValue accountId: Long?
+    ) = panelService.panelInfo(authId(auth), period ?: YearMonth.now(), accountId)
 
-    @Get("/yearly-report{?year,type}")
+    @Get("/yearly-report{?year,type,accountId}")
     suspend fun report(
         auth: Authentication,
         @QueryValue year: Int?,
-        @QueryValue type: String?
+        @QueryValue type: String?,
+        @QueryValue accountId: Long?
     ): PanelAnnualReport {
         val currentYear = year ?: YearMonth.now().year
         val currentType = if (type in listOf("EXPENSE", "INCOME")) type else ""
-        return panelService.annualReport(authId(auth), currentYear, currentType ?: "")
+        return panelService.annualReport(authId(auth), currentYear, currentType ?: "", accountId)
     }
 
-    @Get("/overall-report")
-    suspend fun overallReport(auth: Authentication): PanelOverallReport = panelService.overallReport(authId(auth))
+    @Get("/overall-report{?accountId}")
+    suspend fun overallReport(
+        auth: Authentication,
+        @QueryValue accountId: Long?
+    ): PanelOverallReport = panelService.overallReport(authId(auth), accountId)
 
     @Post("/profile/password")
     suspend fun profilePassword(
@@ -126,7 +133,12 @@ class PanelController(
         auth: Authentication,
         @Body item: ItemBody
     ): HttpResponse<Unit> {
-        itemRepository.save(item.toItem(authId(auth)))
+        val userId = authId(auth)
+        val accountId = item.accountId ?: return HttpResponse.badRequest()
+        if (accountRepository.findByIdAndUserId(accountId, userId) == null) {
+            return HttpResponse.badRequest()
+        }
+        itemRepository.save(item.toItem(userId, accountId))
         return HttpResponse.ok()
     }
 
@@ -171,17 +183,28 @@ class PanelController(
         auth: Authentication,
         @Body items: List<ItemBody>
     ): HttpResponse<Unit> {
+        val userId = authId(auth)
+        val resolved =
+            items.map { body ->
+                val accountId = body.accountId ?: return HttpResponse.badRequest()
+                if (accountRepository.findByIdAndUserId(accountId, userId) == null) {
+                    return HttpResponse.badRequest()
+                }
+                body.toItem(userId, accountId)
+            }
         val itemsToCopy =
-            items
-                .map { it.toItem(authId(auth)) }
+            resolved
                 .groupBy { it.period }
                 .flatMap { (period, periodItems) ->
                     val nextPeriod = period.plusMonths(1)
                     val nextItemsDesc =
-                        itemRepository
-                            .findByUserIdAndPeriod(authId(auth), nextPeriod)
-                            .map { it.description }
-                            .toSet()
+                        periodItems
+                            .flatMap { item ->
+                                itemRepository
+                                    .findByUserIdAndAccountIdAndPeriod(userId, item.accountId, nextPeriod)
+                                    .map { it.description }
+                                    .toList()
+                            }.toSet()
                     periodItems.filter { it.description !in nextItemsDesc }.map { it.copy(period = nextPeriod) }
                 }
         if (itemsToCopy.isNotEmpty()) itemRepository.saveAll(itemsToCopy).toList()
@@ -224,6 +247,7 @@ class PanelController(
     suspend fun importItems(
         auth: Authentication,
         @Part file: CompletedFileUpload,
+        @Part("accountId") accountId: Long?,
         @Part("separator") separator: String?,
         @Part("dateFormat") dateFormat: String?,
         @Part("hasHeader") hasHeader: String?,
@@ -231,7 +255,12 @@ class PanelController(
         @Part("mapValue") mapValue: String?,
         @Part("mapType") mapType: String?,
         @Part("mapDate") mapDate: String?
-    ): ImportResult {
+    ): HttpResponse<ImportResult> {
+        val userId = authId(auth)
+        val targetAccount = accountId ?: return HttpResponse.badRequest()
+        if (accountRepository.findByIdAndUserId(targetAccount, userId) == null) {
+            return HttpResponse.badRequest()
+        }
         val bytes = file.bytes
         val origin = importService.detectOrigin(file.filename, bytes)
         val preview =
@@ -255,7 +284,7 @@ class PanelController(
                     importService.previewCsv(bytes, sep, fmt, withHeader, importService.defaultMapping(first.headers))
                 }
             }
-        return importService.importParsed(authId(auth), preview.rows, origin)
+        return HttpResponse.ok(importService.importParsed(userId, targetAccount, preview.rows, origin))
     }
 
     private fun authId(auth: Authentication): Long = auth.attributes["userId"] as Long

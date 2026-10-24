@@ -6,7 +6,7 @@ import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import { ErrorComponent, ThemedLayout, ThemedSider, ThemedTitle, useNotificationProvider } from "@refinedev/antd";
 import { App as AntdApp } from "antd";
 import "@refinedev/antd/dist/reset.css";
-import { UsergroupAddOutlined, ShopOutlined, DashboardOutlined } from "@ant-design/icons";
+import { UsergroupAddOutlined, ShopOutlined, DashboardOutlined, BankOutlined } from "@ant-design/icons";
 
 import routerBindings, {
   CatchAllNavigate,
@@ -25,14 +25,15 @@ import { LocaleProvider, useLocale } from "./i18n/LocaleContext";
 import { buildI18nProvider } from "./i18n/provider";
 import { normalizeLang } from "./i18n/locale";
 
-import { ItemList, ItemEdit, ItemShow } from "./pages/admin/items";
+import { ItemList, ItemEdit, ItemShow, ItemCreate } from "./pages/admin/items";
+import { AccountList, AccountCreate, AccountEdit } from "./pages/admin/accounts";
 import { UserList, UserCreate, UserEdit, UserShow } from "./pages/admin/users";
 import { DashboardPage } from "./pages/admin/dashboard";
 
 import { Login } from "./pages/login";
 
 import { PanelLayout } from "./pages/panel/layout";
-import { ControlPanel, ReportPanel, ProfilePanel, OverallReportPanel } from "./pages/panel";
+import { ControlPanel, ReportPanel, ProfilePanel, OverallReportPanel, AccountsPanel } from "./pages/panel";
 
 import logoCollapsed from "./assets/images/glomgold-logo-collapsed.png";
 
@@ -41,8 +42,8 @@ const accessControlProvider = {
     const roles = ((await authProvider.getPermissions?.()) ?? []) as string[];
 
     const isAdmin = roles.includes("ROLE_ADMIN");
-    const isAdminResource = ["dashboard", "users", "items"].includes(resource ?? "");
-    return { can: isAdmin || !isAdminResource };
+    const adminResources = ["dashboard", "users", "items", "accounts"];
+    return { can: isAdmin || !adminResources.includes(resource ?? "") };
   },
 };
 
@@ -77,10 +78,21 @@ const resources = [
   {
     name: "items",
     list: "/admin/items",
+    create: "/admin/items/create",
     edit: "/admin/items/edit/:id",
     show: "/admin/items/show/:id",
     meta: {
       icon: <ShopOutlined />,
+      canDelete: true,
+    },
+  },
+  {
+    name: "accounts",
+    list: "/admin/accounts",
+    create: "/admin/accounts/create",
+    edit: "/admin/accounts/edit/:id",
+    meta: {
+      icon: <BankOutlined />,
       canDelete: true,
     },
   },
@@ -150,8 +162,14 @@ function InnerApp() {
           </Route>
           <Route path="items">
             <Route index element={<ItemList />} />
+            <Route path="create" element={<ItemCreate />} />
             <Route path="edit/:id" element={<ItemEdit />} />
             <Route path="show/:id" element={<ItemShow />} />
+          </Route>
+          <Route path="accounts">
+            <Route index element={<AccountList />} />
+            <Route path="create" element={<AccountCreate />} />
+            <Route path="edit/:id" element={<AccountEdit />} />
           </Route>
           <Route path="*" element={<ErrorComponent />} />
         </Route>
@@ -170,6 +188,7 @@ function InnerApp() {
           <Route index element={<ControlPanel />} />
           <Route path="yearly-report" element={<ReportPanel />} />
           <Route path="overall-report" element={<OverallReportPanel />} />
+          <Route path="accounts" element={<AccountsPanel />} />
           <Route path="profile" element={<ProfilePanel />} />
         </Route>
         <Route

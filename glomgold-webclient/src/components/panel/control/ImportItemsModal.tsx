@@ -12,6 +12,7 @@ import type { CsvColumnMapping, ImportPreviewResponse, ImportResult } from "./ty
 interface ImportItemsModalProps {
   open: boolean;
   formattedPeriod: string;
+  accountId?: number;
   onClose: () => void;
   onImported?: (periods: string[]) => void;
 }
@@ -36,7 +37,13 @@ const defaultMapping = (headers: string[]): CsvColumnMapping => ({
 
 const isEmptyMapping = (m: CsvColumnMapping): boolean => !m.description && !m.value && !m.itemType && !m.date;
 
-export const ImportItemsModal: React.FC<ImportItemsModalProps> = ({ open, formattedPeriod, onClose, onImported }) => {
+export const ImportItemsModal: React.FC<ImportItemsModalProps> = ({
+  open,
+  formattedPeriod,
+  accountId,
+  onClose,
+  onImported,
+}) => {
   const translate = useTranslate();
   const { open: notify } = useNotification();
   const invalidatePanel = usePanelInvalidate();
@@ -72,6 +79,7 @@ export const ImportItemsModal: React.FC<ImportItemsModalProps> = ({ open, format
   const buildFormData = useCallback(() => {
     const fd = new FormData();
     if (file) fd.append("file", file);
+    if (accountId !== undefined) fd.append("accountId", `${accountId}`);
     fd.append("separator", separator);
     fd.append("dateFormat", dateFormat);
     fd.append("hasHeader", String(hasHeader));
@@ -80,7 +88,7 @@ export const ImportItemsModal: React.FC<ImportItemsModalProps> = ({ open, format
     if (mapping.itemType) fd.append("mapType", mapping.itemType);
     if (mapping.date) fd.append("mapDate", mapping.date);
     return fd;
-  }, [file, separator, dateFormat, hasHeader, mapping]);
+  }, [file, accountId, separator, dateFormat, hasHeader, mapping]);
 
   // Auto preview (debounced) whenever inputs change. State resets happen in
   // event handlers (file select/remove, close), so the effect only fetches.

@@ -9,6 +9,16 @@ export interface IItem {
   year: number;
   month: number;
   userId: number;
+  accountId: number;
+}
+
+export interface IAccount {
+  id: number;
+  version: number;
+  name: string;
+  currency: string;
+  type: "CHECKING" | "CREDIT_CARD";
+  userId: number;
 }
 
 export interface IUser {

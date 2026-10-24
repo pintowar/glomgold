@@ -12,6 +12,7 @@ describe("Admin Items Tests", () => {
       year: 2023,
       month: 9,
       userId: 2,
+      accountId: 1,
     },
     {
       id: 2,
@@ -23,7 +24,13 @@ describe("Admin Items Tests", () => {
       year: 2023,
       month: 9,
       userId: 3,
+      accountId: 2,
     },
+  ];
+
+  const accounts = [
+    { id: 1, version: 0, name: "Checking", currency: "USD", type: "CHECKING", userId: 2 },
+    { id: 2, version: 0, name: "Credit Card", currency: "USD", type: "CREDIT_CARD", userId: 3 },
   ];
 
   beforeEach(() => {
@@ -32,6 +39,7 @@ describe("Admin Items Tests", () => {
     cy.intercept("POST", "/api/login", { statusCode: 200 }).as("login");
     cy.intercept("GET", "/api/auth/me", { fixture: "login/admin.user.json" });
     cy.intercept("GET", "/api/items*", { body: items, statusCode: 200 }).as("items");
+    cy.intercept("GET", "/api/accounts*", { body: accounts, statusCode: 200 }).as("accounts");
     cy.intercept("GET", "/api/users*", { fixture: "admin/users.json", statusCode: 200 }).as("users");
 
     const { username, password } = admin;
@@ -46,10 +54,11 @@ describe("Admin Items Tests", () => {
     cy.url().should("include", "/admin");
   });
 
-  it("List renders items with user names", () => {
+  it("List renders items with user and account names", () => {
     cy.visit("/#/admin/items");
     cy.wait("@items");
     cy.wait("@users");
+    cy.wait("@accounts");
 
     cy.get(".ant-table-tbody tr[data-row-key]").should("have.length", 2);
     cy.get(".ant-table-tbody").should("contain", "Gym");
@@ -60,12 +69,17 @@ describe("Admin Items Tests", () => {
     cy.get('.ant-table-tbody tr[data-row-key="1"]').should("contain", "Scrooge McDuck");
     cy.get('.ant-table-tbody tr[data-row-key="2"]').should("contain", "Donald Duck");
 
+    // The Account column resolves accountId the same way.
+    cy.get('.ant-table-tbody tr[data-row-key="1"]').should("contain", "Checking");
+    cy.get('.ant-table-tbody tr[data-row-key="2"]').should("contain", "Credit Card");
+
     cy.get(".ant-table-thead").should("contain", "Description");
     cy.get(".ant-table-thead").should("contain", "User");
+    cy.get(".ant-table-thead").should("contain", "Account");
     cy.get(".ant-table-thead").should("contain", "Actions");
   });
 
-  it("Edit form loads item with user Select", () => {
+  it("Edit form loads item with user and account Selects", () => {
     cy.intercept("GET", "/api/items/1", { body: items[0], statusCode: 200 }).as("getItem");
 
     cy.visit("/#/admin/items/edit/1");
@@ -79,13 +93,14 @@ describe("Admin Items Tests", () => {
       cy.contains("label", "Description").should("exist");
       cy.contains("label", "Value").should("exist");
       cy.contains("label", "User").should("exist");
+      cy.contains("label", "Account").should("exist");
     });
 
-    // User field is an antd Select bound to Form.Item name="userId".
+    // User/Account fields are antd Selects bound to Form.Items.
     cy.get("#userId").should("exist");
+    cy.get("#accountId").should("exist");
     cy.get("button.ant-btn-primary").should("exist");
   });
-
   it("Show renders item fields", () => {
     cy.intercept("GET", "/api/items/1", { body: items[0], statusCode: 200 }).as("showItem");
     cy.intercept("GET", "/api/users/2", {

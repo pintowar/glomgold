@@ -7,23 +7,24 @@ import { Table, Select, Row, Col, Form, Input, Button, Tooltip } from "antd";
 
 import { SearchOutlined } from "@ant-design/icons";
 
-import { IItem, IUser } from "../../../interfaces";
+import { IAccount, IItem, IUser } from "../../../interfaces";
 import { ITEM_ORIGINS } from "../../../constants";
 import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
 import { ResourceActions } from "../../../components/common/ResourceActions";
 import { useUserSelect } from "../../../hooks/useUserSelect";
+import { useAccountSelect } from "../../../hooks/useAccountSelect";
 
 export const ItemList: React.FC<IResourceComponentsProps> = () => {
   const importProps = useImport<IItem>();
   const { tableProps, searchFormProps } = useTable<
     IItem,
     HttpError,
-    { description: string; userId: number; origin: string }
+    { description: string; userId: number; accountId: number; origin: string }
   >({
     syncWithLocation: true,
-    onSearch: (params: { description: string; userId: number; origin: string }) => {
+    onSearch: (params: { description: string; userId: number; accountId: number; origin: string }) => {
       const crudFilters: CrudFilters = [];
-      const { description, userId, origin } = params;
+      const { description, userId, accountId, origin } = params;
 
       crudFilters.push({
         field: "description",
@@ -36,6 +37,11 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
         value: userId,
       });
       crudFilters.push({
+        field: "accountId",
+        operator: "eq",
+        value: accountId,
+      });
+      crudFilters.push({
         field: "origin",
         operator: "eq",
         value: origin,
@@ -44,6 +50,9 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
       return crudFilters;
     },
   });
+
+  const selectedUserId = Form.useWatch("userId", searchFormProps.form);
+  const { selectProps: accountSelectProps } = useAccountSelect(selectedUserId);
 
   const userIds = useMemo(
     () => [...new Set(tableProps?.dataSource?.map((item) => item.userId) ?? [])],
@@ -60,19 +69,41 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
     },
   });
 
+  const accountIds = useMemo(
+    () => [...new Set(tableProps?.dataSource?.map((item) => item.accountId) ?? [])],
+    [tableProps?.dataSource]
+  );
+  const {
+    result: accounts,
+    query: { isLoading: isLoadingAccounts },
+  } = useMany<IAccount>({
+    resource: "accounts",
+    ids: accountIds,
+    queryOptions: {
+      enabled: accountIds.length > 0,
+    },
+  });
+
   const userNameById = useMemo(() => new Map((data?.data ?? []).map((user) => [user.id, user.name] as const)), [data]);
+  const accountNameById = useMemo(
+    () => new Map((accounts?.data ?? []).map((account) => [account.id, account.name] as const)),
+    [accounts]
+  );
 
   const { selectProps: userSelectProps } = useUserSelect();
 
   return (
     <Row gutter={[16, 16]}>
-      <Col lg={6} xs={24}>
-        <Form layout="vertical" {...searchFormProps}>
+      <Col xs={24} lg={6}>
+        <Form {...searchFormProps} layout="vertical">
           <Form.Item label="Description" name="description">
             <Input placeholder="Description" prefix={<SearchOutlined />} />
           </Form.Item>
           <Form.Item label="User" name="userId">
             <Select {...userSelectProps} allowClear />
+          </Form.Item>
+          <Form.Item label="Account" name="accountId">
+            <Select {...accountSelectProps} allowClear />
           </Form.Item>
           <Form.Item label="Origin" name="origin">
             <Select options={ITEM_ORIGINS.map((value) => ({ value, label: value }))} allowClear />
@@ -84,7 +115,7 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
           </Form.Item>
         </Form>
       </Col>
-      <Col lg={18} xs={24}>
+      <Col xs={24} lg={18}>
         <List
           headerProps={{
             extra: <ImportButton {...importProps} />,
@@ -115,6 +146,17 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
                 }
 
                 return <TextField value={userNameById.get(value)} />;
+              }}
+            />
+            <Table.Column
+              dataIndex="accountId"
+              title="Account"
+              render={(value) => {
+                if (isLoadingAccounts) {
+                  return <TextField value="Loading..." />;
+                }
+
+                return <TextField value={accountNameById.get(value)} />;
               }}
             />
             <Table.Column<IItem>
