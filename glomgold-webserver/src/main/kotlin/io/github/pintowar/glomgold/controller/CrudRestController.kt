@@ -29,7 +29,7 @@ abstract class CrudRestController<E : Any, DTO : Any, ID : Any>(
     }
 
     @Post("/")
-    suspend fun create(
+    open suspend fun create(
         @Body dto: DTO
     ): HttpResponse<DTO> =
         repository
@@ -45,7 +45,7 @@ abstract class CrudRestController<E : Any, DTO : Any, ID : Any>(
             .let { if (it != null) HttpResponse.ok(entityToDto(it)) else HttpResponse.notFound() }
 
     @Patch("/{id}")
-    suspend fun update(
+    open suspend fun update(
         @PathVariable id: ID,
         @Body dto: DTO
     ): HttpResponse<DTO> =
@@ -56,7 +56,7 @@ abstract class CrudRestController<E : Any, DTO : Any, ID : Any>(
             } ?: HttpResponse.notFound()
 
     @Delete("/{id}")
-    suspend fun delete(
+    open suspend fun delete(
         @PathVariable id: ID
     ): Int = repository.deleteById(id)
 

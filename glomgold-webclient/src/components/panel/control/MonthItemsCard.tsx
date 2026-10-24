@@ -30,6 +30,7 @@ import type { PanelItem } from "./types";
 
 interface MonthItemsCardProps {
   formattedPeriod: string;
+  accountId?: number;
   tableData: PanelItem[];
   locale: string;
   currency: string;
@@ -42,6 +43,7 @@ const INITIAL_FORM_VALUES = { itemType: "EXPENSE", description: "", value: 0 };
 
 export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   formattedPeriod,
+  accountId,
   initialSearch,
   onSearchChange,
   tableData,
@@ -175,6 +177,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 
   const { addItem, editItem, deleteItem, copyNextMonth, deleteSelected } = useMonthItemsMutations({
     formattedPeriod,
+    accountId,
     addForm,
     editForm,
     selectedRows,
@@ -327,10 +330,15 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
           </Form.Item>
         </Form>
         <Space direction="horizontal" size={12} wrap style={{ width: "100%" }}>
-          <Button data-testid={"add-item"} type="primary" onClick={() => addItem()}>
+          <Button data-testid={"add-item"} type="primary" disabled={!accountId} onClick={() => addItem()}>
             {translate("panel.items.add", "Add Item")}
           </Button>
-          <Button data-testid={"import-items"} icon={<UploadOutlined />} onClick={() => setImportOpen(true)}>
+          <Button
+            data-testid={"import-items"}
+            icon={<UploadOutlined />}
+            disabled={!accountId}
+            onClick={() => setImportOpen(true)}
+          >
             {translate("panel.items.import", "Import")}
           </Button>
           <Button
@@ -365,7 +373,12 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             onChange={handleTableChange}
           />
         </Form>
-        <ImportItemsModal open={importOpen} formattedPeriod={formattedPeriod} onClose={() => setImportOpen(false)} />
+        <ImportItemsModal
+          open={importOpen}
+          formattedPeriod={formattedPeriod}
+          accountId={accountId}
+          onClose={() => setImportOpen(false)}
+        />
       </Space>
     </Card>
   );

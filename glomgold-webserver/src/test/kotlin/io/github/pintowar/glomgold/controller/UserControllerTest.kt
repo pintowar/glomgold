@@ -1,6 +1,5 @@
 package io.github.pintowar.glomgold.controller
 
-import io.github.pintowar.glomgold.dto.ItemCommand
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
@@ -89,5 +88,5 @@ interface UserClient {
         @Header(HttpHeaders.COOKIE) auth: String,
         @PathVariable id: Long,
         @Body dto: Map<String, String>
-    ): HttpResponse<ItemCommand>
+    ): HttpResponse<Unit>
 }

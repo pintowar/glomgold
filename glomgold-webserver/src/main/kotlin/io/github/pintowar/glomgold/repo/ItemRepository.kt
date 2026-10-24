@@ -17,8 +17,9 @@ import java.time.YearMonth
 
 @R2dbcRepository(dialect = Dialect.POSTGRES)
 interface ItemRepository : EntityRepository<Item, Long> {
-    fun findByUserIdAndPeriod(
+    fun findByUserIdAndAccountIdAndPeriod(
         userId: Long,
+        accountId: Long,
         period: YearMonth
     ): Flow<Item>
 
@@ -33,9 +34,19 @@ interface ItemRepository : EntityRepository<Item, Long> {
         userId: Long
     ): Flow<Item>
 
-    fun listByPeriodAndUserIdOrderByCreatedAtAndDescription(
+    @Query(
+        """
+        SELECT i.*
+        FROM items i
+        WHERE i.period = :period AND i.user_id = :userId
+            AND (cast(:accountId as bigint) IS NULL OR i.account_id = :accountId)
+        ORDER BY i.created_at, i.description
+        """
+    )
+    fun listByPeriodAndAccount(
         period: YearMonth,
-        userId: Long
+        userId: Long,
+        accountId: Long?
     ): Flow<Item>
 
     @Query(
@@ -45,13 +56,15 @@ interface ItemRepository : EntityRepository<Item, Long> {
             sum(case when i.item_type = 'EXPENSE' THEN -i.value ELSE i.value END) as value
         FROM items i
         WHERE i.period = :period AND i.user_id = :userId
+            AND (cast(:accountId as bigint) IS NULL OR i.account_id = :accountId)
         GROUP BY i.period, i.description, i.item_type
         ORDER BY i.item_type, i.description
         """
     )
     fun monthSummary(
         period: YearMonth,
-        userId: Long
+        userId: Long,
+        accountId: Long?
     ): Flow<ItemSummary>
 
     @Query(
@@ -61,13 +74,15 @@ interface ItemRepository : EntityRepository<Item, Long> {
             sum(case when i.item_type = 'EXPENSE' THEN -i.value ELSE i.value END) as value
         FROM items i
         WHERE extract(year from i.period) = :year AND i.user_id = :userId
+            AND (cast(:accountId as bigint) IS NULL OR i.account_id = :accountId)
         GROUP BY i.period, i.description, i.item_type
         ORDER BY i.period, i.item_type, i.description
         """
     )
     fun yearSummary(
         year: Int,
-        userId: Long
+        userId: Long,
+        accountId: Long?
     ): Flow<ItemSummary>
 
     @Query(
@@ -77,6 +92,7 @@ interface ItemRepository : EntityRepository<Item, Long> {
             sum(case when i.item_type = 'EXPENSE' THEN -i.value ELSE i.value END) as value
         FROM items i
         WHERE extract(year from i.period) = :year AND i.item_type = :itemType AND i.user_id = :userId
+            AND (cast(:accountId as bigint) IS NULL OR i.account_id = :accountId)
         GROUP BY i.period, i.description, i.item_type
         ORDER BY i.period, i.item_type, i.description
         """
@@ -84,7 +100,8 @@ interface ItemRepository : EntityRepository<Item, Long> {
     fun yearSummary(
         year: Int,
         itemType: String,
-        userId: Long
+        userId: Long,
+        accountId: Long?
     ): Flow<ItemSummary>
 
     @Query(
@@ -96,11 +113,15 @@ interface ItemRepository : EntityRepository<Item, Long> {
             count(distinct i.period)::int as months
         FROM items i
         WHERE i.user_id = :userId
+            AND (cast(:accountId as bigint) IS NULL OR i.account_id = :accountId)
         GROUP BY 1
         ORDER BY 1
         """
     )
-    fun overallSummary(userId: Long): Flow<YearlySummary>
+    fun overallSummary(
+        userId: Long,
+        accountId: Long?
+    ): Flow<YearlySummary>
 
     @Query(
         """
@@ -111,11 +132,15 @@ interface ItemRepository : EntityRepository<Item, Long> {
                 - sum(case when i.item_type = 'EXPENSE' THEN i.value ELSE 0 END) as balance
         FROM items i
         WHERE i.user_id = :userId
+            AND (cast(:accountId as bigint) IS NULL OR i.account_id = :accountId)
         GROUP BY 1, 2
         ORDER BY 1, 2
         """
     )
-    fun balanceHeatmap(userId: Long): Flow<MonthlyBalance>
+    fun balanceHeatmap(
+        userId: Long,
+        accountId: Long?
+    ): Flow<MonthlyBalance>
 
     @Query(
         """
@@ -124,11 +149,13 @@ interface ItemRepository : EntityRepository<Item, Long> {
             sum(case when i.item_type = 'INCOME' THEN i.value ELSE 0 END) as income
         FROM items i
         WHERE i.period = :period AND i.user_id = :userId
+            AND (cast(:accountId as bigint) IS NULL OR i.account_id = :accountId)
         """
     )
     suspend fun periodSummary(
         period: YearMonth,
-        userId: Long
+        userId: Long,
+        accountId: Long?
     ): BalanceSummary
 
     suspend fun findDistinctDescriptionByUserIdAndDescriptionIlike(
@@ -136,13 +163,16 @@ interface ItemRepository : EntityRepository<Item, Long> {
         description: String
     ): List<String>
 
-    suspend fun existsByUserIdAndPeriodAndDescriptionAndValueAndItemType(
+    suspend fun existsByUserIdAndAccountIdAndPeriodAndDescriptionAndValueAndItemType(
         userId: Long,
+        accountId: Long,
         period: YearMonth,
         description: String,
         value: BigDecimal,
         itemType: ItemType
     ): Boolean
+
+    suspend fun deleteByAccountId(accountId: Long): Long
 
     suspend fun update(
         @Id id: Long,

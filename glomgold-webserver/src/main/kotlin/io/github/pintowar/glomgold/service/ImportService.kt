@@ -49,6 +49,7 @@ class ImportService(
 
     suspend fun importParsed(
         userId: Long,
+        accountId: Long,
         rows: List<ImportPreviewRow>,
         origin: ItemOrigin
     ): ImportResult {
@@ -57,15 +58,24 @@ class ImportService(
 
         val items =
             valid.map {
-                Item(it.description!!.trim(), it.value!!, it.itemType!!, it.period ?: YearMonth.now(), userId, origin)
+                Item(
+                    it.description!!.trim(),
+                    it.value!!,
+                    it.itemType!!,
+                    it.period ?: YearMonth.now(),
+                    userId,
+                    accountId,
+                    origin
+                )
             }
         var skipped = rows.size - valid.size
         val toSave = mutableListOf<Item>()
         val errors = mutableListOf<String>()
         for (item in items) {
             val dupe =
-                itemRepository.existsByUserIdAndPeriodAndDescriptionAndValueAndItemType(
+                itemRepository.existsByUserIdAndAccountIdAndPeriodAndDescriptionAndValueAndItemType(
                     userId,
+                    accountId,
                     item.period,
                     item.description,
                     item.value,

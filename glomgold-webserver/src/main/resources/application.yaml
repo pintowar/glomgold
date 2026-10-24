@@ -50,6 +50,9 @@ micronaut:
       - pattern: /api/users/**
         access:
           - ROLE_ADMIN
+      - pattern: /api/accounts/**
+        access:
+          - ROLE_ADMIN
       - pattern: /api/items/**
         access:
           - ROLE_ADMIN

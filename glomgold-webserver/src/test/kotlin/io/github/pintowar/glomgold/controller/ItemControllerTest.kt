@@ -4,6 +4,9 @@ import dev.mokkery.mock
 import io.github.pintowar.glomgold.dto.ItemCommand
 import io.github.pintowar.glomgold.dto.RefinePaginateQuery
 import io.github.pintowar.glomgold.dto.toCommand
+import io.github.pintowar.glomgold.model.Account
+import io.github.pintowar.glomgold.model.AccountType
+import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.core.spec.style.DescribeSpec
@@ -35,22 +38,27 @@ import java.time.YearMonth
 @MicronautTest(transactional = false)
 class ItemControllerTest(
     private val userRepo: UserRepository,
+    private val accountRepo: AccountRepository,
     private val itemRepo: ItemRepository,
     private val itemClient: ItemClient,
     private val authClient: AuthClient
 ) : DescribeSpec({
 
         val testUsername = "admin"
+        var accountId = 0L
 
         beforeSpec {
+            itemRepo.deleteAll()
+            accountRepo.deleteAll()
             userRepo.deleteAll()
-            userRepo.save(fakeUsers().getValue(testUsername))
+            val admin = userRepo.save(fakeUsers().getValue(testUsername))
+            accountId = accountRepo.save(Account("Checking", "USD", AccountType.CHECKING, admin.id!!)).id!!
         }
 
         describe("paginate 25 items") {
             val userId = userRepo.findByUsername("admin")?.id!!
             val totalItems = 25
-            itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+            itemRepo.saveAll(fakeItems(userId, accountId, totalItems)).collect()
             val allItems = itemRepo.findAll().toList().sortedBy { it.id }
 
             val token = authCookie(authClient, testUsername)
@@ -78,7 +86,7 @@ class ItemControllerTest(
             val userId = userRepo.findByUsername("admin")?.id!!
             val token = authCookie(authClient, testUsername)
 
-            fakeItems(userId, 5).forEach { item ->
+            fakeItems(userId, accountId, 5).forEach { item ->
                 val resp =
                     itemClient
                         .create(token, item.toCommand())
@@ -96,7 +104,7 @@ class ItemControllerTest(
         describe("read item") {
             val userId = userRepo.findByUsername("admin")?.id!!
             val totalItems = 5
-            itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+            itemRepo.saveAll(fakeItems(userId, accountId, totalItems)).collect()
             val allItems = itemRepo.findAll().toList()
             val token = authCookie(authClient, testUsername)
 
@@ -118,7 +126,7 @@ class ItemControllerTest(
         describe("update item") {
             val userId = userRepo.findByUsername("admin")?.id!!
             val totalItems = 5
-            itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+            itemRepo.saveAll(fakeItems(userId, accountId, totalItems)).collect()
             val allItems = itemRepo.findAll().toList()
             val token = authCookie(authClient, testUsername)
 
@@ -148,7 +156,7 @@ class ItemControllerTest(
         describe("delete item") {
             val userId = userRepo.findByUsername("admin")?.id!!
             val totalItems = 5
-            itemRepo.saveAll(fakeItems(userId, totalItems)).collect()
+            itemRepo.saveAll(fakeItems(userId, accountId, totalItems)).collect()
             val allItems = itemRepo.findAll().toList()
             val token = authCookie(authClient, testUsername)
 

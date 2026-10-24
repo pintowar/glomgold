@@ -8,4 +8,5 @@
     <include file="changelog/20220320194314-add-user-fk-on-items.sql" relativeToChangelogFile="true"/>
     <include file="changelog/20230809000000-add-item-type-column.sql" relativeToChangelogFile="true"/>
     <include file="changelog/20260930000000-add-origin-column.sql" relativeToChangelogFile="true"/>
+    <include file="changelog/20261017000000-create-accounts.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>

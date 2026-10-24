@@ -1,5 +1,5 @@
 import dataProvider from "@refinedev/simple-rest";
-import type { BaseRecord, DataProvider, DeleteManyParams } from "@refinedev/core";
+import type { BaseRecord, DataProvider, DeleteManyParams, GetListParams } from "@refinedev/core";
 import { axiosInstance } from "../authProvider";
 import { API_URL, PANEL_URLS } from "../constants";
 
@@ -7,10 +7,26 @@ const base = dataProvider(API_URL, axiosInstance);
 
 const isPanelItems = (resource: string) => resource === "panel-items";
 const isPanelProfile = (resource: string) => resource === "panel-profile";
+const isPanelAccounts = (resource: string) => resource === "panel-accounts";
 
 export const panelDataProvider: DataProvider = {
   ...base,
+  getList: async <TData extends BaseRecord = BaseRecord>({
+    resource,
+    pagination,
+    sorters,
+    filters,
+    meta,
+  }: GetListParams) => {
+    if (!isPanelAccounts(resource)) return base.getList<TData>({ resource, pagination, sorters, filters, meta });
+    const { data } = await axiosInstance.get<TData[]>(PANEL_URLS.accounts);
+    return { data, total: data.length };
+  },
   create: async ({ resource, variables, meta }) => {
+    if (isPanelAccounts(resource)) {
+      const { data } = await axiosInstance.post(PANEL_URLS.accounts, variables);
+      return { data };
+    }
     if (!isPanelItems(resource)) return base.create({ resource, variables, meta });
     const { data } = await axiosInstance.post(PANEL_URLS.addItem, variables);
     return { data };
@@ -20,11 +36,19 @@ export const panelDataProvider: DataProvider = {
       const { data } = await axiosInstance.patch(PANEL_URLS.profile, variables);
       return { data };
     }
+    if (isPanelAccounts(resource)) {
+      const { data } = await axiosInstance.patch(PANEL_URLS.account(id), variables);
+      return { data };
+    }
     if (!isPanelItems(resource)) return base.update({ resource, id, variables, meta });
     const { data } = await axiosInstance.patch(PANEL_URLS.editItem(id as string | number), variables);
     return { data };
   },
   deleteOne: async ({ resource, id, meta }) => {
+    if (isPanelAccounts(resource)) {
+      const { data } = await axiosInstance.delete(PANEL_URLS.account(id));
+      return { data };
+    }
     if (!isPanelItems(resource)) return base.deleteOne({ resource, id, meta });
     const { data } = await axiosInstance.delete(PANEL_URLS.removeItem(id as string | number));
     return { data };
@@ -47,6 +71,10 @@ export const panelDataProvider: DataProvider = {
   getOne: async ({ resource, id, meta }) => {
     if (isPanelProfile(resource)) {
       const { data } = await axiosInstance.get(PANEL_URLS.profile);
+      return { data };
+    }
+    if (isPanelAccounts(resource)) {
+      const { data } = await axiosInstance.get(PANEL_URLS.account(id));
       return { data };
     }
     return base.getOne({ resource, id, meta });

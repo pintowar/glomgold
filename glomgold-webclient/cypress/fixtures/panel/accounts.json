@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "version": 0,
+    "name": "Conta Corrente",
+    "currency": "BRL",
+    "type": "CHECKING",
+    "userId": 3
+  },
+  {
+    "id": 2,
+    "version": 0,
+    "name": "Cartão de Crédito",
+    "currency": "BRL",
+    "type": "CREDIT_CARD",
+    "userId": 3
+  }
+]

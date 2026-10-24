@@ -11,6 +11,7 @@ describe("Login Tests", () => {
       // the SPA then reads non-sensitive metadata from /api/auth/me.
       cy.intercept("POST", "/api/login", { statusCode: 200 });
       cy.intercept("GET", "/api/auth/me", { fixture: "login/common.user.json" });
+      cy.intercept("GET", /\/api\/panel\/accounts$/, { fixture: "panel/accounts.json" });
       cy.intercept("GET", "/api/panel*", { fixture: "panel/control.json" });
 
       const { username, password } = user;
