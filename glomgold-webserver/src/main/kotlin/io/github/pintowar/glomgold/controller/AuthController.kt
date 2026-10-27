@@ -3,15 +3,17 @@ package io.github.pintowar.glomgold.controller
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
-import io.micronaut.security.authentication.Authentication
+import io.micronaut.security.utils.SecurityService
 
 @Controller("/api/auth")
 class AuthController(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val securityService: SecurityService
 ) {
     @Get("/me")
-    suspend fun panel(auth: Authentication): Map<String, Any?> =
-        userRepository.findByUsername(auth.name)?.let { user ->
+    suspend fun panel(): Map<String, Any?> {
+        val auth = securityService.authentication.orElseThrow()
+        return userRepository.findByUsername(auth.name)?.let { user ->
             mapOf(
                 "username" to user.username,
                 "name" to user.name,
@@ -23,4 +25,5 @@ class AuthController(
                 "symbol" to auth.attributes["symbol"]
             )
         } ?: emptyMap()
+    }
 }

@@ -9,4 +9,5 @@
     <include file="changelog/20230809000000-add-item-type-column.sql" relativeToChangelogFile="true"/>
     <include file="changelog/20260930000000-add-origin-column.sql" relativeToChangelogFile="true"/>
     <include file="changelog/20261017000000-create-accounts.sql" relativeToChangelogFile="true"/>
+    <include file="changelog/20261023000000-create-categories.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -179,6 +179,7 @@ interface ItemRepository : EntityRepository<Item, Long> {
         @Version version: Int,
         description: String,
         value: BigDecimal,
-        itemType: ItemType
+        itemType: ItemType,
+        categoryId: Long?
     ): Long
 }
