@@ -6,7 +6,14 @@ import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import { ErrorComponent, ThemedLayout, ThemedSider, ThemedTitle, useNotificationProvider } from "@refinedev/antd";
 import { App as AntdApp } from "antd";
 import "@refinedev/antd/dist/reset.css";
-import { UsergroupAddOutlined, ShopOutlined, DashboardOutlined, BankOutlined } from "@ant-design/icons";
+import {
+  UsergroupAddOutlined,
+  ShopOutlined,
+  DashboardOutlined,
+  BankOutlined,
+  TagsOutlined,
+  FolderOutlined,
+} from "@ant-design/icons";
 
 import routerBindings, {
   CatchAllNavigate,
@@ -27,6 +34,8 @@ import { normalizeLang } from "./i18n/locale";
 
 import { ItemList, ItemEdit, ItemShow, ItemCreate } from "./pages/admin/items";
 import { AccountList, AccountCreate, AccountEdit } from "./pages/admin/accounts";
+import { CategoryList, CategoryCreate, CategoryEdit } from "./pages/admin/categories";
+import { CategoryGroupList, CategoryGroupCreate, CategoryGroupEdit } from "./pages/admin/category-groups";
 import { UserList, UserCreate, UserEdit, UserShow } from "./pages/admin/users";
 import { DashboardPage } from "./pages/admin/dashboard";
 
@@ -42,7 +51,7 @@ const accessControlProvider = {
     const roles = ((await authProvider.getPermissions?.()) ?? []) as string[];
 
     const isAdmin = roles.includes("ROLE_ADMIN");
-    const adminResources = ["dashboard", "users", "items", "accounts"];
+    const adminResources = ["dashboard", "users", "items", "accounts", "categories", "category-groups"];
     return { can: isAdmin || !adminResources.includes(resource ?? "") };
   },
 };
@@ -94,6 +103,24 @@ const resources = [
     meta: {
       icon: <BankOutlined />,
       canDelete: true,
+    },
+  },
+  {
+    name: "categories",
+    list: "/admin/categories",
+    create: "/admin/categories/create",
+    edit: "/admin/categories/edit/:id",
+    meta: {
+      icon: <TagsOutlined />,
+    },
+  },
+  {
+    name: "category-groups",
+    list: "/admin/category-groups",
+    create: "/admin/category-groups/create",
+    edit: "/admin/category-groups/edit/:id",
+    meta: {
+      icon: <FolderOutlined />,
     },
   },
 ];
@@ -170,6 +197,16 @@ function InnerApp() {
             <Route index element={<AccountList />} />
             <Route path="create" element={<AccountCreate />} />
             <Route path="edit/:id" element={<AccountEdit />} />
+          </Route>
+          <Route path="categories">
+            <Route index element={<CategoryList />} />
+            <Route path="create" element={<CategoryCreate />} />
+            <Route path="edit/:id" element={<CategoryEdit />} />
+          </Route>
+          <Route path="category-groups">
+            <Route index element={<CategoryGroupList />} />
+            <Route path="create" element={<CategoryGroupCreate />} />
+            <Route path="edit/:id" element={<CategoryGroupEdit />} />
           </Route>
           <Route path="*" element={<ErrorComponent />} />
         </Route>

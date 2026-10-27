@@ -26,6 +26,8 @@ import { EditableCell, type EditableInputType, ITEM_TYPE_OPTIONS, useGreaterThan
 import { useColumnSearch } from "./ColumnSearchFilter";
 import { useMonthItemsMutations } from "./useMonthItemsMutations";
 import { ImportItemsModal } from "./ImportItemsModal";
+import { CategoryBadge } from "../../common/CategoryBadge";
+import { usePanelCategories } from "../../../hooks/useCategories";
 import type { PanelItem } from "./types";
 
 interface MonthItemsCardProps {
@@ -39,7 +41,7 @@ interface MonthItemsCardProps {
   onSearchChange?: (value: string) => void;
 }
 
-const INITIAL_FORM_VALUES = { itemType: "EXPENSE", description: "", value: 0 };
+const INITIAL_FORM_VALUES = { itemType: "EXPENSE", description: "", value: 0, categoryId: undefined };
 
 export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   formattedPeriod,
@@ -55,6 +57,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   const [editForm] = Form.useForm();
   const translate = useTranslate();
   const greaterThanZeroRule = useGreaterThanZeroRule();
+  const { categoryById, options: categoryOptions } = usePanelCategories();
   const descInputRef = useRef<RefSelectProps>(null);
   const searchInput = useRef<InputRef>(null);
 
@@ -91,7 +94,13 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
 
   const edit = useCallback(
     (record: Partial<PanelItem> & { key: React.Key }) => {
-      editForm.setFieldsValue({ description: "", value: "", itemType: "EXPENSE", ...record });
+      editForm.setFieldsValue({
+        description: "",
+        value: "",
+        itemType: "EXPENSE",
+        categoryId: undefined,
+        ...record,
+      });
       setEditingKey(`${record.key}`);
     },
     [editForm]
@@ -105,9 +114,10 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       title,
       inputType,
       locale,
+      categoryOptions,
       editing: `${record.key}` === editingKey,
     }),
-    [locale, editingKey]
+    [locale, categoryOptions, editingKey]
   );
   // end of editable cells
 
@@ -186,6 +196,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
   });
 
   const colDescription = translate("panel.items.column.description", "Description");
+  const colCategory = translate("panel.items.column.category", "Category");
   const colType = translate("panel.items.column.type", "Type");
   const colValue = translate("panel.items.column.value", "Value");
   const originManual = translate("panel.items.origin.manual", "Manual");
@@ -198,17 +209,26 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         key: "description",
         title: colDescription,
         dataIndex: "description",
-        width: "50%",
+        width: "38%",
         sorter: (a: PanelItem, b: PanelItem) => a.description.localeCompare(b.description),
         onCell: (record: PanelItem) => cellProps("description", colDescription, "text", record),
         ...getColumnSearchProps("description"),
         filteredValue: descFilter ? [descFilter] : null,
       },
       {
+        key: "categoryId",
+        title: colCategory,
+        dataIndex: "categoryId",
+        width: "22%",
+        ellipsis: true,
+        onCell: (record: PanelItem) => cellProps("categoryId", colCategory, "category", record),
+        render: (value: number | null) => <CategoryBadge category={value != null ? categoryById.get(value) : null} />,
+      },
+      {
         key: "itemType",
         title: colType,
         dataIndex: "itemType",
-        width: "10%",
+        width: "8%",
         onCell: (record: PanelItem) => cellProps("itemType", colType, "select", record),
         sorter: (a: PanelItem, b: PanelItem) => a.itemType.localeCompare(b.itemType),
         render: (record: string) => (
@@ -221,7 +241,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
         key: "value",
         title: colValue,
         dataIndex: "value",
-        width: "15%",
+        width: "17%",
         onCell: (record: PanelItem) => cellProps("value", colValue, "number", record),
         sorter: (a: PanelItem, b: PanelItem) => a.value - b.value,
         ...getColumnSearchProps("value", true),
@@ -274,6 +294,8 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
       editItem,
       deleteItem,
       colDescription,
+      colCategory,
+      categoryById,
       colType,
       colValue,
       originManual,
@@ -328,6 +350,15 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
               }}
             />
           </Form.Item>
+          <Form.Item name="categoryId">
+            <Select
+              allowClear
+              data-testid={"category"}
+              options={categoryOptions}
+              placeholder={translate("panel.items.column.category", "Category")}
+              style={{ width: 160 }}
+            />
+          </Form.Item>
         </Form>
         <Space direction="horizontal" size={12} wrap style={{ width: "100%" }}>
           <Button data-testid={"add-item"} type="primary" disabled={!accountId} onClick={() => addItem()}>
@@ -370,6 +401,7 @@ export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
             dataSource={tableData}
             size="small"
             pagination={false}
+            tableLayout="fixed"
             onChange={handleTableChange}
           />
         </Form>

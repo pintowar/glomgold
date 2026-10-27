@@ -6,6 +6,7 @@ export interface PanelItem {
   itemType: ItemType;
   value: number;
   origin?: ItemOrigin;
+  categoryId?: number | null;
 }
 
 export interface ItemBody {
@@ -14,6 +15,7 @@ export interface ItemBody {
   value: number;
   itemType?: ItemType;
   accountId?: number;
+  categoryId?: number | null;
 }
 
 export interface CsvColumnMapping {
