@@ -1,5 +1,6 @@
 package io.github.pintowar.glomgold.conf
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
@@ -12,12 +13,13 @@ import io.micronaut.runtime.server.event.ServerStartupEvent
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import mu.KLogging
 import java.math.BigDecimal
 import java.security.SecureRandom
 import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
+
+private val logger = KotlinLogging.logger {}
 
 @Singleton
 class SeedInitializer(
@@ -25,7 +27,7 @@ class SeedInitializer(
     env: Environment,
     private val userRepo: UserRepository,
     private val itemRepo: ItemRepository
-) : KLogging() {
+) {
     private val random = SecureRandom(randomSeed.toByteArray())
     private val isProd = env.activeNames.contains("prod")
     private val isDev = env.activeNames.contains("dev")
@@ -34,7 +36,7 @@ class SeedInitializer(
     @EventListener // does not support `suspend`
     fun onStartUp(e: ServerStartupEvent) {
         if (isProd || isDev) {
-            logger.info("starting data initialization at StartUpEvent: $e")
+            logger.info { "starting data initialization at StartUpEvent: $e" }
             runBlocking {
                 val allItems =
                     genUsers()
@@ -46,7 +48,7 @@ class SeedInitializer(
                             val items = genItems(user)
                             itemRepo.saveAll(items).toList()
                         }
-                logger.info("Data initialization is done!! Generated ${allItems.size} items.")
+                logger.info { "Data initialization is done!! Generated ${allItems.size} items." }
             }
         }
     }

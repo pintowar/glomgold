@@ -1,5 +1,6 @@
 package io.github.pintowar.glomgold.model
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.micronaut.core.annotation.ReflectiveAccess
 import io.micronaut.data.annotation.Index
 import io.micronaut.data.annotation.Indexes
@@ -10,11 +11,12 @@ import io.micronaut.data.model.naming.NamingStrategies.UnderScoreSeparatedLowerC
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-import mu.KLogging
 import org.mindrot.jbcrypt.BCrypt
 import java.security.SecureRandom
 import java.time.ZoneId
 import java.util.*
+
+private val logger = KotlinLogging.logger {}
 
 @ReflectiveAccess
 @Indexes(
@@ -34,7 +36,7 @@ data class User(
     @field:NotNull
     var timezone: ZoneId = ZoneId.systemDefault()
 ) : Entity() {
-    companion object : KLogging() {
+    companion object {
         private val secureRandom = SecureRandom()
     }
 
