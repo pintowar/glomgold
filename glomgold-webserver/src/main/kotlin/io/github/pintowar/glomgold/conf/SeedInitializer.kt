@@ -1,5 +1,6 @@
 package io.github.pintowar.glomgold.conf
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.pintowar.glomgold.model.Account
 import io.github.pintowar.glomgold.model.AccountDefaults
 import io.github.pintowar.glomgold.model.AccountType
@@ -18,22 +19,23 @@ import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import mu.KLogging
 import java.math.BigDecimal
 import java.security.SecureRandom
 import java.time.YearMonth
 import java.time.ZoneId
 import java.util.Locale
 
+private val logger = KotlinLogging.logger {}
+
 @Singleton
 class SeedInitializer(
     @Value("glomgold.random.seed") randomSeed: String,
     env: Environment,
     private val userRepo: UserRepository,
-    private val itemRepo: ItemRepository,
     private val accountRepo: AccountRepository,
+    private val itemRepo: ItemRepository,
     private val categorySeedService: CategorySeedService
-) : KLogging() {
+) {
     private val random = SecureRandom(randomSeed.toByteArray())
     private val isProd = env.activeNames.contains("prod")
     private val isDev = env.activeNames.contains("dev")
@@ -43,7 +45,7 @@ class SeedInitializer(
     @EventListener // does not support `suspend`
     fun onStartUp(e: ServerStartupEvent) {
         if (isProd || isDev) {
-            logger.info("starting data initialization at StartUpEvent: $e")
+            logger.info { "starting data initialization at StartUpEvent: $e" }
             runBlocking {
                 val allItems =
                     genUsers()
@@ -69,7 +71,7 @@ class SeedInitializer(
                                 )
                             itemRepo.saveAll(genItems(user, checking.id!!, creditCard.id!!)).toList()
                         }
-                logger.info("Data initialization is done!! Generated ${allItems.size} items.")
+                logger.info { "Data initialization is done!! Generated ${allItems.size} items." }
                 // Backfills defaults for users created before categories existed; no-op once seeded.
                 userRepo.findAll().toList().forEach { categorySeedService.seedDefaults(it) }
             }

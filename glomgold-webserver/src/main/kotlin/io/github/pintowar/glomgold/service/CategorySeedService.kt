@@ -1,5 +1,6 @@
 package io.github.pintowar.glomgold.service
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.pintowar.glomgold.model.Category
 import io.github.pintowar.glomgold.model.CategoryGroup
 import io.github.pintowar.glomgold.model.User
@@ -7,15 +8,16 @@ import io.github.pintowar.glomgold.repo.CategoryGroupRepository
 import io.github.pintowar.glomgold.repo.CategoryRepository
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.firstOrNull
-import mu.KLogging
 import tools.jackson.databind.JsonNode
 import tools.jackson.module.kotlin.jacksonObjectMapper
+
+private val logger = KotlinLogging.logger {}
 
 @Singleton
 class CategorySeedService(
     private val categoryGroupRepository: CategoryGroupRepository,
     private val categoryRepository: CategoryRepository
-) : KLogging() {
+) {
     private val mapper = jacksonObjectMapper()
 
     suspend fun seedDefaults(user: User) {

@@ -20,7 +20,6 @@ import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.github.pintowar.glomgold.service.ImportService
 import io.github.pintowar.glomgold.service.PanelService
-import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.MediaType
@@ -65,7 +64,7 @@ class PanelController(
         @QueryValue year: Int?,
         @QueryValue type: String?,
         @QueryValue accountId: Long?,
-        @QueryValue byCategory: Boolean?,
+        @QueryValue byCategory: Boolean?
     ): PanelAnnualReport {
         val currentYear = year ?: YearMonth.now().year
         val currentType = if (type in listOf("EXPENSE", "INCOME")) type else ""
