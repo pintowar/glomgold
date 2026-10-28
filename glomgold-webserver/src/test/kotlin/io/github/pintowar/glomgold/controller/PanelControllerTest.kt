@@ -388,10 +388,11 @@ interface PanelClient {
         @QueryValue period: String? = null
     ): HttpResponse<PanelInfo>
 
-    @Get("/yearly-report{?year}")
+    @Get("/yearly-report{?year,byCategory}")
     suspend fun report(
         @Header(HttpHeaders.COOKIE) auth: String,
-        @QueryValue year: Int? = null
+        @QueryValue year: Int? = null,
+        @QueryValue byCategory: Boolean? = null
     ): HttpResponse<PanelAnnualReport>
 
     @Post("/add-item")

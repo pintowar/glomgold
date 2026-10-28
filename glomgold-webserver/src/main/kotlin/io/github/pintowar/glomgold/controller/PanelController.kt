@@ -20,6 +20,7 @@ import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.github.pintowar.glomgold.service.ImportService
 import io.github.pintowar.glomgold.service.PanelService
+import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.MediaType
@@ -59,15 +60,22 @@ class PanelController(
         @QueryValue accountId: Long?
     ) = panelService.panelInfo(securityService.currentUserId(), period ?: YearMonth.now(), accountId)
 
-    @Get("/yearly-report{?year,type,accountId}")
+    @Get("/yearly-report{?year,type,accountId,byCategory}")
     suspend fun report(
         @QueryValue year: Int?,
         @QueryValue type: String?,
-        @QueryValue accountId: Long?
+        @QueryValue accountId: Long?,
+        @QueryValue byCategory: Boolean?,
     ): PanelAnnualReport {
         val currentYear = year ?: YearMonth.now().year
         val currentType = if (type in listOf("EXPENSE", "INCOME")) type else ""
-        return panelService.annualReport(securityService.currentUserId(), currentYear, currentType ?: "", accountId)
+        return panelService.annualReport(
+            securityService.currentUserId(),
+            currentYear,
+            currentType ?: "",
+            accountId,
+            byCategory ?: false
+        )
     }
 
     @Get("/overall-report{?accountId}")
