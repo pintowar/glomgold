@@ -29,7 +29,7 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.re
 kotlin-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
 kotlin-coroutines-reactive = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactive", version.ref = "kotlin-coroutines" }
 kotlin-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor", version.ref = "kotlin-coroutines" }
-kotlin-logging = { module = "io.github.microutils:kotlin-logging-jvm", version = "3.0.5" }
+kotlin-logging = { module = "io.github.oshai:kotlin-logging-jvm", version = "8.0.4" }
 
 micronaut-http-validation = { module = "io.micronaut:micronaut-http-validation" }
 micronaut-data-processor = { module = "io.micronaut.data:micronaut-data-processor" }
