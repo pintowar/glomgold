@@ -1,7 +1,5 @@
 package io.github.pintowar.glomgold.controller
 
-import io.github.pintowar.glomgold.dto.CategoryCommand
-import io.github.pintowar.glomgold.dto.CategoryGroupCommand
 import io.github.pintowar.glomgold.dto.ChangePassword
 import io.github.pintowar.glomgold.dto.CsvColumnMapping
 import io.github.pintowar.glomgold.dto.ImportPreviewResponse
@@ -11,10 +9,8 @@ import io.github.pintowar.glomgold.dto.PanelAnnualReport
 import io.github.pintowar.glomgold.dto.PanelOverallReport
 import io.github.pintowar.glomgold.dto.ProfileInfo
 import io.github.pintowar.glomgold.dto.UpdateProfile
-import io.github.pintowar.glomgold.dto.toCommand
 import io.github.pintowar.glomgold.model.ItemOrigin
 import io.github.pintowar.glomgold.repo.AccountRepository
-import io.github.pintowar.glomgold.repo.CategoryGroupRepository
 import io.github.pintowar.glomgold.repo.CategoryRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
@@ -48,7 +44,6 @@ class PanelController(
     private val itemRepository: ItemRepository,
     private val accountRepository: AccountRepository,
     private val categoryRepository: CategoryRepository,
-    private val categoryGroupRepository: CategoryGroupRepository,
     private val panelService: PanelService,
     private val importService: ImportService,
     private val securityService: SecurityService
@@ -122,14 +117,6 @@ class PanelController(
 
     @Get("/timezones")
     fun panelTimezones(): List<String> = ZoneId.getAvailableZoneIds().sorted()
-
-    @Get("/categories")
-    suspend fun categories(): List<CategoryCommand> =
-        categoryRepository.listScoped(securityService.currentUserId()).map { it.toCommand() }.toList()
-
-    @Get("/category-groups")
-    suspend fun categoryGroups(): List<CategoryGroupCommand> =
-        categoryGroupRepository.listScoped(securityService.currentUserId()).map { it.toCommand() }.toList()
 
     @Get("/item-complete{?description}")
     suspend fun itemComplete(

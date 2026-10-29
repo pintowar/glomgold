@@ -42,7 +42,14 @@ import { DashboardPage } from "./pages/admin/dashboard";
 import { Login } from "./pages/login";
 
 import { PanelLayout } from "./pages/panel/layout";
-import { ControlPanel, ReportPanel, ProfilePanel, OverallReportPanel, AccountsPanel } from "./pages/panel";
+import {
+  ControlPanel,
+  ReportPanel,
+  ProfilePanel,
+  OverallReportPanel,
+  AccountsPanel,
+  CategoriesPanel,
+} from "./pages/panel";
 
 import logoCollapsed from "./assets/images/glomgold-logo-collapsed.png";
 
@@ -226,6 +233,7 @@ function InnerApp() {
           <Route path="yearly-report" element={<ReportPanel />} />
           <Route path="overall-report" element={<OverallReportPanel />} />
           <Route path="accounts" element={<AccountsPanel />} />
+          <Route path="categories" element={<CategoriesPanel />} />
           <Route path="profile" element={<ProfilePanel />} />
         </Route>
         <Route

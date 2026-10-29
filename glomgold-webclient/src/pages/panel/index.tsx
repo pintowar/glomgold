@@ -3,3 +3,4 @@ export { ReportPanel } from "./yearly-report";
 export { ProfilePanel } from "./profile";
 export { OverallReportPanel } from "./overall-report";
 export { AccountsPanel } from "./accounts";
+export { CategoriesPanel } from "./categories";
