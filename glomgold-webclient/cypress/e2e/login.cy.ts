@@ -24,8 +24,14 @@ describe("Login Tests", () => {
 
       cy.url().should("include", "/panel");
       cy.get(".ant-layout-header").contains("Painel");
-      cy.get(".ant-layout-header").contains("Relatório Anual");
-      cy.get(".ant-layout-header").contains("Relatório Geral");
+      cy.get(".ant-layout-header").contains("Relatórios");
+
+      // Reports live in a submenu, so the entries only render once it is opened.
+      cy.get(".ant-layout-header .ant-menu-submenu-title").contains("Relatórios").trigger("mouseover");
+      cy.get(".ant-menu-submenu-popup")
+        .should("be.visible")
+        .and("contain", "Relatório Anual")
+        .and("contain", "Relatório Geral");
 
       cy.get(".ant-card").should("have.length", 4);
 

@@ -23,7 +23,7 @@ import {
   Table,
   Typography,
 } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import type { ICategory, ICategoryGroup, ICategoryUsage } from "../../../interfaces";
 import { CategoryBadge } from "../../../components/common/CategoryBadge";
@@ -75,22 +75,15 @@ const CategoryDeleteButton: React.FC<{ record: ICategory; candidates: ICategory[
   };
 
   return (
-    <>
-      <Button size="small" danger icon={<DeleteOutlined />} data-cy="remove-category" onClick={() => setOpen(true)} />
-      <Modal
-        open={open}
-        title={translate("panel.category.remove", "Remove category")}
-        onCancel={() => setOpen(false)}
-        onOk={confirm}
-        okButtonProps={{ danger: true, disabled: query.isLoading || (itemCount > 0 && !target) }}
-        confirmLoading={query.isLoading}
-        okText={translate("panel.profile.save", "Save")}
-        cancelText={translate("panel.items.importCancel", "Cancel")}
-      >
-        {query.isLoading ? (
+    <Popconfirm
+      open={open}
+      onOpenChange={setOpen}
+      title={translate("panel.category.remove", "Remove category")}
+      description={
+        query.isLoading ? (
           <Spin />
         ) : itemCount === 0 ? (
-          <Typography.Text>{translate("panel.category.confirmRemove", "Sure to remove?")}</Typography.Text>
+          translate("panel.category.confirmRemove", "Sure to remove?")
         ) : (
           <Space direction="vertical" style={{ width: "100%" }}>
             <Typography.Text>
@@ -104,12 +97,21 @@ const CategoryDeleteButton: React.FC<{ record: ICategory; candidates: ICategory[
               style={{ width: "100%" }}
               value={target}
               onChange={setTarget}
+              getPopupContainer={(trigger) => trigger.parentElement ?? document.body}
               options={candidates.map((c) => ({ value: c.id, label: <CategoryBadge category={c} /> }))}
             />
           </Space>
-        )}
-      </Modal>
-    </>
+        )
+      }
+      onConfirm={confirm}
+      okButtonProps={{ disabled: query.isLoading || (itemCount > 0 && !target) }}
+      okText={translate("panel.profile.save", "Save")}
+      cancelText={translate("panel.items.importCancel", "Cancel")}
+    >
+      <Button size="small" danger data-cy="remove-category">
+        <DeleteOutlined />
+      </Button>
+    </Popconfirm>
   );
 };
 
@@ -273,7 +275,7 @@ export const CategoriesPanel: React.FC = () => {
             render={(_, category: ICategory) => (
               <Space>
                 <Button size="small" data-cy="edit-category" onClick={() => openCategoryEdit(category)}>
-                  {translate("panel.category.edit", "Edit")}
+                  <EditOutlined />
                 </Button>
                 <CategoryDeleteButton record={category} candidates={categories.filter((c) => c.id !== category.id)} />
               </Space>
@@ -303,7 +305,7 @@ export const CategoriesPanel: React.FC = () => {
             render={(_, group: ICategoryGroup) => (
               <Space>
                 <Button size="small" data-cy="edit-category-group" onClick={() => openGroupEdit(group)}>
-                  {translate("panel.category.edit", "Edit")}
+                  <EditOutlined />
                 </Button>
                 <Popconfirm
                   title={translate(
@@ -315,7 +317,7 @@ export const CategoriesPanel: React.FC = () => {
                   cancelText={translate("panel.items.importCancel", "Cancel")}
                 >
                   <Button size="small" danger data-cy="remove-category-group">
-                    {translate("panel.category.group.remove", "Remove group")}
+                    <DeleteOutlined />
                   </Button>
                 </Popconfirm>
               </Space>
