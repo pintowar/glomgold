@@ -58,6 +58,7 @@ export const useMonthItemsMutations = ({
         description: row.description,
         value: row.value,
         itemType: row.itemType,
+        categoryId: row.categoryId ?? null,
       };
       const options = {
         onSuccess: () => {
@@ -148,6 +149,7 @@ export const useMonthItemsMutations = ({
         itemType: it.itemType,
         value: it.value,
         accountId,
+        categoryId: it.categoryId ?? null,
       })),
       successNotification: successPayload(
         translate("panel.items.replicated", "Items were successfully replicated to the next month")

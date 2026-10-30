@@ -119,6 +119,7 @@ describe("Panel Tests", () => {
             value: itemValue,
             itemType: "EXPENSE",
             accountId: 1,
+            categoryId: null,
           });
         });
       });
@@ -184,6 +185,7 @@ describe("Panel Tests", () => {
               itemType: "EXPENSE",
               value: 100,
               accountId: 1,
+              categoryId: null,
             },
             {
               period: "2023-09",
@@ -191,6 +193,7 @@ describe("Panel Tests", () => {
               itemType: "EXPENSE",
               value: 4000,
               accountId: 1,
+              categoryId: null,
             },
           ]);
       });

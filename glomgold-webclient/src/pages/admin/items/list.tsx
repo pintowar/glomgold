@@ -10,9 +10,11 @@ import { SearchOutlined } from "@ant-design/icons";
 import { IAccount, IItem, IUser } from "../../../interfaces";
 import { ITEM_ORIGINS } from "../../../constants";
 import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
+import { CategoryBadge } from "../../../components/common/CategoryBadge";
 import { ResourceActions } from "../../../components/common/ResourceActions";
 import { useUserSelect } from "../../../hooks/useUserSelect";
 import { useAccountSelect } from "../../../hooks/useAccountSelect";
+import { useCategories } from "../../../hooks/useCategories";
 
 export const ItemList: React.FC<IResourceComponentsProps> = () => {
   const importProps = useImport<IItem>();
@@ -91,6 +93,7 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
   );
 
   const { selectProps: userSelectProps } = useUserSelect();
+  const { categoryById } = useCategories();
 
   return (
     <Row gutter={[16, 16]}>
@@ -133,6 +136,11 @@ export const ItemList: React.FC<IResourceComponentsProps> = () => {
               )}
             />
             <Table.Column dataIndex="description" title="Description" />
+            <Table.Column
+              dataIndex="categoryId"
+              title="Category"
+              render={(value) => <CategoryBadge category={value != null ? categoryById.get(value) : null} />}
+            />
             <Table.Column dataIndex="value" title="Value" />
             <Table.Column dataIndex="year" title="Year" />
             <Table.Column dataIndex="month" title="Month" />

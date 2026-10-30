@@ -2,6 +2,8 @@ package io.github.pintowar.glomgold.controller
 
 import io.github.pintowar.glomgold.dto.BalancePercent
 import io.github.pintowar.glomgold.dto.BalanceSummary
+import io.github.pintowar.glomgold.dto.CategoryCommand
+import io.github.pintowar.glomgold.dto.CategoryGroupCommand
 import io.github.pintowar.glomgold.dto.ItemBody
 import io.github.pintowar.glomgold.dto.PanelAnnualReport
 import io.github.pintowar.glomgold.dto.PanelInfo
@@ -9,10 +11,14 @@ import io.github.pintowar.glomgold.dto.ProfileInfo
 import io.github.pintowar.glomgold.dto.UpdateProfile
 import io.github.pintowar.glomgold.model.Account
 import io.github.pintowar.glomgold.model.AccountType
+import io.github.pintowar.glomgold.model.Category
+import io.github.pintowar.glomgold.model.CategoryGroup
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemType
 import io.github.pintowar.glomgold.model.User
 import io.github.pintowar.glomgold.repo.AccountRepository
+import io.github.pintowar.glomgold.repo.CategoryGroupRepository
+import io.github.pintowar.glomgold.repo.CategoryRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.assertions.throwables.shouldThrow
@@ -48,6 +54,8 @@ class PanelControllerTest(
     private val userRepo: UserRepository,
     private val accountRepo: AccountRepository,
     private val itemRepo: ItemRepository,
+    private val categoryRepo: CategoryRepository,
+    private val groupRepo: CategoryGroupRepository,
     private val authClient: AuthClient,
     private val panelClient: PanelClient
 ) : DescribeSpec({
@@ -57,6 +65,8 @@ class PanelControllerTest(
 
         beforeSpec {
             itemRepo.deleteAll()
+            categoryRepo.deleteAll()
+            groupRepo.deleteAll()
             accountRepo.deleteAll()
             userRepo.deleteAll()
             val userList =
@@ -344,6 +354,30 @@ class PanelControllerTest(
                 (timezones.body.get().isNotEmpty()) shouldBe true
             }
         }
+
+        describe("panel operations - categories") {
+            it("returns only the logged user's categories and groups") {
+                val adminId = users.getValue("admin").id!!
+                val donaldId = users.getValue("donald").id!!
+                categoryRepo.save(Category("Admin category", userId = adminId))
+                categoryRepo.save(Category("Donald category", userId = donaldId))
+                groupRepo.save(CategoryGroup("Admin group", userId = adminId))
+                groupRepo.save(CategoryGroup("Donald group", userId = donaldId))
+
+                val donaldToken = authCookie(authClient, "donald")
+
+                panelClient
+                    .categories(donaldToken)
+                    .body
+                    .get()
+                    .map { it.name } shouldBe listOf("Donald category")
+                panelClient
+                    .categoryGroups(donaldToken)
+                    .body
+                    .get()
+                    .map { it.name } shouldBe listOf("Donald group")
+            }
+        }
     })
 
 @Client("/api/panel")
@@ -354,10 +388,11 @@ interface PanelClient {
         @QueryValue period: String? = null
     ): HttpResponse<PanelInfo>
 
-    @Get("/yearly-report{?year}")
+    @Get("/yearly-report{?year,byCategory}")
     suspend fun report(
         @Header(HttpHeaders.COOKIE) auth: String,
-        @QueryValue year: Int? = null
+        @QueryValue year: Int? = null,
+        @QueryValue byCategory: Boolean? = null
     ): HttpResponse<PanelAnnualReport>
 
     @Post("/add-item")
@@ -405,4 +440,14 @@ interface PanelClient {
     suspend fun timezones(
         @Header(HttpHeaders.COOKIE) auth: String
     ): HttpResponse<List<String>>
+
+    @Get("/categories")
+    suspend fun categories(
+        @Header(HttpHeaders.COOKIE) auth: String
+    ): HttpResponse<List<CategoryCommand>>
+
+    @Get("/category-groups")
+    suspend fun categoryGroups(
+        @Header(HttpHeaders.COOKIE) auth: String
+    ): HttpResponse<List<CategoryGroupCommand>>
 }

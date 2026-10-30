@@ -16,5 +16,13 @@
 // Import commands.js using ES2015 syntax:
 import "./commands";
 
+// Categories and groups are loaded by the panel and by item forms. Specs that do not
+// stub them would otherwise hit the real API unauthenticated, and a 401 clears the
+// session and bounces the test back to /login.
+beforeEach(() => {
+  cy.intercept("GET", /\/api\/(panel\/)?category-groups.*/, { statusCode: 200, body: [] });
+  cy.intercept("GET", /\/api\/(panel\/)?categories.*/, { statusCode: 200, body: [] });
+});
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

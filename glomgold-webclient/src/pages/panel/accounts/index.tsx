@@ -6,6 +6,7 @@ import { ACCOUNT_TYPES, type AccountType } from "../../../constants";
 import type { IAccount } from "../../../interfaces";
 import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
 import { errorPayload, successPayload } from "../../../utils/notify";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 const RESOURCE = "panel-accounts";
 
@@ -101,7 +102,7 @@ export const AccountsPanel: React.FC = () => {
             render={(_, account: IAccount) => (
               <Space>
                 <Button size="small" data-cy="edit-account" onClick={() => openEdit(account)}>
-                  {translate("panel.account.edit", "Edit")}
+                  <EditOutlined />
                 </Button>
                 <Popconfirm
                   title={translate(
@@ -113,7 +114,7 @@ export const AccountsPanel: React.FC = () => {
                   cancelText={translate("panel.items.importCancel", "Cancel")}
                 >
                   <Button size="small" danger data-cy="remove-account">
-                    {translate("panel.account.remove", "Remove")}
+                    <DeleteOutlined />
                   </Button>
                 </Popconfirm>
               </Space>

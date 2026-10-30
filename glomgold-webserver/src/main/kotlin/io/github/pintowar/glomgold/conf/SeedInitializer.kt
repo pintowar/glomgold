@@ -10,6 +10,7 @@ import io.github.pintowar.glomgold.model.User
 import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
+import io.github.pintowar.glomgold.service.CategorySeedService
 import io.micronaut.context.annotation.Value
 import io.micronaut.context.env.Environment
 import io.micronaut.runtime.event.annotation.EventListener
@@ -32,7 +33,8 @@ class SeedInitializer(
     env: Environment,
     private val userRepo: UserRepository,
     private val accountRepo: AccountRepository,
-    private val itemRepo: ItemRepository
+    private val itemRepo: ItemRepository,
+    private val categorySeedService: CategorySeedService
 ) {
     private val random = SecureRandom(randomSeed.toByteArray())
     private val isProd = env.activeNames.contains("prod")
@@ -70,6 +72,8 @@ class SeedInitializer(
                             itemRepo.saveAll(genItems(user, checking.id!!, creditCard.id!!)).toList()
                         }
                 logger.info { "Data initialization is done!! Generated ${allItems.size} items." }
+                // Backfills defaults for users created before categories existed; no-op once seeded.
+                userRepo.findAll().toList().forEach { categorySeedService.seedDefaults(it) }
             }
         }
     }
