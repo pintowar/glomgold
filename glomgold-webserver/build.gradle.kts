@@ -75,6 +75,10 @@ application {
     applicationDefaultJvmArgs = defaultJvmArgs
 }
 
+jacoco {
+    toolVersion = libs.versions.jacoco.get()
+}
+
 tasks.test {
     jvmArgs = defaultJvmArgs.filterNot { it.contains("micronaut.environments") }
     useJUnitPlatform()
@@ -191,6 +195,7 @@ micronaut {
     aot {
         // Please review carefully the optimizations enabled below
         // Check https://micronaut-projects.github.io/micronaut-aot/latest/guide/ for more details
+        version.set(libs.versions.micro.aot.get())
         optimizeServiceLoading.set(false)
         convertYamlToJava.set(false)
         precomputeOperations.set(true)
@@ -203,6 +208,7 @@ micronaut {
 }
 
 ktlint {
+    version.set(libs.versions.ktlint.get())
     verbose.set(true)
     outputToConsole.set(true)
     coloredOutput.set(true)
