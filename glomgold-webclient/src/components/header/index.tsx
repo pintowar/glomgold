@@ -9,10 +9,13 @@ import {
   SettingOutlined,
   DollarOutlined,
   DownOutlined,
+  AuditOutlined,
+  ControlOutlined,
   LineChartOutlined,
   BarChartOutlined,
   BankOutlined,
   LogoutOutlined,
+  TagsOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 
@@ -29,6 +32,8 @@ function menuKeyFromUrl(pathname: string): string {
     return "menu-overall-report";
   } else if (pathname.includes("report")) {
     return "menu-report";
+  } else if (pathname.includes("categories")) {
+    return "menu-categories";
   } else if (pathname.includes("accounts")) {
     return "menu-accounts";
   } else if (pathname.includes("profile")) {
@@ -66,19 +71,39 @@ export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({ sticky }) => {
         icon: <DollarOutlined />,
       },
       {
-        key: "menu-report",
-        label: <Link to={"/panel/yearly-report"}>{translate("header.menu.yearlyReport", "Yearly Report")}</Link>,
-        icon: <LineChartOutlined />,
+        key: "menu-setup",
+        label: translate("header.menu.setup", "Setup"),
+        icon: <ControlOutlined />,
+        children: [
+          {
+            key: "menu-accounts",
+            label: <Link to={"/panel/accounts"}>{translate("header.menu.accounts", "Account")}</Link>,
+            icon: <BankOutlined />,
+          },
+          {
+            key: "menu-categories",
+            label: <Link to={"/panel/categories"}>{translate("header.menu.categories", "Category")}</Link>,
+            icon: <TagsOutlined />,
+          },
+        ],
       },
+
       {
-        key: "menu-overall-report",
-        label: <Link to={"/panel/overall-report"}>{translate("header.menu.overallReport", "Overall Report")}</Link>,
-        icon: <BarChartOutlined />,
-      },
-      {
-        key: "menu-accounts",
-        label: <Link to={"/panel/accounts"}>{translate("header.menu.accounts", "Account")}</Link>,
-        icon: <BankOutlined />,
+        key: "menu-reports",
+        label: translate("header.menu.reports", "Reports"),
+        icon: <AuditOutlined />,
+        children: [
+          {
+            key: "menu-report",
+            label: <Link to={"/panel/yearly-report"}>{translate("header.menu.yearlyReport", "Yearly Report")}</Link>,
+            icon: <LineChartOutlined />,
+          },
+          {
+            key: "menu-overall-report",
+            label: <Link to={"/panel/overall-report"}>{translate("header.menu.overallReport", "Overall Report")}</Link>,
+            icon: <BarChartOutlined />,
+          },
+        ],
       },
       ...(isAdmin
         ? [

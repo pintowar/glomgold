@@ -10,6 +10,32 @@ export interface IItem {
   month: number;
   userId: number;
   accountId: number;
+  categoryId?: number | null;
+}
+
+export interface ICategory {
+  id: number;
+  version: number;
+  name: string;
+  color: string;
+  isSystem: boolean;
+  userId: number;
+  groupId?: number | null;
+}
+
+export interface ICategoryGroup {
+  id: number;
+  version: number;
+  name: string;
+  color: string;
+  position: number;
+  isSystem: boolean;
+  userId: number;
+}
+
+export interface ICategoryUsage {
+  categoryId: number;
+  itemCount: number;
 }
 
 export interface IAccount {

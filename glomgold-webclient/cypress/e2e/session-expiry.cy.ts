@@ -60,6 +60,8 @@ describe("Session Expiry", () => {
     // Shadow every panel call once logged in, so no stale 401 can fire again.
     cy.intercept("GET", /\/api\/panel/, { fixture: "panel/control-empty.json" });
     cy.intercept("GET", /\/api\/panel\/accounts/, { fixture: "panel/accounts.json" });
+    cy.intercept("GET", /\/api\/panel\/categories/, { statusCode: 200, body: [] });
+    cy.intercept("GET", /\/api\/panel\/category-groups/, { statusCode: 200, body: [] });
     login("donald", "123123");
 
     cy.url().should("include", "/#/panel");

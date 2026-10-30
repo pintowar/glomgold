@@ -9,6 +9,7 @@ import { ITEM_TYPES } from "../../../constants";
 import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
 import { useUserSelect } from "../../../hooks/useUserSelect";
 import { useAccountSelect } from "../../../hooks/useAccountSelect";
+import { useCategories } from "../../../hooks/useCategories";
 
 export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
   const { form, formProps, saveButtonProps, query } = useForm<IItem>({
@@ -19,6 +20,7 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
   const [userId, setUserId] = useState<number | undefined>();
   const { selectProps: userSelectProps } = useUserSelect(postData?.userId);
   const { selectProps: accountSelectProps } = useAccountSelect(userId ?? postData?.userId);
+  const { options: categoryOptions } = useCategories(userId ?? postData?.userId);
 
   return (
     <Edit saveButtonProps={saveButtonProps}>
@@ -111,6 +113,9 @@ export const ItemEdit: React.FC<IResourceComponentsProps> = () => {
           ]}
         >
           <Select {...accountSelectProps} />
+        </Form.Item>
+        <Form.Item label="Category" name="categoryId">
+          <Select allowClear options={categoryOptions} />
         </Form.Item>
       </Form>
     </Edit>

@@ -24,7 +24,7 @@ fun fakeItems(
                 typeGenerator { (faker.random.nextDouble() * 100).toBigDecimal().setScale(2, RoundingMode.HALF_UP) }
                 typeGenerator { YearMonth.now().plusMonths(faker.random.nextLong(24)) }
                 typeGenerator { userId }
-            }.copy(userId = userId, accountId = accountId)
+            }.copy(userId = userId, accountId = accountId, categoryId = null)
     }
 }
 

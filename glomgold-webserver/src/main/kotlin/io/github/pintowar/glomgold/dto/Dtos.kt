@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.Nulls
 import io.github.pintowar.glomgold.model.Account
 import io.github.pintowar.glomgold.model.AccountType
+import io.github.pintowar.glomgold.model.Category
+import io.github.pintowar.glomgold.model.CategoryGroup
 import io.github.pintowar.glomgold.model.Item
 import io.github.pintowar.glomgold.model.ItemOrigin
 import io.github.pintowar.glomgold.model.ItemType
@@ -20,6 +22,7 @@ import io.micronaut.http.annotation.QueryValue
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Pattern
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
@@ -134,7 +137,8 @@ data class ItemBody(
     val description: String,
     val value: BigDecimal,
     val itemType: ItemType,
-    val accountId: Long? = null
+    val accountId: Long? = null,
+    val categoryId: Long? = null
 ) {
     fun toItem(
         userId: Long,
@@ -146,7 +150,8 @@ data class ItemBody(
         period,
         userId,
         accountId,
-        ItemOrigin.MANUAL
+        ItemOrigin.MANUAL,
+        categoryId
     )
 }
 
@@ -235,14 +240,23 @@ data class ItemCommand(
     @field:NotNull val month: Int,
     @field:NotNull val userId: Long,
     @field:NotNull val accountId: Long,
-    val origin: ItemOrigin = ItemOrigin.MANUAL
+    val origin: ItemOrigin = ItemOrigin.MANUAL,
+    val categoryId: Long? = null
 ) {
     fun toItem() =
-        Item(description, BigDecimal.valueOf(value), itemType, YearMonth.of(year, month), userId, accountId, origin)
-            .apply {
-                id = this@ItemCommand.id
-                version = this@ItemCommand.version
-            }
+        Item(
+            description,
+            BigDecimal.valueOf(value),
+            itemType,
+            YearMonth.of(year, month),
+            userId,
+            accountId,
+            origin,
+            categoryId
+        ).apply {
+            id = this@ItemCommand.id
+            version = this@ItemCommand.version
+        }
 }
 
 fun Item.toCommand() =
@@ -256,7 +270,8 @@ fun Item.toCommand() =
         this.period.monthValue,
         this.userId,
         this.accountId,
-        this.origin
+        this.origin,
+        this.categoryId
     )
 
 @ReflectiveAccess
@@ -299,3 +314,70 @@ fun User.toCommand() =
         this.locale,
         this.timezone
     )
+
+@ReflectiveAccess
+@Introspected
+data class CategoryGroupCommand(
+    val id: Long? = null,
+    val version: Int? = null,
+    @field:NotBlank var name: String,
+    @field:Pattern(regexp = "^#[0-9A-Fa-f]{6}$") var color: String = "#6B7280",
+    var position: Int = 0,
+    var isSystem: Boolean = false,
+    var userId: Long? = null
+) {
+    fun toCategoryGroup(userId: Long) =
+        CategoryGroup(name.trim(), color, position, isSystem, userId)
+            .apply {
+                id = this@CategoryGroupCommand.id
+                version = this@CategoryGroupCommand.version
+            }
+}
+
+fun CategoryGroup.toCommand() =
+    CategoryGroupCommand(
+        this.id,
+        this.version,
+        this.name,
+        this.color,
+        this.position,
+        this.isSystem,
+        this.userId
+    )
+
+@ReflectiveAccess
+@Introspected
+data class CategoryCommand(
+    val id: Long? = null,
+    val version: Int? = null,
+    @field:NotBlank var name: String,
+    @field:Pattern(regexp = "^#[0-9A-Fa-f]{6}$") var color: String = "#6B7280",
+    var isSystem: Boolean = false,
+    var userId: Long? = null,
+    var groupId: Long? = null
+) {
+    fun toCategory(userId: Long) =
+        Category(name.trim(), color, isSystem, userId, groupId)
+            .apply {
+                id = this@CategoryCommand.id
+                version = this@CategoryCommand.version
+            }
+}
+
+fun Category.toCommand() =
+    CategoryCommand(
+        this.id,
+        this.version,
+        this.name,
+        this.color,
+        this.isSystem,
+        this.userId,
+        this.groupId
+    )
+
+@ReflectiveAccess
+@Introspected
+data class CategoryUsage(
+    val categoryId: Long,
+    val itemCount: Long
+)

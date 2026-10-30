@@ -9,6 +9,7 @@ import { ITEM_TYPES } from "../../../constants";
 import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
 import { useUserSelect } from "../../../hooks/useUserSelect";
 import { useAccountSelect } from "../../../hooks/useAccountSelect";
+import { useCategories } from "../../../hooks/useCategories";
 
 export const ItemCreate: React.FC<IResourceComponentsProps> = () => {
   const { form, formProps, saveButtonProps } = useForm<IItem>({
@@ -17,6 +18,7 @@ export const ItemCreate: React.FC<IResourceComponentsProps> = () => {
   const [userId, setUserId] = useState<number | undefined>();
   const { selectProps: userSelectProps } = useUserSelect();
   const { selectProps: accountSelectProps } = useAccountSelect(userId);
+  const { options: categoryOptions } = useCategories(userId);
 
   return (
     <Create saveButtonProps={saveButtonProps}>
@@ -103,6 +105,9 @@ export const ItemCreate: React.FC<IResourceComponentsProps> = () => {
           ]}
         >
           <Select {...accountSelectProps} disabled={!userId} />
+        </Form.Item>
+        <Form.Item label="Category" name="categoryId">
+          <Select allowClear options={categoryOptions} disabled={!userId} />
         </Form.Item>
       </Form>
     </Create>

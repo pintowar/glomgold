@@ -1,8 +1,7 @@
 import React, { useMemo } from "react";
 
-import { Row, Col, Card, Space, DatePicker, Tabs, Skeleton, Select } from "antd";
+import { Row, Col, Card, Space, DatePicker, Tabs, Skeleton, Select, Switch } from "antd";
 import { CalculatorOutlined, LineChartOutlined, TableOutlined } from "@ant-design/icons";
-
 import dayjs from "dayjs";
 
 import { ItemChart, PeriodChart, SummaryTable } from "../../../components/panel/report";
@@ -21,14 +20,14 @@ export const ReportPanel: React.FC = () => {
   const periodParam = "period";
   const typeParam = "type";
   const accountParam = "account";
-
+  const byCategoryParam = "byCategory";
   const { accounts } = usePanelAccounts();
   const { searchParams, updateSearchParams } = usePanelSearchParams();
   const period = searchParams.get(periodParam) ?? dayjs().format(periodFormat);
   const type = (searchParams.get(typeParam) ?? "BALANCE") as ReportType;
   const accountValue = searchParams.get(accountParam);
   const accountId = accountValue ? Number(accountValue) : undefined;
-
+  const byCategory = searchParams.get(byCategoryParam) === "true";
   const currentPeriod = useMemo(() => dayjs(period, periodFormat), [period, periodFormat]);
 
   const {
@@ -38,7 +37,7 @@ export const ReportPanel: React.FC = () => {
   } = useCustom<IPanelAnnualReport>({
     url: `/api/panel/yearly-report`,
     method: "get",
-    config: { query: { year: currentPeriod.year(), type, accountId } },
+    config: { query: { year: currentPeriod.year(), type, accountId, byCategory: byCategory } },
   });
 
   const onChangePeriod = (date: dayjs.Dayjs | null) => {
@@ -57,6 +56,9 @@ export const ReportPanel: React.FC = () => {
     updateSearchParams({ account: value !== undefined ? `${value}` : undefined });
   };
 
+  const onGroupByCategoryChange = (checked: boolean) => {
+    updateSearchParams({ [byCategoryParam]: checked ? "true" : undefined });
+  };
   const tabsItems = useMemo(
     () => [
       {
@@ -148,6 +150,14 @@ export const ReportPanel: React.FC = () => {
                     placeholder={translate("panel.account.all", "All accounts")}
                     options={accounts.map((account) => ({ value: account.id, label: account.name }))}
                   />
+                </Col>
+                <Col>
+                  <Switch
+                    data-testid="report-group-by-category"
+                    checked={byCategory}
+                    onChange={onGroupByCategoryChange}
+                  />
+                  {translate("panel.report.groupByCategory", " by category")}{" "}
                 </Col>
                 <Col span={14} />
               </Row>

@@ -56,6 +56,12 @@ micronaut:
       - pattern: /api/items/**
         access:
           - ROLE_ADMIN
+      - pattern: /api/categories/**
+        access:
+          - ROLE_ADMIN
+      - pattern: /api/category-groups/**
+        access:
+          - ROLE_ADMIN
       - pattern: /api/management/health
         access: isAnonymous()
       - pattern: /api/management/**

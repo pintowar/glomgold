@@ -88,12 +88,13 @@ export const ControlPanel: React.FC = () => {
 
   const tableData = useMemo(
     () =>
-      (panelData?.data?.items ?? []).map(({ id, description, value, itemType, origin }) => ({
+      (panelData?.data?.items ?? []).map(({ id, description, value, itemType, origin, categoryId }) => ({
         key: id,
         description,
         itemType,
         value,
         origin,
+        categoryId,
       })),
     [panelData?.data?.items]
   );

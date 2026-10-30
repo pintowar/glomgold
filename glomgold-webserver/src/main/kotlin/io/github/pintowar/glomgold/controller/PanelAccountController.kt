@@ -14,35 +14,34 @@ import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Patch
 import io.micronaut.http.annotation.PathVariable
 import io.micronaut.http.annotation.Post
-import io.micronaut.security.authentication.Authentication
+import io.micronaut.security.utils.SecurityService
 import kotlinx.coroutines.flow.toList
 
 @Controller("/api/panel/accounts")
 class PanelAccountController(
     private val accountRepository: AccountRepository,
     private val userRepository: UserRepository,
-    private val itemRepository: ItemRepository
+    private val itemRepository: ItemRepository,
+    private val securityService: SecurityService
 ) {
-    private fun authId(auth: Authentication): Long = auth.attributes["userId"] as Long
-
     @Get("/")
-    suspend fun index(auth: Authentication): List<AccountCommand> =
-        accountRepository.findByUserIdOrderByIdAsc(authId(auth)).toList().map { it.toCommand() }
+    suspend fun index(): List<AccountCommand> =
+        accountRepository.findByUserIdOrderByIdAsc(securityService.currentUserId()).toList().map { it.toCommand() }
 
     @Get("/{id}")
     suspend fun read(
-        auth: Authentication,
         @PathVariable id: Long
     ): HttpResponse<AccountCommand> =
-        accountRepository.findByIdAndUserId(id, authId(auth))?.let { HttpResponse.ok(it.toCommand()) }
+        accountRepository
+            .findByIdAndUserId(id, securityService.currentUserId())
+            ?.let { HttpResponse.ok(it.toCommand()) }
             ?: HttpResponse.notFound()
 
     @Post("/")
     suspend fun create(
-        auth: Authentication,
         @Body dto: AccountCommand
     ): HttpResponse<AccountCommand> {
-        val userId = authId(auth)
+        val userId = securityService.currentUserId()
         return userRepository.findById(userId)?.let { user ->
             val currency = dto.currency.trim().ifEmpty { AccountDefaults.defaultCurrency(user.locale) }
             val account =
@@ -57,11 +56,10 @@ class PanelAccountController(
 
     @Patch("/{id}")
     suspend fun update(
-        auth: Authentication,
         @PathVariable id: Long,
         @Body dto: AccountCommand
     ): HttpResponse<AccountCommand> =
-        accountRepository.findByIdAndUserId(id, authId(auth))?.let { account ->
+        accountRepository.findByIdAndUserId(id, securityService.currentUserId())?.let { account ->
             account.name = dto.name.trim()
             account.type = dto.type
             dto.currency
@@ -74,10 +72,9 @@ class PanelAccountController(
 
     @Delete("/{id}")
     suspend fun delete(
-        auth: Authentication,
         @PathVariable id: Long
     ): HttpResponse<Unit> =
-        accountRepository.findByIdAndUserId(id, authId(auth))?.let { account ->
+        accountRepository.findByIdAndUserId(id, securityService.currentUserId())?.let { account ->
             itemRepository.deleteByAccountId(account.id!!)
             accountRepository.delete(account)
             HttpResponse.ok()

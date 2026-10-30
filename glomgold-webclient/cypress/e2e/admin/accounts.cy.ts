@@ -47,6 +47,10 @@ describe("Admin Accounts Tests", () => {
   });
 
   it("Filters by type and currency", () => {
+    cy.intercept("GET", "/api/accounts?*type=*", (req) => {
+      req.reply({ body: [accounts[1]], statusCode: 200 });
+    }).as("filteredAccounts");
+
     cy.visit("/#/admin/accounts");
     cy.wait("@accounts");
 
@@ -58,9 +62,9 @@ describe("Admin Accounts Tests", () => {
     cy.get("#type").click();
     cy.get(".ant-select-dropdown:visible .ant-select-item-option").contains("Credit Card").click();
     cy.get("#currency").type("usd");
-    cy.get("button.ant-btn-primary").click();
+    cy.get("form button.ant-btn-primary").click();
 
-    cy.wait("@accounts").its("request.query").should("include", { type: "CREDIT_CARD", currency: "USD" });
+    cy.wait("@filteredAccounts").its("request.query").should("deep.include", { type: "CREDIT_CARD", currency: "USD" });
   });
 
   it("Create form renders fields and submits", () => {

@@ -11,6 +11,7 @@ import io.github.pintowar.glomgold.dto.ProfileInfo
 import io.github.pintowar.glomgold.dto.UpdateProfile
 import io.github.pintowar.glomgold.model.ItemOrigin
 import io.github.pintowar.glomgold.repo.AccountRepository
+import io.github.pintowar.glomgold.repo.CategoryRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.github.pintowar.glomgold.service.ImportService
@@ -29,7 +30,7 @@ import io.micronaut.http.annotation.PathVariable
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.annotation.QueryValue
 import io.micronaut.http.multipart.CompletedFileUpload
-import io.micronaut.security.authentication.Authentication
+import io.micronaut.security.utils.SecurityService
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.toSet
@@ -42,40 +43,43 @@ class PanelController(
     private val userRepository: UserRepository,
     private val itemRepository: ItemRepository,
     private val accountRepository: AccountRepository,
+    private val categoryRepository: CategoryRepository,
     private val panelService: PanelService,
-    private val importService: ImportService
+    private val importService: ImportService,
+    private val securityService: SecurityService
 ) {
     @Get("/{?period,accountId}")
     suspend fun panel(
-        auth: Authentication,
         @QueryValue period: YearMonth?,
         @QueryValue accountId: Long?
-    ) = panelService.panelInfo(authId(auth), period ?: YearMonth.now(), accountId)
+    ) = panelService.panelInfo(securityService.currentUserId(), period ?: YearMonth.now(), accountId)
 
-    @Get("/yearly-report{?year,type,accountId}")
+    @Get("/yearly-report{?year,type,accountId,byCategory}")
     suspend fun report(
-        auth: Authentication,
         @QueryValue year: Int?,
         @QueryValue type: String?,
-        @QueryValue accountId: Long?
+        @QueryValue accountId: Long?,
+        @QueryValue byCategory: Boolean?
     ): PanelAnnualReport {
         val currentYear = year ?: YearMonth.now().year
         val currentType = if (type in listOf("EXPENSE", "INCOME")) type else ""
-        return panelService.annualReport(authId(auth), currentYear, currentType ?: "", accountId)
+        return panelService.annualReport(
+            securityService.currentUserId(),
+            currentYear,
+            currentType ?: "",
+            accountId,
+            byCategory ?: false
+        )
     }
 
     @Get("/overall-report{?accountId}")
     suspend fun overallReport(
-        auth: Authentication,
         @QueryValue accountId: Long?
-    ): PanelOverallReport = panelService.overallReport(authId(auth), accountId)
+    ): PanelOverallReport = panelService.overallReport(securityService.currentUserId(), accountId)
 
     @Post("/profile/password")
-    suspend fun profilePassword(
-        auth: Authentication,
-        passwords: ChangePassword
-    ): HttpResponse<Unit> =
-        userRepository.findById(authId(auth)).let { user ->
+    suspend fun profilePassword(passwords: ChangePassword): HttpResponse<Unit> =
+        userRepository.findById(securityService.currentUserId()).let { user ->
             if (user?.checkPassword(passwords.actualPassword) == true) {
                 userRepository.update(user.apply { applyPassword(passwords.newPassword) })
                 HttpResponse.ok()
@@ -85,17 +89,16 @@ class PanelController(
         }
 
     @Get("/profile")
-    suspend fun profile(auth: Authentication): HttpResponse<ProfileInfo> =
-        userRepository.findById(authId(auth))?.let { user ->
+    suspend fun profile(): HttpResponse<ProfileInfo> =
+        userRepository.findById(securityService.currentUserId())?.let { user ->
             HttpResponse.ok(ProfileInfo(user.name, user.email, user.locale, user.timezone))
         } ?: HttpResponse.notFound()
 
     @Patch("/profile")
     suspend fun updateProfile(
-        auth: Authentication,
         @Body dto: UpdateProfile
     ): HttpResponse<Unit> =
-        userRepository.findById(authId(auth))?.let { user ->
+        userRepository.findById(securityService.currentUserId())?.let { user ->
             val emailOwner = userRepository.findByEmail(dto.email)
             if (emailOwner != null && emailOwner.id != user.id) {
                 HttpResponse.status(HttpStatus.CONFLICT)
@@ -117,12 +120,11 @@ class PanelController(
 
     @Get("/item-complete{?description}")
     suspend fun itemComplete(
-        auth: Authentication,
         @QueryValue description: String?
     ): List<String> {
         val desc = if (description != null) "$description%" else ""
         return if (desc.isNotEmpty()) {
-            itemRepository.findDistinctDescriptionByUserIdAndDescriptionIlike(authId(auth), desc)
+            itemRepository.findDistinctDescriptionByUserIdAndDescriptionIlike(securityService.currentUserId(), desc)
         } else {
             emptyList()
         }
@@ -130,12 +132,14 @@ class PanelController(
 
     @Post("/add-item")
     suspend fun addItem(
-        auth: Authentication,
         @Body item: ItemBody
     ): HttpResponse<Unit> {
-        val userId = authId(auth)
+        val userId = securityService.currentUserId()
         val accountId = item.accountId ?: return HttpResponse.badRequest()
         if (accountRepository.findByIdAndUserId(accountId, userId) == null) {
+            return HttpResponse.badRequest()
+        }
+        if (item.categoryId != null && categoryRepository.findByIdAndUserId(item.categoryId, userId) == null) {
             return HttpResponse.badRequest()
         }
         itemRepository.save(item.toItem(userId, accountId))
@@ -144,50 +148,57 @@ class PanelController(
 
     @Patch("/edit-item/{id}")
     suspend fun editItem(
-        auth: Authentication,
         @PathVariable id: Long,
         @Body item: ItemBody
     ): HttpResponse<Unit> =
-        itemRepository.findByIdAndUserId(id, authId(auth))?.let { foundItem ->
-            itemRepository.update(id, foundItem.version!!, item.description, item.value, item.itemType)
+        itemRepository.findByIdAndUserId(id, securityService.currentUserId())?.let { foundItem ->
+            if (item.categoryId != null &&
+                categoryRepository.findByIdAndUserId(item.categoryId, securityService.currentUserId()) == null
+            ) {
+                return HttpResponse.badRequest()
+            }
+            itemRepository.update(id, foundItem.version!!, item.description, item.value, item.itemType, item.categoryId)
             HttpResponse.ok()
         } ?: HttpResponse.notFound()
 
     @Delete("/remove-item/{id}")
     suspend fun removeItem(
-        auth: Authentication,
         @PathVariable id: Long
     ): HttpResponse<Unit> =
-        itemRepository.findByIdAndUserId(id, authId(auth))?.let { item ->
+        itemRepository.findByIdAndUserId(id, securityService.currentUserId())?.let { item ->
             itemRepository.delete(item)
             HttpResponse.ok()
         } ?: HttpResponse.notFound()
 
     @Delete("/remove-items/{period}{?ids}")
     suspend fun removeItems(
-        auth: Authentication,
         @PathVariable period: YearMonth,
         @QueryValue ids: List<Long>?
-    ): HttpResponse<Unit> =
-        itemRepository.findByIdInAndPeriodAndUserId(ids ?: emptyList(), period, authId(auth)).toList().let { items ->
-            if (items.isEmpty()) {
-                HttpResponse.notFound()
-            } else {
-                itemRepository.deleteAll(items)
-                HttpResponse.ok()
-            }
+    ): HttpResponse<Unit> {
+        val items =
+            itemRepository
+                .findByIdInAndPeriodAndUserId(ids ?: emptyList(), period, securityService.currentUserId())
+                .toList()
+        return if (items.isEmpty()) {
+            HttpResponse.notFound()
+        } else {
+            itemRepository.deleteAll(items)
+            HttpResponse.ok()
         }
+    }
 
     @Post("/copy-items")
     suspend fun copyItems(
-        auth: Authentication,
         @Body items: List<ItemBody>
     ): HttpResponse<Unit> {
-        val userId = authId(auth)
+        val userId = securityService.currentUserId()
         val resolved =
             items.map { body ->
                 val accountId = body.accountId ?: return HttpResponse.badRequest()
                 if (accountRepository.findByIdAndUserId(accountId, userId) == null) {
+                    return HttpResponse.badRequest()
+                }
+                if (body.categoryId != null && categoryRepository.findByIdAndUserId(body.categoryId, userId) == null) {
                     return HttpResponse.badRequest()
                 }
                 body.toItem(userId, accountId)
@@ -245,7 +256,6 @@ class PanelController(
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Post("/import-items")
     suspend fun importItems(
-        auth: Authentication,
         @Part file: CompletedFileUpload,
         @Part("accountId") accountId: Long?,
         @Part("separator") separator: String?,
@@ -256,7 +266,7 @@ class PanelController(
         @Part("mapType") mapType: String?,
         @Part("mapDate") mapDate: String?
     ): HttpResponse<ImportResult> {
-        val userId = authId(auth)
+        val userId = securityService.currentUserId()
         val targetAccount = accountId ?: return HttpResponse.badRequest()
         if (accountRepository.findByIdAndUserId(targetAccount, userId) == null) {
             return HttpResponse.badRequest()
@@ -286,6 +296,4 @@ class PanelController(
             }
         return HttpResponse.ok(importService.importParsed(userId, targetAccount, preview.rows, origin))
     }
-
-    private fun authId(auth: Authentication): Long = auth.attributes["userId"] as Long
 }

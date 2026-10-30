@@ -106,6 +106,23 @@ interface ItemRepository : EntityRepository<Item, Long> {
 
     @Query(
         """
+        SELECT i.*
+        FROM items i
+        WHERE extract(year from i.period) = :year AND i.user_id = :userId
+            AND (cast(:accountId as bigint) IS NULL OR i.account_id = :accountId)
+            AND (cast(:itemType as varchar) IS NULL OR i.item_type = :itemType)
+        ORDER BY i.period, i.description
+        """
+    )
+    fun listByYear(
+        year: Int,
+        userId: Long,
+        accountId: Long?,
+        itemType: String?
+    ): Flow<Item>
+
+    @Query(
+        """
         SELECT
             cast(extract(year from i.period) as int) as year,
             sum(case when i.item_type = 'EXPENSE' THEN i.value ELSE 0 END) as expense,
@@ -179,6 +196,7 @@ interface ItemRepository : EntityRepository<Item, Long> {
         @Version version: Int,
         description: String,
         value: BigDecimal,
-        itemType: ItemType
+        itemType: ItemType,
+        categoryId: Long?
     ): Long
 }

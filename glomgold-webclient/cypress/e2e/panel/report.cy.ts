@@ -29,8 +29,8 @@ describe("Panel Report Tests", () => {
 
       cy.get(`[data-node-key="2"]`).click();
 
-      cy.get("#apexchartsline").should("have.css", "height", "350px");
-      cy.get("#apexchartsbar").should("have.css", "height", "350px");
+      cy.get("#apexchartsline .apexcharts-svg").should("have.css", "height", "350px");
+      cy.get("#apexchartsbar .apexcharts-svg").should("have.css", "height", "350px");
     });
   });
 });

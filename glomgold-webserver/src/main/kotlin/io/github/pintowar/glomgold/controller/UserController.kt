@@ -7,6 +7,7 @@ import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.User
 import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.UserRepository
+import io.github.pintowar.glomgold.service.CategorySeedService
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Body
 import io.micronaut.http.annotation.Controller
@@ -21,7 +22,8 @@ import java.util.Locale
 @Controller("/api/users")
 class UserController(
     private val userRepository: UserRepository,
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val categorySeedService: CategorySeedService
 ) : CrudRestController<User, UserCommand, Long>(userRepository) {
     override fun entityToDto(entity: User): UserCommand = entity.toCommand()
 
@@ -43,6 +45,8 @@ class UserController(
             .findByUserIdAndTypeOrderByIdAsc(user.id!!, AccountType.CHECKING)
             .firstOrNull()
             ?: accountRepository.save(AccountDefaults.checking(user.locale, user.id!!))
+        // Default categories are part of every new account, not just sample data.
+        categorySeedService.seedDefaults(user)
         return HttpResponse.ok(entityToDto(user))
     }
 

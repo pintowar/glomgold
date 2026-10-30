@@ -14,7 +14,8 @@ import java.time.YearMonth
 
 @ReflectiveAccess
 @Indexes(
-    Index(name = "item_period_user", columns = ["period", "user_id"])
+    Index(name = "item_period_user", columns = ["period", "user_id"]),
+    Index(name = "item_category", columns = ["category_id"])
 )
 @MappedEntity(value = "items", namingStrategy = UnderScoreSeparatedLowerCase::class)
 data class Item(
@@ -24,5 +25,6 @@ data class Item(
     @field:TypeDef(type = DataType.TIMESTAMP) var period: YearMonth,
     @field:NotNull var userId: Long,
     @field:NotNull var accountId: Long,
-    var origin: ItemOrigin = ItemOrigin.MANUAL
+    var origin: ItemOrigin = ItemOrigin.MANUAL,
+    var categoryId: Long? = null
 ) : Entity()

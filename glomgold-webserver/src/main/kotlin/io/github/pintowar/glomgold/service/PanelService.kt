@@ -3,7 +3,10 @@ package io.github.pintowar.glomgold.service
 import io.github.pintowar.glomgold.dto.PanelAnnualReport
 import io.github.pintowar.glomgold.dto.PanelInfo
 import io.github.pintowar.glomgold.dto.PanelOverallReport
+import io.github.pintowar.glomgold.model.ItemType
+import io.github.pintowar.glomgold.repo.CategoryRepository
 import io.github.pintowar.glomgold.repo.ItemRepository
+import io.github.pintowar.glomgold.repo.UserRepository
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.toList
 import org.nield.kotlinstatistics.average
@@ -15,7 +18,9 @@ import java.time.format.DateTimeFormatter
 
 @Singleton
 class PanelService(
-    private val itemRepository: ItemRepository
+    private val itemRepository: ItemRepository,
+    private val categoryRepository: CategoryRepository,
+    private val userRepository: UserRepository
 ) {
     private val formatter = DateTimeFormatter.ofPattern("MMM")
 
@@ -23,21 +28,39 @@ class PanelService(
         userId: Long,
         year: Int,
         itemType: String,
-        accountId: Long? = null
+        accountId: Long? = null,
+        groupByCategory: Boolean = false
     ): PanelAnnualReport {
-        val summary =
-            (
-                if (itemType.trim().isEmpty()) {
-                    itemRepository.yearSummary(year, userId, accountId)
-                } else {
-                    itemRepository.yearSummary(year, itemType, userId, accountId)
-                }
-            ).toList()
+        val locale = userRepository.findById(userId)?.locale
+        val pt = locale?.language?.equals("pt", ignoreCase = true) == true
+        val uncategorized = if (pt) "Sem categoria" else "Uncategorized"
+        val rows =
+            if (groupByCategory) {
+                val categoryNames = categoryRepository.listScoped(userId).toList().associate { it.id!! to it.name }
+                itemRepository
+                    .listByYear(year, userId, accountId, if (itemType.trim().isEmpty()) null else itemType)
+                    .toList()
+                    .map { item ->
+                        Triple(
+                            item.period,
+                            item.categoryId?.let { categoryNames[it] } ?: uncategorized,
+                            if (item.itemType == ItemType.EXPENSE) -item.value else item.value
+                        )
+                    }
+            } else {
+                val summary =
+                    if (itemType.trim().isEmpty()) {
+                        itemRepository.yearSummary(year, userId, accountId)
+                    } else {
+                        itemRepository.yearSummary(year, itemType, userId, accountId)
+                    }
+                summary.toList().map { Triple(it.period, it.description, it.value) }
+            }
 
         val table =
-            summary
-                .groupingBy { it.period to it.description }
-                .fold(BigDecimal.ZERO) { acc, it -> acc + it.value }
+            rows
+                .groupingBy { it.first to it.second }
+                .fold(BigDecimal.ZERO) { acc, it -> acc + it.third }
 
         val columns: List<YearMonth> = (1..12).map { YearMonth.of(year, it) }
         val rowIndex: Set<String> = table.keys.map { (_, desc) -> desc }.toSortedSet()
@@ -51,7 +74,7 @@ class PanelService(
         val colAverage =
             colSummary
                 .zip(data.map { row -> row.count { it != null } })
-                .map { (sum, count) -> sum?.divide(BigDecimal(count), RoundingMode.HALF_UP) }
+                .map { (sum, count) -> if (count == 0) null else sum?.divide(BigDecimal(count), RoundingMode.HALF_UP) }
 
         return PanelAnnualReport(
             columns.map { it.format(formatter) },

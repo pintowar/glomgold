@@ -1,0 +1,68 @@
+[
+  {
+    "name": { "en": "Housing", "pt_BR": "Moradia" },
+    "color": "#3B82F6",
+    "position": 1,
+    "categories": [
+      { "name": { "en": "Rent", "pt_BR": "Aluguel" } },
+      { "name": { "en": "Mortgage", "pt_BR": "Financiamento" } },
+      { "name": { "en": "Utilities", "pt_BR": "Serviços" } },
+      { "name": { "en": "Internet", "pt_BR": "Internet" } }
+    ]
+  },
+  {
+    "name": { "en": "Transport", "pt_BR": "Transporte" },
+    "color": "#8B5CF6",
+    "position": 2,
+    "categories": [
+      { "name": { "en": "Fuel", "pt_BR": "Combustível" } },
+      { "name": { "en": "Public Transport", "pt_BR": "Transporte Público" } },
+      { "name": { "en": "Maintenance", "pt_BR": "Manutenção" } },
+      { "name": { "en": "Parking", "pt_BR": "Estacionamento" } }
+    ]
+  },
+  {
+    "name": { "en": "Food", "pt_BR": "Alimentação" },
+    "color": "#F59E0B",
+    "position": 3,
+    "categories": [
+      { "name": { "en": "Groceries", "pt_BR": "Supermercado" } },
+      { "name": { "en": "Restaurants", "pt_BR": "Restaurantes" } },
+      { "name": { "en": "Coffee", "pt_BR": "Café" } },
+      { "name": { "en": "Delivery", "pt_BR": "Delivery" } }
+    ]
+  },
+  {
+    "name": { "en": "Health", "pt_BR": "Saúde" },
+    "color": "#EF4444",
+    "position": 4,
+    "categories": [
+      { "name": { "en": "Pharmacy", "pt_BR": "Farmácia" } },
+      { "name": { "en": "Doctor", "pt_BR": "Médico" } },
+      { "name": { "en": "Insurance", "pt_BR": "Seguro" } },
+      { "name": { "en": "Gym", "pt_BR": "Academia" } }
+    ]
+  },
+  {
+    "name": { "en": "Income", "pt_BR": "Renda" },
+    "color": "#22C55E",
+    "position": 5,
+    "categories": [
+      { "name": { "en": "Salary", "pt_BR": "Salário" } },
+      { "name": { "en": "Freelance", "pt_BR": "Freelance" } },
+      { "name": { "en": "Investments", "pt_BR": "Investimentos" } },
+      { "name": { "en": "Gifts", "pt_BR": "Presentes" } }
+    ]
+  },
+  {
+    "name": { "en": "Other", "pt_BR": "Outros" },
+    "color": "#6B7280",
+    "position": 6,
+    "categories": [
+      { "name": { "en": "Shopping", "pt_BR": "Compras" } },
+      { "name": { "en": "Entertainment", "pt_BR": "Entretenimento" } },
+      { "name": { "en": "Education", "pt_BR": "Educação" } },
+      { "name": { "en": "Personal", "pt_BR": "Pessoal" } }
+    ]
+  }
+]
