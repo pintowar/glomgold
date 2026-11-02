@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useCustom, useTranslate, useUpdate } from "@refinedev/core";
 
-import { Card, Form, Input, Button, Select } from "antd";
-
-import { useTranslate } from "@refinedev/core";
-import { useForm } from "@refinedev/antd";
-
-import { PANEL_QUERY_KEYS } from "../../../constants";
+import { SelectInput, TextInput } from "../../common/form-fields";
+import { Button } from "../../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { PANEL_QUERY_KEYS, PANEL_URLS } from "../../../constants";
 import { usePanelInvalidate } from "../../../hooks/usePanelInvalidate";
 import { successPayload } from "../../../utils/notify";
 import type { ProfileForm } from "./types";
@@ -15,75 +15,97 @@ interface ProfileInfoCardProps {
   timezonesOptions: { label: string; value: string }[];
 }
 
-export const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ localeOptions, timezonesOptions }) => {
-  const invalidatePanel = usePanelInvalidate();
+export const ProfileInfoCard = ({ localeOptions, timezonesOptions }: ProfileInfoCardProps) => {
   const translate = useTranslate();
+  const invalidatePanel = usePanelInvalidate();
+  const { mutate: updateProfile } = useUpdate();
 
-  const {
-    form: profileForm,
-    formProps,
-    saveButtonProps,
-    query,
-  } = useForm<ProfileForm>({
-    resource: "panel-profile",
-    action: "edit",
-    id: "profile",
-    redirect: false,
-    successNotification: successPayload(translate("panel.profile.updated", "Profile updated.")),
-    // 409 branch needs the server error — errorPayload can't express it, so it stays inline.
-    errorNotification: (error) => ({
-      message: translate("common.error", "Operation Error"),
-      description:
-        error?.statusCode === 409
-          ? translate("panel.profile.emailInUse", "E-mail already in use.")
-          : translate("panel.profile.updateError", "Could not update profile."),
-      type: "error",
-    }),
-    onMutationSuccess: () => void invalidatePanel(PANEL_QUERY_KEYS.profile),
+  const { result: profile } = useCustom<ProfileForm>({
+    url: PANEL_URLS.profile,
+    method: "get",
+    queryOptions: { queryKey: [PANEL_QUERY_KEYS.profile] },
   });
 
-  const liveProfile = query?.data?.data;
+  const {
+    register,
+    control,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProfileForm>();
 
   useEffect(() => {
-    if (liveProfile) {
-      profileForm.setFieldsValue({
-        name: liveProfile.name,
-        email: liveProfile.email,
-        locale: liveProfile.locale,
-        timezone: liveProfile.timezone,
-      });
-    }
-  }, [liveProfile, profileForm]);
+    if (profile?.data?.name) reset(profile.data);
+  }, [profile, reset]);
+
+  const onSubmit = (values: ProfileForm) =>
+    updateProfile(
+      {
+        resource: "panel-profile",
+        id: "profile",
+        values,
+        successNotification: successPayload(translate("panel.profile.updated", "Profile updated.")),
+        errorNotification: (error) => ({
+          message: translate("common.error", "Operation Error"),
+          description:
+            error?.statusCode === 409
+              ? translate("panel.profile.emailInUse", "E-mail already in use.")
+              : translate("panel.profile.updateError", "Could not update profile."),
+          type: "error",
+        }),
+      },
+      { onSuccess: () => void invalidatePanel(PANEL_QUERY_KEYS.profile) }
+    );
 
   return (
-    <Card title={translate("panel.profile.infoTitle", "Profile Information")} variant="borderless">
-      <Form {...formProps} name="profile-form">
-        <Form.Item label={translate("panel.profile.field.name", "Name")} name="name" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label={translate("panel.profile.field.email", "E-mail")}
-          name="email"
-          rules={[{ required: true, type: "email" }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item label={translate("panel.profile.field.locale", "Locale")} name="locale" rules={[{ required: true }]}>
-          <Select options={localeOptions} showSearch />
-        </Form.Item>
-        <Form.Item
-          label={translate("panel.profile.field.timezone", "Timezone")}
-          name="timezone"
-          rules={[{ required: true }]}
-        >
-          <Select options={timezonesOptions} showSearch />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit" {...saveButtonProps}>
-            {translate("panel.profile.save", "Save")}
-          </Button>
-        </Form.Item>
-      </Form>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{translate("panel.profile.infoTitle", "Profile Information")}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form className="flex max-w-xl flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+          <TextInput
+            label={translate("panel.profile.field.name", "Name")}
+            error={errors.name?.message}
+            {...register("name", { required: true })}
+          />
+          <TextInput
+            type="email"
+            label={translate("panel.profile.field.email", "E-mail")}
+            error={errors.email?.message}
+            {...register("email", { required: true })}
+          />
+          <Controller
+            control={control}
+            name="locale"
+            rules={{ required: true }}
+            render={({ field, fieldState }) => (
+              <SelectInput
+                label={translate("panel.profile.field.locale", "Locale")}
+                options={localeOptions}
+                value={field.value}
+                onChange={field.onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="timezone"
+            rules={{ required: true }}
+            render={({ field, fieldState }) => (
+              <SelectInput
+                label={translate("panel.profile.field.timezone", "Timezone")}
+                options={timezonesOptions}
+                value={field.value}
+                onChange={field.onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Button type="submit">{translate("panel.profile.save", "Save")}</Button>
+        </form>
+      </CardContent>
     </Card>
   );
 };

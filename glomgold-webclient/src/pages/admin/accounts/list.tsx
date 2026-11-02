@@ -1,123 +1,111 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
+import { useList, useTranslate, type CrudFilter } from "@refinedev/core";
+import { useTable } from "@refinedev/react-table";
+import { useForm } from "react-hook-form";
+import type { ColumnDef } from "@tanstack/react-table";
 
-import { CrudFilters, HttpError, IResourceComponentsProps, useMany, useTranslate } from "@refinedev/core";
+import { DataTable } from "@/components/refine-ui/data-table/data-table";
+import { PageHeader } from "@/components/common/PageHeader";
+import { ResourceActions } from "@/components/common/ResourceActions";
+import { SelectInput, TextInput } from "@/components/common/form-fields";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ACCOUNT_TYPES, type AccountType } from "@/constants";
+import { useUserSelect } from "@/hooks/useUserSelect";
+import type { IAccount, IUser } from "@/interfaces";
 
-import { List, TextField, useTable } from "@refinedev/antd";
-import { Button, Col, Form, Input, Row, Select, Table } from "antd";
+const ALL = { pagination: { pageSize: 1000 } };
 
-import { ACCOUNT_TYPES, type AccountType } from "../../../constants";
-import { IAccount, IUser } from "../../../interfaces";
-import { ResourceActions } from "../../../components/common/ResourceActions";
-import { useUserSelect } from "../../../hooks/useUserSelect";
+interface FilterValues {
+  userId?: number;
+  type?: AccountType;
+  currency?: string;
+}
 
-export const AccountList: React.FC<IResourceComponentsProps> = () => {
+export const AccountList = () => {
   const translate = useTranslate();
-  const { tableProps, searchFormProps } = useTable<
-    IAccount,
-    HttpError,
-    { userId: number; type: AccountType; currency: string }
-  >({
-    syncWithLocation: true,
-    onSearch: (params: { userId: number; type: AccountType; currency: string }) => {
-      const crudFilters: CrudFilters = [];
-      crudFilters.push({
-        field: "userId",
-        operator: "eq",
-        value: params.userId,
-      });
-      crudFilters.push({
-        field: "type",
-        operator: "eq",
-        value: params.type,
-      });
-      crudFilters.push({
-        field: "currency",
-        operator: "eq",
-        // Currencies are stored trimmed and uppercase; normalise user input to match.
-        value: params.currency?.trim().toUpperCase(),
-      });
+  const { options: userOptions } = useUserSelect();
+  const { register, handleSubmit, setValue, watch } = useForm<FilterValues>({});
 
-      return crudFilters;
-    },
+  const { result: users } = useList<IUser>({ resource: "users", ...ALL });
+  const userNameById = useMemo(() => new Map((users?.data ?? []).map((user) => [user.id, user.name] as const)), [users]);
+
+  const columns = useMemo<ColumnDef<IAccount>[]>(
+    () => [
+      { id: "id", accessorKey: "id", header: "ID" },
+      { id: "name", accessorKey: "name", header: translate("panel.account.field.name", "Name") },
+      {
+        id: "type",
+        accessorKey: "type",
+        header: translate("panel.account.field.type", "Type"),
+        cell: ({ row }) => translate(`panel.account.type.${row.original.type}`, row.original.type),
+      },
+      { id: "currency", accessorKey: "currency", header: translate("panel.account.field.currency", "Currency") },
+      {
+        id: "userId",
+        accessorKey: "userId",
+        header: translate("panel.account.field.user", "User"),
+        cell: ({ row }) => userNameById.get(row.original.userId) ?? "Loading...",
+      },
+      {
+        id: "actions",
+        header: translate("panel.items.column.action", "Action"),
+        cell: ({ row }) => <ResourceActions recordId={row.original.id} />,
+      },
+    ],
+    [translate, userNameById]
+  );
+
+  const table = useTable<IAccount>({
+    refineCoreProps: { resource: "accounts", syncWithLocation: true },
+    columns,
   });
 
-  const userIds = useMemo(
-    () => [...new Set(tableProps?.dataSource?.map((account) => account.userId) ?? [])],
-    [tableProps?.dataSource]
-  );
-  const {
-    result: users,
-    query: { isLoading },
-  } = useMany<IUser>({
-    resource: "users",
-    ids: userIds,
-    queryOptions: {
-      enabled: userIds.length > 0,
-    },
-  });
-
-  const userNameById = useMemo(
-    () => new Map((users?.data ?? []).map((user) => [user.id, user.name] as const)),
-    [users]
-  );
-  const { selectProps: userSelectProps } = useUserSelect();
+  const onSearch = (values: FilterValues) =>
+    table.refineCore.setFilters(
+      [
+        { field: "userId", operator: "eq", value: values.userId },
+        { field: "type", operator: "eq", value: values.type },
+        { field: "currency", operator: "eq", value: values.currency?.trim().toUpperCase() },
+      ].filter((filter) => filter.value !== undefined && filter.value !== "") as CrudFilter[],
+      "replace"
+    );
 
   return (
-    <Row gutter={[16, 16]}>
-      <Col xs={24} lg={6}>
-        <Form {...searchFormProps} layout="vertical">
-          <Form.Item label={translate("panel.account.field.user", "User")} name="userId">
-            <Select {...userSelectProps} allowClear />
-          </Form.Item>
-          <Form.Item label={translate("panel.account.field.type", "Type")} name="type">
-            <Select
-              options={ACCOUNT_TYPES.map((value) => ({
-                value,
-                label: translate(`panel.account.type.${value}`, value),
-              }))}
-              allowClear
-            />
-          </Form.Item>
-          <Form.Item label={translate("panel.account.field.currency", "Currency")} name="currency">
-            <Input maxLength={3} allowClear />
-          </Form.Item>
-          <Form.Item>
-            <Button htmlType="submit" type="primary">
-              {translate("panel.items.filter.filter", "Filter")}
-            </Button>
-          </Form.Item>
-        </Form>
-      </Col>
-      <Col xs={24} lg={18}>
-        <List>
-          <Table {...tableProps} rowKey="id">
-            <Table.Column dataIndex="id" title="ID" />
-            <Table.Column dataIndex="name" title={translate("panel.account.field.name", "Name")} />
-            <Table.Column
-              dataIndex="type"
-              title={translate("panel.account.field.type", "Type")}
-              render={(value: string) => translate(`panel.account.type.${value}`, value)}
-            />
-            <Table.Column dataIndex="currency" title={translate("panel.account.field.currency", "Currency")} />
-            <Table.Column
-              dataIndex="userId"
-              title={translate("panel.account.field.user", "User")}
-              render={(value) => {
-                if (isLoading) {
-                  return <TextField value="Loading..." />;
-                }
-
-                return <TextField value={userNameById.get(value)} />;
-              }}
-            />
-            <Table.Column<IAccount>
-              title="Actions"
-              dataIndex="actions"
-              render={(_, record) => <ResourceActions recordId={record.id} />}
-            />
-          </Table>
-        </List>
-      </Col>
-    </Row>
+    <div className="flex flex-col gap-4">
+      <PageHeader title={translate("accounts.accounts", "Accounts")} />
+      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+        <Card>
+          <CardContent>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSearch)}>
+              <SelectInput
+                label={translate("panel.account.field.user", "User")}
+                options={userOptions}
+                value={watch("userId")}
+                onChange={(value) => setValue("userId", value as number | undefined)}
+                allowClear
+              />
+              <SelectInput
+                label={translate("panel.account.field.type", "Type")}
+                options={ACCOUNT_TYPES.map((value) => ({
+                  value,
+                  label: translate(`panel.account.type.${value}`, value),
+                }))}
+                value={watch("type")}
+                onChange={(value) => setValue("type", value as AccountType | undefined)}
+                allowClear
+              />
+              <TextInput
+                label={translate("panel.account.field.currency", "Currency")}
+                maxLength={3}
+                {...register("currency")}
+              />
+              <Button type="submit">{translate("panel.items.filter.filter", "Filter")}</Button>
+            </form>
+          </CardContent>
+        </Card>
+        <DataTable table={table} />
+      </div>
+    </div>
   );
 };

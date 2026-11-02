@@ -1,20 +1,27 @@
-import React from "react";
-
-import { Row, Col, Card, Skeleton, Statistic, Space, Select, Typography } from "antd";
-import { CalculatorOutlined, DollarOutlined, ShoppingCartOutlined } from "@ant-design/icons";
-
-import { HeatMapChart, YearChart } from "../../../components/panel/report";
-import { IPanelOverallReport } from "../../../interfaces";
 import { useCustom, useTranslate } from "@refinedev/core";
-import { BALANCE_COLOR, EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
-import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
-import { usePanelSearchParams } from "../../../hooks/usePanelSearchParams";
-import { usePanelAccounts } from "../../../hooks/usePanelAccounts";
+import { Calculator, DollarSign, ShoppingCart } from "lucide-react";
 
-const formatValue = (locale: string, value: number) =>
-  value.toLocaleString(locale, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+import { HeatMapChart } from "@/components/panel/report/HeatMapChart";
+import { YearChart } from "@/components/panel/report/YearChart";
+import { PageHeader } from "@/components/common/PageHeader";
+import { SelectInput } from "@/components/common/form-fields";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BALANCE_COLOR, EXPENSE_COLOR, INCOME_COLOR } from "@/constants";
+import { useIdentityDefaults } from "@/hooks/useIdentityDefaults";
+import { usePanelAccounts } from "@/hooks/usePanelAccounts";
+import { usePanelSearchParams } from "@/hooks/usePanelSearchParams";
+import type { IPanelOverallReport } from "@/interfaces";
 
-interface KpiCardProps {
+const KpiCard = ({
+  title,
+  value,
+  color,
+  icon,
+  locale,
+  symbol,
+  extra,
+}: {
   title: string;
   value: number;
   color: string;
@@ -22,21 +29,28 @@ interface KpiCardProps {
   locale: string;
   symbol: string;
   extra?: string;
-}
-
-const KpiCard: React.FC<KpiCardProps> = ({ title, value, color, icon, locale, symbol, extra }) => (
-  <Card variant="borderless">
-    <Statistic title={title} value={formatValue(locale, value)} valueStyle={{ color }} prefix={icon} suffix={symbol} />
-    {extra && <div style={{ color, opacity: 0.7 }}>{extra}</div>}
+}) => (
+  <Card>
+    <CardHeader>
+      <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="flex items-center gap-1 text-2xl font-semibold" style={{ color }}>
+        {icon}
+        {value.toLocaleString(locale, { maximumFractionDigits: 2, minimumFractionDigits: 2 })}
+        <span className="text-base font-normal">{symbol}</span>
+      </p>
+      {extra && <p className="text-xs opacity-70" style={{ color }}>{extra}</p>}
+    </CardContent>
   </Card>
 );
 
-export const OverallReportPanel: React.FC = () => {
+export const OverallReportPanel = () => {
   const { locale, currency, symbol } = useIdentityDefaults();
   const translate = useTranslate();
-
   const { searchParams, updateSearchParams } = usePanelSearchParams();
   const { accounts } = usePanelAccounts();
+
   const accountValue = searchParams.get("account");
   const accountId = accountValue ? Number(accountValue) : undefined;
 
@@ -44,115 +58,87 @@ export const OverallReportPanel: React.FC = () => {
     query: { isLoading },
     result: report,
   } = useCustom<IPanelOverallReport>({
-    url: `/api/panel/overall-report`,
+    url: "/api/panel/overall-report",
     method: "get",
     config: { query: { accountId } },
   });
 
-  const data = report?.data;
-
   return (
-    <>
-      <div className="card-row">
-        <Card variant="borderless">
-          <Space size={12} wrap>
-            <Typography.Text strong>{translate("panel.account.label", "Account")}</Typography.Text>
-            <Select
-              data-testid="report-account"
-              allowClear
-              value={accountId}
-              onChange={(value?: number) =>
-                updateSearchParams({ account: value !== undefined ? `${value}` : undefined })
-              }
-              style={{ minWidth: 200 }}
-              placeholder={translate("panel.account.all", "All accounts")}
-              options={accounts.map((account) => ({ value: account.id, label: account.name }))}
-            />
-          </Space>
-        </Card>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader title={translate("panel.overall.title", "Overall Report")} />
+      <Card>
+        <CardContent>
+          <SelectInput
+            label={translate("panel.account.label", "Account")}
+            options={accounts.map((account) => ({ value: `${account.id}`, label: account.name }))}
+            value={accountId}
+            onChange={(value) => updateSearchParams({ account: value === undefined ? undefined : `${value}` })}
+            allowClear
+            placeholder={translate("panel.account.all", "All accounts")}
+          />
+        </CardContent>
+      </Card>
+
       {isLoading ? (
-        <Skeleton active />
+        <Skeleton className="h-80 w-full" />
       ) : (
         <>
-          <div className="card-row">
-            <Row gutter={[24, 24]}>
-              <Col span={6}>
-                <KpiCard
-                  title={translate("panel.overall.totalSpent", "Total Spent")}
-                  value={data?.totalExpense ?? 0}
-                  color={EXPENSE_COLOR}
-                  icon={<ShoppingCartOutlined />}
-                  locale={locale}
-                  symbol={symbol}
-                />
-              </Col>
-              <Col span={6}>
-                <KpiCard
-                  title={translate("panel.overall.totalEarned", "Total Earned")}
-                  value={data?.totalIncome ?? 0}
-                  color={INCOME_COLOR}
-                  icon={<DollarOutlined />}
-                  locale={locale}
-                  symbol={symbol}
-                />
-              </Col>
-              <Col span={6}>
-                <KpiCard
-                  title={translate("panel.overall.netBalance", "Net Balance")}
-                  value={data?.totalBalance ?? 0}
-                  color={BALANCE_COLOR}
-                  icon={<CalculatorOutlined />}
-                  locale={locale}
-                  symbol={symbol}
-                />
-              </Col>
-              <Col span={6}>
-                <KpiCard
-                  title={translate("panel.overall.avgMonthlyExpense", "Avg Monthly Expense")}
-                  value={data?.avgMonthlyExpense ?? 0}
-                  color={EXPENSE_COLOR}
-                  icon={<ShoppingCartOutlined />}
-                  locale={locale}
-                  symbol={symbol}
-                  extra={translate(
-                    "panel.overall.overMonths",
-                    { months: data?.activeMonths ?? 0 },
-                    `over ${data?.activeMonths ?? 0} months`
-                  )}
-                />
-              </Col>
-            </Row>
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <KpiCard
+              title={translate("panel.overall.totalSpent", "Total Spent")}
+              value={report?.data?.totalExpense ?? 0}
+              color={EXPENSE_COLOR}
+              icon={<ShoppingCart className="size-5" />}
+              locale={locale}
+              symbol={symbol}
+            />
+            <KpiCard
+              title={translate("panel.overall.totalEarned", "Total Earned")}
+              value={report?.data?.totalIncome ?? 0}
+              color={INCOME_COLOR}
+              icon={<DollarSign className="size-5" />}
+              locale={locale}
+              symbol={symbol}
+            />
+            <KpiCard
+              title={translate("panel.overall.netBalance", "Net Balance")}
+              value={report?.data?.totalBalance ?? 0}
+              color={BALANCE_COLOR}
+              icon={<Calculator className="size-5" />}
+              locale={locale}
+              symbol={symbol}
+            />
+            <KpiCard
+              title={translate("panel.overall.avgMonthlyExpense", "Avg Monthly Expense")}
+              value={report?.data?.avgMonthlyExpense ?? 0}
+              color={EXPENSE_COLOR}
+              icon={<ShoppingCart className="size-5" />}
+              locale={locale}
+              symbol={symbol}
+              extra={translate(
+                "panel.overall.overMonths",
+                { months: report?.data?.activeMonths ?? 0 },
+                `over ${report?.data?.activeMonths ?? 0} months`
+              )}
+            />
           </div>
-          <div className="card-row">
-            <Row gutter={[24, 24]}>
-              <Col span={24}>
-                <Card variant="borderless">
-                  <Space direction="vertical" size={12} style={{ width: "100%" }}>
-                    <YearChart years={data?.years ?? []} locale={locale} currency={currency} />
-                  </Space>
-                </Card>
-              </Col>
-            </Row>
-          </div>
-          <div className="card-row">
-            <Row gutter={[24, 24]}>
-              <Col span={24}>
-                <Card variant="borderless">
-                  <Space direction="vertical" size={12} style={{ width: "100%" }}>
-                    <HeatMapChart
-                      years={data?.years ?? []}
-                      heatmap={data?.heatmap ?? []}
-                      locale={locale}
-                      currency={currency}
-                    />
-                  </Space>
-                </Card>
-              </Col>
-            </Row>
-          </div>
+          <Card>
+            <CardContent>
+              <YearChart years={report?.data?.years ?? []} locale={locale} currency={currency} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <HeatMapChart
+                years={report?.data?.years ?? []}
+                heatmap={report?.data?.heatmap ?? []}
+                locale={locale}
+                currency={currency}
+              />
+            </CardContent>
+          </Card>
         </>
       )}
-    </>
+    </div>
   );
 };

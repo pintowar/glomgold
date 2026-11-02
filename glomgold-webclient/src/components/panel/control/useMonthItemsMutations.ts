@@ -1,5 +1,4 @@
-import React, { useCallback } from "react";
-import { type FormInstance } from "antd";
+import { useCallback } from "react";
 import { useCreate, useCustomMutation, useDelete, useDeleteMany, useTranslate, useUpdate } from "@refinedev/core";
 import { PANEL_QUERY_KEYS, PANEL_URLS } from "../../../constants";
 import { usePanelInvalidate } from "../../../hooks/usePanelInvalidate";
@@ -9,21 +8,17 @@ import type { ItemBody, PanelItem } from "./types";
 interface MonthItemsMutationsDeps {
   formattedPeriod: string;
   accountId?: number;
-  addForm: FormInstance;
-  editForm: FormInstance;
-  selectedRows: { keys: React.Key[]; rows: PanelItem[] };
-  setEditingKey: (key: string) => void;
-  focusDescription: () => void;
+  selectedRows: PanelItem[];
+  onAddSuccess?: () => void;
+  onEditSettled?: () => void;
 }
 
 export const useMonthItemsMutations = ({
   formattedPeriod,
   accountId,
-  addForm,
-  editForm,
   selectedRows,
-  setEditingKey,
-  focusDescription,
+  onAddSuccess,
+  onEditSettled,
 }: MonthItemsMutationsDeps) => {
   const { mutate: createItem } = useCreate<ItemBody>();
   const { mutate: updateItem } = useUpdate<ItemBody>();
@@ -38,89 +33,56 @@ export const useMonthItemsMutations = ({
     [invalidatePanel, formattedPeriod]
   );
 
-  // Shared add/edit path: only the form, op, and callbacks differ.
-  const saveItem = useCallback(
-    async (
-      source: FormInstance,
-      op: "create" | { key: number },
-      callbacks: { onSuccess?: () => void; onSettled?: () => void; onValidationError?: () => void } = {}
-    ) => {
-      let row: PanelItem;
-      try {
-        row = (await source.validateFields()) as PanelItem;
-      } catch (errInfo) {
-        console.error("Validate Failed:", errInfo);
-        callbacks.onValidationError?.();
-        return;
-      }
-      const values: ItemBody = {
-        period: formattedPeriod,
-        description: row.description,
-        value: row.value,
-        itemType: row.itemType,
-        categoryId: row.categoryId ?? null,
-      };
-      const options = {
-        onSuccess: () => {
-          void invalidatePeriod();
-          callbacks.onSuccess?.();
-        },
-        onSettled: callbacks.onSettled,
-      };
-      const successNotification = successPayload(translate("panel.items.saved", "Item saved."));
-      const errorNotification = errorPayload(translate("panel.items.saveError", "Could not save item."));
-      if (op === "create") {
-        createItem(
-          {
-            resource: "panel-items",
-            values: { ...values, accountId },
-            successNotification,
-            errorNotification,
-          },
-          options
-        );
-      } else {
-        updateItem(
-          {
-            resource: "panel-items",
-            id: op.key,
-            values,
-            successNotification,
-            errorNotification,
-          },
-          options
-        );
-      }
-    },
-    [createItem, updateItem, formattedPeriod, accountId, invalidatePeriod, translate]
+  const toBody = useCallback(
+    (row: Pick<PanelItem, "description" | "value" | "itemType" | "categoryId">): ItemBody => ({
+      period: formattedPeriod,
+      description: row.description,
+      value: row.value,
+      itemType: row.itemType,
+      categoryId: row.categoryId ?? null,
+    }),
+    [formattedPeriod]
   );
 
   const addItem = useCallback(
-    () =>
-      saveItem(addForm, "create", {
-        onSuccess: () => {
-          addForm.resetFields();
-          focusDescription();
+    (row: Pick<PanelItem, "description" | "value" | "itemType" | "categoryId">) =>
+      createItem(
+        {
+          resource: "panel-items",
+          values: { ...toBody(row), accountId },
+          successNotification: successPayload(translate("panel.items.saved", "Item saved.")),
+          errorNotification: errorPayload(translate("panel.items.saveError", "Could not save item.")),
         },
-      }),
-    [saveItem, addForm, focusDescription]
+        {
+          onSuccess: () => {
+            void invalidatePeriod();
+            onAddSuccess?.();
+          },
+        }
+      ),
+    [createItem, toBody, accountId, invalidatePeriod, translate, onAddSuccess]
   );
 
   const editItem = useCallback(
-    (key: number) =>
-      saveItem(
-        editForm,
-        { key },
+    (key: number, row: Pick<PanelItem, "description" | "value" | "itemType" | "categoryId">) =>
+      updateItem(
         {
-          onSettled: () => setEditingKey(""),
-          onValidationError: () => setEditingKey(""),
+          resource: "panel-items",
+          id: key,
+          values: toBody(row),
+          successNotification: successPayload(translate("panel.items.saved", "Item saved.")),
+          errorNotification: errorPayload(translate("panel.items.saveError", "Could not save item.")),
+        },
+        {
+          onSuccess: () => void invalidatePeriod(),
+          onSettled: () => onEditSettled?.(),
         }
       ),
-    [saveItem, editForm, setEditingKey]
+    [updateItem, toBody, invalidatePeriod, translate, onEditSettled]
   );
 
   const deleteItem = useCallback(
-    (item: PanelItem) => {
+    (item: PanelItem) =>
       deleteOneItem(
         {
           resource: "panel-items",
@@ -128,22 +90,16 @@ export const useMonthItemsMutations = ({
           successNotification: successPayload(translate("panel.items.removed", "Item removed.")),
           errorNotification: errorPayload(translate("panel.items.removeError", "Could not remove item.")),
         },
-        {
-          onSuccess: () => {
-            void invalidatePeriod();
-            addForm.resetFields();
-          },
-        }
-      );
-    },
-    [deleteOneItem, invalidatePeriod, addForm, translate]
+        { onSuccess: () => void invalidatePeriod() }
+      ),
+    [deleteOneItem, invalidatePeriod, translate]
   );
 
   const copyNextMonth = useCallback(() => {
     onMonthItemCopy({
       url: PANEL_URLS.copyItems,
       method: "post",
-      values: selectedRows.rows.map((it) => ({
+      values: selectedRows.map((it) => ({
         period: formattedPeriod,
         description: it.description,
         itemType: it.itemType,
@@ -156,22 +112,20 @@ export const useMonthItemsMutations = ({
       ),
       errorNotification: errorPayload(translate("panel.items.replicateError", "Could not replicate items.")),
     });
-  }, [onMonthItemCopy, selectedRows.rows, formattedPeriod, accountId, translate]);
+  }, [onMonthItemCopy, selectedRows, formattedPeriod, accountId, translate]);
 
   const deleteSelected = useCallback(() => {
     deleteManyItems(
       {
         resource: "panel-items",
-        ids: selectedRows.rows.map((r) => r.key),
+        ids: selectedRows.map((r) => r.key),
         meta: { period: formattedPeriod },
         successNotification: successPayload(translate("panel.items.removed", "Item removed.")),
         errorNotification: errorPayload(translate("panel.items.removeError", "Could not remove item.")),
       },
-      {
-        onSuccess: () => void invalidatePeriod(),
-      }
+      { onSuccess: () => void invalidatePeriod() }
     );
-  }, [deleteManyItems, selectedRows.rows, formattedPeriod, invalidatePeriod, translate]);
+  }, [deleteManyItems, selectedRows, formattedPeriod, invalidatePeriod, translate]);
 
   return { addItem, editItem, deleteItem, copyNextMonth, deleteSelected };
 };

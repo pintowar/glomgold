@@ -1,10 +1,18 @@
 import { useMemo } from "react";
 import { useList, useTranslate } from "@refinedev/core";
-import type { SelectProps } from "antd";
-import { CategoryBadge } from "../components/common/CategoryBadge";
 import type { ICategory, ICategoryGroup } from "../interfaces";
 
 const ALL = { pagination: { pageSize: 500 } };
+
+export interface CategorySelectOption {
+  value: string;
+  label: string;
+}
+
+export interface CategorySelectGroup {
+  label?: string;
+  options: CategorySelectOption[];
+}
 
 const useCategoryData = (categoryResource: string, groupResource: string, userId?: number) => {
   const translate = useTranslate();
@@ -15,13 +23,10 @@ const useCategoryData = (categoryResource: string, groupResource: string, userId
   const groups = useMemo(() => groupResult?.data ?? [], [groupResult]);
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c] as const)), [categories]);
 
-  const options = useMemo<SelectProps["options"]>(() => {
+  const options = useMemo<CategorySelectGroup[]>(() => {
     const visible = categories.filter((c) => userId == null || c.userId === userId);
-    const toOption = (category: ICategory) => ({
-      value: category.id,
-      label: <CategoryBadge category={category} />,
-    });
-    if (groups.length === 0) return visible.map(toOption);
+    const toOption = (category: ICategory) => ({ value: `${category.id}`, label: category.name });
+    if (groups.length === 0) return [{ options: visible.map(toOption) }];
 
     const byGroup = new Map<number | null, ICategory[]>();
     visible.forEach((c) => byGroup.set(c.groupId ?? null, [...(byGroup.get(c.groupId ?? null) ?? []), c]));

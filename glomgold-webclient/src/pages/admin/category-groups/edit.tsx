@@ -1,48 +1,58 @@
-import React from "react";
-import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
+import { useForm } from "@refinedev/react-hook-form";
+import { useTranslate, type HttpError } from "@refinedev/core";
+import { Link } from "react-router";
 
-import { Edit, useForm } from "@refinedev/antd";
-import { Form, Input, InputNumber, Select } from "antd";
+import { CategoryGroupFormFields } from "@/components/admin/CategoryGroupFormFields";
+import { PageHeader } from "@/components/common/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useUserSelect } from "@/hooks/useUserSelect";
+import type { ICategoryGroup } from "@/interfaces";
 
-import { ICategoryGroup } from "../../../interfaces";
-import { useUserSelect } from "../../../hooks/useUserSelect";
-
-export const CategoryGroupEdit: React.FC<IResourceComponentsProps> = () => {
+export const CategoryGroupEdit = () => {
   const translate = useTranslate();
-  const { formProps, saveButtonProps, query } = useForm<ICategoryGroup>({ warnWhenUnsavedChanges: true });
-  const { selectProps: userSelectProps } = useUserSelect(query?.data?.data?.userId);
+  const {
+    register,
+    control,
+    formState: { errors },
+    saveButtonProps,
+    refineCore,
+  } = useForm<ICategoryGroup, HttpError, ICategoryGroup>({
+    refineCoreProps: { resource: "category-groups" },
+    warnWhenUnsavedChanges: true,
+  });
+  const { options: userOptions } = useUserSelect(refineCore.query?.data?.data?.userId);
 
   return (
-    <Edit saveButtonProps={saveButtonProps}>
-      <Form {...formProps} layout="vertical">
-        <Form.Item label="ID" name="id" hidden={true}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="Version" name="version" hidden={true}>
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label={translate("panel.category.field.name", "Name")}
-          name="name"
-          rules={[
-            {
-              required: true,
-              message: translate("panel.category.nameRequired", "Please input a name!"),
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item label={translate("panel.category.field.color", "Color")} name="color">
-          <Input type="color" />
-        </Form.Item>
-        <Form.Item label={translate("panel.category.field.position", "Position")} name="position">
-          <InputNumber min={0} />
-        </Form.Item>
-        <Form.Item label={translate("panel.category.field.user", "User")} name="userId">
-          <Select {...userSelectProps} disabled />
-        </Form.Item>
-      </Form>
-    </Edit>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title={translate("panel.category.group.edit", "Edit group")}
+        actions={
+          <Button variant="outline" asChild>
+            <Link to="/admin/category-groups">Back</Link>
+          </Button>
+        }
+      />
+      <Card>
+        <CardContent>
+          <form className="flex max-w-xl flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+            <input type="hidden" {...register("id")} />
+            <input type="hidden" {...register("version")} />
+            <CategoryGroupFormFields
+              register={register}
+              control={control}
+              errors={errors}
+              userOptions={userOptions}
+              userDisabled
+            />
+            <div>
+              <Button onClick={saveButtonProps.onClick} disabled={saveButtonProps.disabled}>
+                {translate("buttons.save", "Save")}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

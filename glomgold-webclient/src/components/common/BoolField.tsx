@@ -1,13 +1,8 @@
-import React from "react";
-import { BooleanField } from "@refinedev/antd";
-import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { CheckCircle2, XCircle } from "lucide-react";
 
-export const BoolField: React.FC<{ value: boolean }> = ({ value }) => (
-  <BooleanField
-    value={value}
-    trueIcon={<CheckCircleOutlined />}
-    falseIcon={<CloseCircleOutlined />}
-    valueLabelTrue="Yes"
-    valueLabelFalse="No"
-  />
-);
+export const BoolField = ({ value }: { value: boolean }) =>
+  value ? (
+    <CheckCircle2 className="size-4 text-green-600" aria-label="Yes" />
+  ) : (
+    <XCircle className="size-4 text-destructive" aria-label="No" />
+  );

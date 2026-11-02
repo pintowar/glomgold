@@ -1,7 +1,8 @@
-import React, { useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useMemo } from "react";
+import { Link } from "react-router";
 import { useTranslate } from "@refinedev/core";
-import { Table, Typography } from "antd";
+
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
 import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 
@@ -17,7 +18,7 @@ interface SummaryTableProps {
   total: number;
 }
 
-export const SummaryTable: React.FC<SummaryTableProps> = ({
+export const SummaryTable = ({
   year,
   locale,
   currency,
@@ -27,90 +28,59 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({
   rowSummary,
   colSummary,
   total,
-}) => {
+}: SummaryTableProps) => {
   const translate = useTranslate();
-  const totalLabel = translate("panel.report.total", "Total");
   const formatCurrency = useCurrencyFormat(locale, currency);
-  const currencyFormatFactory = useCallback(
-    (month?: number, desc?: string) => {
-      const currencyFormat = (value?: number) => {
-        const valueFormat = value ? formatCurrency(Math.abs(value)) : "";
-        const color = (value || 0) > 0 ? INCOME_COLOR : EXPENSE_COLOR;
-        if (month && desc) {
-          const formattedMonth = `${month}`.padStart(2, "0");
-          return (
-            <Link style={{ color }} to={`/panel?period=${year}-${formattedMonth}&desc=${desc}`}>
-              {valueFormat}
-            </Link>
-          );
-        } else {
-          return <Typography style={{ color }}>{valueFormat}</Typography>;
-        }
-      };
-      return currencyFormat;
+
+  const cell = useMemo(
+    () => (value: number | undefined, month?: number, description?: string) => {
+      if (!value) return "";
+      const color = value > 0 ? INCOME_COLOR : EXPENSE_COLOR;
+      const label = formatCurrency(Math.abs(value));
+      return month && description ? (
+        <Link style={{ color }} to={`/panel?period=${year}-${`${month}`.padStart(2, "0")}&desc=${description}`}>
+          {label}
+        </Link>
+      ) : (
+        <span style={{ color }}>{label}</span>
+      );
     },
-    [year, formatCurrency]
+    [formatCurrency, year]
   );
 
-  const currencyFormat = useMemo(() => currencyFormatFactory(), [currencyFormatFactory]);
-
-  const tableCols = useMemo(
-    () =>
-      [{ title: "", dataIndex: "desc", key: "desc", render: (value?: number) => <>{value}</> }]
-        .concat(
-          columns.map((col: string) => ({
-            title: col,
-            dataIndex: col,
-            key: col,
-            render: (value?: number) => <>{value}</>,
-          }))
-        )
-        .concat([{ title: totalLabel, dataIndex: "total", key: "total", render: currencyFormatFactory() }]),
-    [columns, currencyFormatFactory, totalLabel]
-  );
-
-  const source = useMemo(
-    () =>
-      rowIndex.map((desc, row) => {
-        const summary = { key: row, desc: desc, total: colSummary[row] };
-        const dataCols = columns.reduce((acc, col, idx) => {
-          const cell = data[row][idx];
-          const formattedCell = cell ? currencyFormatFactory(idx + 1, desc)(cell) : cell;
-          return { [col]: formattedCell, ...acc };
-        }, {});
-
-        return { ...dataCols, ...summary };
-      }),
-    [rowIndex, columns, data, colSummary, currencyFormatFactory]
-  );
-
-  const summaryCells = useMemo(
-    () => (
-      <Table.Summary.Row>
-        <Table.Summary.Cell key={"summary-total"} index={0}>
-          <strong>{totalLabel}</strong>
-        </Table.Summary.Cell>
-        {rowSummary.map((it, idx) => (
-          <Table.Summary.Cell key={`summary-${idx + 1}`} index={idx}>
-            {currencyFormat(it)}
-          </Table.Summary.Cell>
-        ))}
-        <Table.Summary.Cell key={`summary-${rowSummary.length + 1}`} index={rowSummary.length + 1}>
-          <strong>{currencyFormat(total)}</strong>
-        </Table.Summary.Cell>
-      </Table.Summary.Row>
-    ),
-    [rowSummary, total, currencyFormat, totalLabel]
-  );
+  const totalLabel = translate("panel.report.total", "Total");
 
   return (
-    <Table
-      columns={tableCols}
-      dataSource={source}
-      size="small"
-      pagination={false}
-      bordered
-      summary={() => <Table.Summary fixed>{summaryCells}</Table.Summary>}
-    />
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead />
+            {columns.map((column) => (
+              <TableHead key={column}>{column}</TableHead>
+            ))}
+            <TableHead>{totalLabel}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rowIndex.map((description, row) => (
+            <TableRow key={`${description}-${row}`}>
+              <TableCell>{description}</TableCell>
+              {columns.map((column, index) => (
+                <TableCell key={column}>{cell(data[row]?.[index], index + 1, description)}</TableCell>
+              ))}
+              <TableCell>{cell(colSummary[row])}</TableCell>
+            </TableRow>
+          ))}
+          <TableRow>
+            <TableCell className="font-semibold">{totalLabel}</TableCell>
+            {rowSummary.map((value, index) => (
+              <TableCell key={`summary-${index}`}>{cell(value)}</TableCell>
+            ))}
+            <TableCell className="font-semibold">{cell(total)}</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
   );
 };

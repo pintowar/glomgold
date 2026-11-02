@@ -1,61 +1,17 @@
-import React, { useCallback, useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslate } from "@refinedev/core";
-import { ColorModeContext } from "../../../contexts/color-mode";
-import { ApexOptions } from "apexcharts";
-import Chart from "react-apexcharts";
+
 import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
-import { IMonthlyBalance, IYearlySummary } from "../../../interfaces";
+import type { IMonthlyBalance, IYearlySummary } from "../../../interfaces";
 
 const MONTH_COUNT = 12;
-
-/** Short month names in the user's locale (e.g. Jan/Feb… or jan./fev.…). */
-const useMonthLabels = (locale: string): string[] =>
-  useMemo(() => {
-    const formatter = new Intl.DateTimeFormat(locale, { month: "short" });
-    return Array.from({ length: MONTH_COUNT }, (_, i) => formatter.format(new Date(2000, i, 1)));
-  }, [locale]);
-
-const STEPS = 5;
 const EPS = 1e-9;
 const NEUTRAL_COLOR = "#D9D9D9";
 const RED_DARK_TO_LIGHT = ["#A8071A", "#CF1322", EXPENSE_COLOR, "#F78F8B", "#FAC5C3"];
 const BLUE_LIGHT_TO_DARK = ["#E6F4FF", "#91CAFF", "#4096FF", INCOME_COLOR, "#003EB3"];
 
-interface HeatMapColorRange {
-  from: number;
-  to: number;
-  color: string;
-}
-
-const buildColorRanges = (heatmap: IMonthlyBalance[]): HeatMapColorRange[] => {
-  const balances = heatmap.map((it) => Number(it.balance));
-  const min = Math.min(0, ...balances);
-  const max = Math.max(0, ...balances);
-  const ranges: HeatMapColorRange[] = [{ from: -EPS, to: EPS, color: NEUTRAL_COLOR }];
-
-  if (min < -EPS) {
-    for (let i = 0; i < STEPS; i++) {
-      const from = (min * (STEPS - i)) / STEPS;
-      const to = (min * (STEPS - i - 1)) / STEPS;
-      ranges.push({ from, to: i === STEPS - 1 ? -EPS : to, color: RED_DARK_TO_LIGHT[i] });
-    }
-  }
-
-  if (max > EPS) {
-    for (let i = 0; i < STEPS; i++) {
-      const from = (max * i) / STEPS;
-      const to = (max * (i + 1)) / STEPS;
-      ranges.push({ from: i === 0 ? EPS : from, to, color: BLUE_LIGHT_TO_DARK[i] });
-    }
-  }
-
-  if (ranges.length === 1) {
-    ranges.push({ from: -Number.MAX_VALUE, to: Number.MAX_VALUE, color: NEUTRAL_COLOR });
-  }
-
-  return ranges;
-};
+const bucket = (ratio: number) => Math.min(4, Math.max(0, Math.floor(ratio * 5)));
 
 interface HeatMapChartProps {
   years: IYearlySummary[];
@@ -64,62 +20,70 @@ interface HeatMapChartProps {
   currency: string;
 }
 
-export const HeatMapChart: React.FC<HeatMapChartProps> = ({ years, heatmap, locale, currency }) => {
-  const { mode } = useContext(ColorModeContext);
+export const HeatMapChart = ({ years, heatmap, locale, currency }: HeatMapChartProps) => {
   const translate = useTranslate();
-  const monthLabels = useMonthLabels(locale);
+  const currencyFormat = useCurrencyFormat(locale, currency);
 
-  const formatCurrency = useCurrencyFormat(locale, currency);
-  const currencyFormat = useCallback(
-    (value: number | null) => (value == null ? value : formatCurrency(value)),
-    [formatCurrency]
+  const yearLabels = useMemo(
+    () => (years.length > 0 ? years.map((it) => String(it.year)) : [...new Set(heatmap.map((it) => String(it.year)))].sort()),
+    [years, heatmap]
   );
 
-  const yearLabels = useMemo(() => years.map((it) => String(it.year)), [years]);
+  const monthLabels = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(locale, { month: "short" });
+    return Array.from({ length: MONTH_COUNT }, (_, index) => formatter.format(new Date(2000, index, 1)));
+  }, [locale]);
 
-  const heatMapConfig = useMemo(() => {
-    const series = [...monthLabels].reverse().map((label, idx) => {
-      const month = monthLabels.length - idx;
-      return {
-        name: label,
-        data: yearLabels.map((year) => {
-          const cell = heatmap.find((it) => String(it.year) === year && it.month === month);
-          return { x: year, y: cell ? Number(cell.balance) : null };
-        }),
-      };
-    });
+  const bounds = useMemo(() => {
+    const balances = heatmap.map((it) => Number(it.balance));
+    return { min: Math.min(0, ...balances), max: Math.max(0, ...balances) };
+  }, [heatmap]);
 
-    return {
-      options: {
-        title: { text: translate("panel.charts.monthlyHeatmap", "Monthly Balance Heatmap") },
-        chart: { id: "heatmap", background: "transparent", animations: { enabled: false }, type: "heatmap" },
-        colors: [EXPENSE_COLOR],
-        theme: { mode },
-        legend: { show: false },
-        dataLabels: { enabled: false },
-        tooltip: { y: { formatter: currencyFormat } },
-        xaxis: { categories: yearLabels },
-        plotOptions: {
-          heatmap: {
-            radius: 0,
-            enableShades: false,
-            colorScale: {
-              ranges: buildColorRanges(heatmap),
-            },
-          },
-        },
-      } as ApexOptions,
-      series,
-    };
-  }, [years, heatmap, yearLabels, currencyFormat, mode, monthLabels, translate]);
+  const colorFor = (value: number | undefined) => {
+    if (value == null || Math.abs(value) < EPS) return NEUTRAL_COLOR;
+    if (value < 0) {
+      const ratio = bounds.min < -EPS ? value / bounds.min : 1;
+      return RED_DARK_TO_LIGHT[bucket(1 - ratio)];
+    }
+    const ratio = bounds.max > EPS ? value / bounds.max : 1;
+    return BLUE_LIGHT_TO_DARK[bucket(ratio)];
+  };
 
   return (
-    <Chart
-      options={heatMapConfig.options}
-      series={heatMapConfig.series}
-      type="heatmap"
-      height={350 + monthLabels.length * 8}
-      width="100%"
-    />
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-semibold">{translate("panel.charts.monthlyHeatmap", "Monthly Balance Heatmap")}</p>
+      <div className="overflow-x-auto">
+        <div
+          className="grid gap-1 text-xs"
+          style={{ gridTemplateColumns: `80px repeat(${Math.max(yearLabels.length, 1)}, minmax(70px, 1fr))` }}
+        >
+          <div />
+          {yearLabels.map((year) => (
+            <div key={year} className="text-center font-semibold">
+              {year}
+            </div>
+          ))}
+          {monthLabels.map((month, index) => (
+            <div key={month} className="contents">
+              <div className="flex items-center">{month}</div>
+              {yearLabels.map((year) => {
+                const cell = heatmap.find((it) => String(it.year) === year && it.month === index + 1);
+                const value = cell ? Number(cell.balance) : undefined;
+                return (
+                  <div
+                    key={`${year}-${month}`}
+                    className="rounded-sm py-2 text-center text-white"
+                    style={{ backgroundColor: colorFor(value) }}
+                    title={value == null ? "" : currencyFormat(value)}
+                  >
+                    {value == null ? "" : currencyFormat(value)}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };

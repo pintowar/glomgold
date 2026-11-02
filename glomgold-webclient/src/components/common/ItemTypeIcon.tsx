@@ -1,6 +1,5 @@
-import React from "react";
-import { DollarOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { DollarSign, ShoppingCart } from "lucide-react";
 import type { ItemType } from "../../constants";
 
-export const ItemTypeIcon: React.FC<{ type: ItemType }> = ({ type }) =>
-  type === "EXPENSE" ? <ShoppingCartOutlined /> : <DollarOutlined />;
+export const ItemTypeIcon = ({ type }: { type: ItemType }) =>
+  type === "EXPENSE" ? <ShoppingCart className="size-4" /> : <DollarSign className="size-4" />;

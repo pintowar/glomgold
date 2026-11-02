@@ -1,57 +1,59 @@
-import React from "react";
+import { useForm } from "react-hook-form";
+import { useCustomMutation, useLogout, useTranslate } from "@refinedev/core";
 
-import { Card, Form, Input, Button } from "antd";
-
-import { useApiUrl, useCustomMutation, useLogout, useTranslate } from "@refinedev/core";
-
+import { TextInput } from "../../common/form-fields";
+import { Button } from "../../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { API_URL } from "../../../constants";
 import { errorPayload, successPayload } from "../../../utils/notify";
 import type { ProfilePasswordForm } from "./types";
 
-export const ProfilePasswordCard: React.FC = () => {
-  const apiUrl = useApiUrl();
+export const ProfilePasswordCard = () => {
   const translate = useTranslate();
   const { mutate: logout } = useLogout();
-  const [passwordForm] = Form.useForm<ProfilePasswordForm>();
-  const { mutate: changePassword } = useCustomMutation<ProfilePasswordForm>();
+  const { mutate: changePassword, mutation } = useCustomMutation<ProfilePasswordForm>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProfilePasswordForm>();
 
-  const onFinishPassword = async (form: ProfilePasswordForm) => {
+  const onSubmit = (values: ProfilePasswordForm) =>
     changePassword(
       {
-        url: `${apiUrl}/panel/profile/password`,
+        url: `${API_URL}/panel/profile/password`,
         method: "post",
-        values: { passwords: form },
+        values,
         successNotification: successPayload(translate("panel.profile.passwordChanged", "Password changed.")),
         errorNotification: errorPayload(translate("panel.profile.passwordError", "Could not change password.")),
       },
-      {
-        onSuccess: () => logout(),
-      }
+      { onSuccess: () => logout() }
     );
-  };
 
   return (
-    <Card title={translate("panel.profile.passwordTitle", "Change Password")} variant="borderless">
-      <Form form={passwordForm} name="user-form" onFinish={onFinishPassword}>
-        <Form.Item
-          label={translate("panel.profile.field.actualPassword", "Actual Password")}
-          name="actualPassword"
-          rules={[{ required: true }]}
-        >
-          <Input.Password />
-        </Form.Item>
-        <Form.Item
-          label={translate("panel.profile.field.newPassword", "New Password")}
-          name="newPassword"
-          rules={[{ required: true }]}
-        >
-          <Input.Password />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{translate("panel.profile.passwordTitle", "Change Password")}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form className="flex max-w-xl flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+          <TextInput
+            type="password"
+            label={translate("panel.profile.field.actualPassword", "Actual Password")}
+            error={errors.actualPassword?.message}
+            {...register("actualPassword", { required: true })}
+          />
+          <TextInput
+            type="password"
+            label={translate("panel.profile.field.newPassword", "New Password")}
+            error={errors.newPassword?.message}
+            {...register("newPassword", { required: true })}
+          />
+          <Button type="submit" disabled={mutation.isPending}>
             {translate("panel.profile.change", "Change")}
           </Button>
-        </Form.Item>
-      </Form>
+        </form>
+      </CardContent>
     </Card>
   );
 };

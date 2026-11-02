@@ -1,200 +1,129 @@
-import React, { useMemo, useState } from "react";
-import {
-  CrudFilters,
-  HttpError,
-  IResourceComponentsProps,
-  useCustom,
-  useCustomMutation,
-  useDelete,
-  useInvalidate,
-  useMany,
-  useTranslate,
-} from "@refinedev/core";
-import { EditButton, List, TextField, useTable } from "@refinedev/antd";
-import { Button, Col, Form, Input, Modal, Row, Select, Space, Spin, Table, Typography } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { useMemo } from "react";
+import { useList, useTranslate, type CrudFilter } from "@refinedev/core";
+import { useTable } from "@refinedev/react-table";
+import { useForm } from "react-hook-form";
+import type { ColumnDef } from "@tanstack/react-table";
 
-import { ICategory, ICategoryUsage, IUser } from "../../../interfaces";
-import { CategoryBadge } from "../../../components/common/CategoryBadge";
-import { useCategories } from "../../../hooks/useCategories";
-import { useUserSelect } from "../../../hooks/useUserSelect";
-import { errorPayload, successPayload } from "../../../utils/notify";
+import { DataTable } from "@/components/refine-ui/data-table/data-table";
+import { PageHeader } from "@/components/common/PageHeader";
+import { CategoryBadge } from "@/components/common/CategoryBadge";
+import { CategoryDeleteDialog } from "@/components/common/CategoryDeleteDialog";
+import { EditButton } from "@/components/refine-ui/buttons/edit";
+import { SelectInput, TextInput } from "@/components/common/form-fields";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useCategories } from "@/hooks/useCategories";
+import { useUserSelect } from "@/hooks/useUserSelect";
+import type { ICategory, IUser } from "@/interfaces";
 
-/** Delete is usage-aware: referencing items must be transferred to another category first. */
-const CategoryDeleteButton: React.FC<{ record: ICategory; candidates: ICategory[] }> = ({ record, candidates }) => {
+const ALL = { pagination: { pageSize: 1000 } };
+
+interface FilterValues {
+  name?: string;
+  groupId?: number;
+  userId?: number;
+}
+
+export const CategoryList = () => {
   const translate = useTranslate();
-  const invalidate = useInvalidate();
-  const [open, setOpen] = useState(false);
-  const [target, setTarget] = useState<number>();
-  const { mutate: removeOne } = useDelete();
-  const { mutate: removeWithTransfer } = useCustomMutation();
-
-  const { result: usage, query } = useCustom<ICategoryUsage>({
-    url: `/api/categories/usage/${record.id}`,
-    method: "get",
-    queryOptions: { enabled: open, retry: false },
-  });
-  const itemCount = usage?.data?.itemCount ?? 0;
-
-  const done = () => {
-    setOpen(false);
-    setTarget(undefined);
-    void invalidate({ resource: "categories", invalidates: ["list", "many"] });
-  };
-
-  const confirm = () => {
-    const successNotification = successPayload(translate("panel.category.removed", "Category removed."));
-    const errorNotification = errorPayload(translate("panel.category.removeError", "Could not remove category."));
-    if (itemCount === 0) {
-      removeOne({ resource: "categories", id: record.id }, { onSuccess: done });
-    } else {
-      removeWithTransfer(
-        {
-          url: `/api/categories/${record.id}?transferTo=${target}`,
-          method: "delete",
-          values: {},
-          successNotification,
-          errorNotification,
-        },
-        { onSuccess: done }
-      );
-    }
-  };
-
-  return (
-    <>
-      <Button size="small" danger icon={<DeleteOutlined />} onClick={() => setOpen(true)} />
-      <Modal
-        open={open}
-        title={translate("panel.category.remove", "Remove category")}
-        onCancel={() => setOpen(false)}
-        onOk={confirm}
-        okButtonProps={{ danger: true, disabled: query.isLoading || (itemCount > 0 && !target) }}
-        confirmLoading={query.isLoading}
-      >
-        {query.isLoading ? (
-          <Spin />
-        ) : itemCount === 0 ? (
-          <Typography.Text>{translate("panel.category.confirmRemove", "Sure to remove?")}</Typography.Text>
-        ) : (
-          <Space direction="vertical" style={{ width: "100%" }}>
-            <Typography.Text>
-              {translate(
-                "panel.category.transferPrompt",
-                { count: itemCount },
-                "{count} items use this category. Move them to:"
-              )}
-            </Typography.Text>
-            <Select
-              style={{ width: "100%" }}
-              value={target}
-              onChange={setTarget}
-              options={candidates.map((c) => ({ value: c.id, label: <CategoryBadge category={c} /> }))}
-            />
-          </Space>
-        )}
-      </Modal>
-    </>
-  );
-};
-
-export const CategoryList: React.FC<IResourceComponentsProps> = () => {
-  const translate = useTranslate();
-  const { tableProps, searchFormProps } = useTable<
-    ICategory,
-    HttpError,
-    { name: string; groupId: number; userId: number }
-  >({
-    syncWithLocation: true,
-    onSearch: (params: { name: string; groupId: number; userId: number }) => {
-      const crudFilters: CrudFilters = [];
-      crudFilters.push({ field: "name", operator: "eq", value: params.name?.trim() });
-      crudFilters.push({ field: "groupId", operator: "eq", value: params.groupId });
-      crudFilters.push({ field: "userId", operator: "eq", value: params.userId });
-
-      return crudFilters;
-    },
-  });
+  const { register, handleSubmit, setValue, watch } = useForm<FilterValues>({});
   const { categories, groups } = useCategories();
-  const { selectProps: userSelectProps } = useUserSelect();
+  const { options: userOptions } = useUserSelect();
 
-  const groupNameById = useMemo(() => new Map(groups.map((g) => [g.id, g.name] as const)), [groups]);
+  const { result: users } = useList<IUser>({ resource: "users", ...ALL });
+  const groupNameById = useMemo(() => new Map(groups.map((group) => [group.id, group.name] as const)), [groups]);
+  const userNameById = useMemo(() => new Map((users?.data ?? []).map((user) => [user.id, user.name] as const)), [users]);
 
-  const userIds = useMemo(
-    () => [...new Set(tableProps?.dataSource?.map((category) => category.userId) ?? [])],
-    [tableProps?.dataSource]
+  const columns = useMemo<ColumnDef<ICategory>[]>(
+    () => [
+      {
+        id: "name",
+        accessorKey: "name",
+        header: translate("panel.category.field.name", "Name"),
+        cell: ({ row }) => <CategoryBadge category={row.original} />,
+      },
+      {
+        id: "groupId",
+        accessorKey: "groupId",
+        header: translate("panel.category.field.group", "Group"),
+        cell: ({ row }) => groupNameById.get(row.original.groupId ?? -1) ?? "-",
+      },
+      {
+        id: "userId",
+        accessorKey: "userId",
+        header: translate("panel.category.field.user", "User"),
+        cell: ({ row }) => userNameById.get(row.original.userId) ?? "Loading...",
+      },
+      {
+        id: "isSystem",
+        accessorKey: "isSystem",
+        header: translate("panel.category.field.system", "System"),
+        cell: ({ row }) =>
+          row.original.isSystem ? translate("panel.category.yes", "Yes") : translate("panel.category.no", "No"),
+      },
+      {
+        id: "actions",
+        header: translate("panel.items.column.action", "Action"),
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <EditButton variant="outline" size="icon" recordItemId={row.original.id} />
+            <CategoryDeleteDialog
+              record={row.original}
+              candidates={categories.filter((category) => category.id !== row.original.id)}
+              resource="categories"
+              usageUrl="/api/categories/usage"
+              invalidates={["list", "many"]}
+            />
+          </div>
+        ),
+      },
+    ],
+    [translate, categories, groupNameById, userNameById]
   );
-  const {
-    result: users,
-    query: { isLoading: isLoadingUsers },
-  } = useMany<IUser>({
-    resource: "users",
-    ids: userIds,
-    queryOptions: { enabled: userIds.length > 0 },
+
+  const table = useTable<ICategory>({
+    refineCoreProps: { resource: "categories", syncWithLocation: true },
+    columns,
   });
-  const userNameById = useMemo(
-    () => new Map((users?.data ?? []).map((user) => [user.id, user.name] as const)),
-    [users]
-  );
+
+  const onSearch = (values: FilterValues) =>
+    table.refineCore.setFilters(
+      [
+        { field: "name", operator: "eq", value: values.name?.trim() },
+        { field: "groupId", operator: "eq", value: values.groupId },
+        { field: "userId", operator: "eq", value: values.userId },
+      ].filter((filter) => filter.value !== undefined && filter.value !== "") as CrudFilter[],
+      "replace"
+    );
 
   return (
-    <Row gutter={[16, 16]}>
-      <Col xs={24} lg={6}>
-        <Form {...searchFormProps} layout="vertical">
-          <Form.Item label={translate("panel.category.field.name", "Name")} name="name">
-            <Input allowClear />
-          </Form.Item>
-          <Form.Item label={translate("panel.category.field.group", "Group")} name="groupId">
-            <Select options={groups.map((group) => ({ value: group.id, label: group.name }))} allowClear />
-          </Form.Item>
-          <Form.Item label={translate("panel.category.field.user", "User")} name="userId">
-            <Select {...userSelectProps} allowClear />
-          </Form.Item>
-          <Form.Item>
-            <Button htmlType="submit" type="primary">
-              {translate("panel.items.filter.filter", "Filter")}
-            </Button>
-          </Form.Item>
-        </Form>
-      </Col>
-      <Col xs={24} lg={18}>
-        <List>
-          <Table {...tableProps} rowKey="id">
-            <Table.Column
-              dataIndex="name"
-              title={translate("panel.category.field.name", "Name")}
-              render={(_, record: ICategory) => <CategoryBadge category={record} />}
-            />
-            <Table.Column
-              dataIndex="groupId"
-              title={translate("panel.category.field.group", "Group")}
-              render={(value) => groupNameById.get(value) ?? "-"}
-            />
-            <Table.Column
-              dataIndex="userId"
-              title={translate("panel.category.field.user", "User")}
-              render={(value) => <TextField value={isLoadingUsers ? "Loading..." : userNameById.get(value)} />}
-            />
-            <Table.Column
-              dataIndex="isSystem"
-              title={translate("panel.category.field.system", "System")}
-              render={(value: boolean) =>
-                value ? translate("panel.category.yes", "Yes") : translate("panel.category.no", "No")
-              }
-            />
-            <Table.Column<ICategory>
-              title={translate("panel.items.column.action", "Action")}
-              dataIndex="actions"
-              render={(_, record) => (
-                <Space>
-                  <EditButton hideText size="small" recordItemId={record.id} />
-                  <CategoryDeleteButton record={record} candidates={categories.filter((c) => c.id !== record.id)} />
-                </Space>
-              )}
-            />
-          </Table>
-        </List>
-      </Col>
-    </Row>
+    <div className="flex flex-col gap-4">
+      <PageHeader title={translate("categories.categories", "Categories")} />
+      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+        <Card>
+          <CardContent>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSearch)}>
+              <TextInput label={translate("panel.category.field.name", "Name")} {...register("name")} />
+              <SelectInput
+                label={translate("panel.category.field.group", "Group")}
+                options={groups.map((group) => ({ value: `${group.id}`, label: group.name }))}
+                value={watch("groupId")}
+                onChange={(value) => setValue("groupId", value as number | undefined)}
+                allowClear
+              />
+              <SelectInput
+                label={translate("panel.category.field.user", "User")}
+                options={userOptions}
+                value={watch("userId")}
+                onChange={(value) => setValue("userId", value as number | undefined)}
+                allowClear
+              />
+              <Button type="submit">{translate("panel.items.filter.filter", "Filter")}</Button>
+            </form>
+          </CardContent>
+        </Card>
+        <DataTable table={table} />
+      </div>
+    </div>
   );
 };

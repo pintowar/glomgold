@@ -1,8 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
-import enUS from "antd/locale/en_US";
-import ptBR from "antd/locale/pt_BR";
 import type { SupportedLang } from "./translations";
 import { persistLang, resolveInitialLang, toBcp47 } from "./locale";
 
@@ -11,14 +9,12 @@ interface LocaleContextValue {
   setLang: (lang: SupportedLang) => void;
   /** BCP47 tag for Intl formatters (pt-BR / en-US). */
   bcp47: string;
-  antdLocale: typeof enUS;
 }
 
 const LocaleContext = createContext<LocaleContextValue>({
   lang: "en",
   setLang: () => undefined,
   bcp47: "en-US",
-  antdLocale: enUS,
 });
 
 export const LocaleProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
@@ -40,7 +36,6 @@ export const LocaleProvider: React.FC<React.PropsWithChildren> = ({ children }) 
       lang,
       setLang,
       bcp47: toBcp47(lang === "pt" ? "pt-BR" : "en-US"),
-      antdLocale: lang === "pt" ? ptBR : enUS,
     }),
     [lang, setLang]
   );

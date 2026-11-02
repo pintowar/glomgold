@@ -1,11 +1,8 @@
-import React from "react";
-import { Typography } from "antd";
+import type { ReactNode } from "react";
 
-const { Title, Text } = Typography;
-
-export const ShowField: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <>
-    <Title level={5}>{label}</Title>
-    <Text>{children}</Text>
-  </>
+export const ShowField = ({ label, children }: { label: string; children: ReactNode }) => (
+  <div className="flex flex-col gap-1 py-1">
+    <span className="text-sm font-semibold">{label}</span>
+    <span className="text-sm">{children}</span>
+  </div>
 );

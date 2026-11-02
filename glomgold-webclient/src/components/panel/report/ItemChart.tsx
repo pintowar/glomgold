@@ -1,24 +1,9 @@
-import React, { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslate } from "@refinedev/core";
-import { ColorModeContext } from "../../../contexts/color-mode";
-import { ApexOptions } from "apexcharts";
-import Chart from "react-apexcharts";
-import { EXPENSE_COLOR, INCOME_COLOR, ITEM_TYPES } from "../../../constants";
-import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const groupItemsByValue = (values: number[]) => {
-  const grouped = new Map<string, (number | null)[]>();
-  values
-    .map((it) => (it !== 0 ? it : null))
-    .forEach((value) => {
-      const types = ITEM_TYPES;
-      const currentType = (value || 0) < 0 ? types[0] : types[1];
-      types.forEach((type) =>
-        grouped.set(type, (grouped.get(type) || []).concat(currentType === type ? [value] : [null]))
-      );
-    });
-  return grouped;
-};
+import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
+import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 
 interface ItemChartProps {
   cols: string[];
@@ -27,36 +12,37 @@ interface ItemChartProps {
   currency: string;
 }
 
-export const ItemChart: React.FC<ItemChartProps> = ({ cols, data, locale, currency }) => {
-  const { mode } = useContext(ColorModeContext);
+export const ItemChart = ({ cols, data, locale, currency }: ItemChartProps) => {
   const translate = useTranslate();
-
   const currencyFormat = useCurrencyFormat(locale, currency);
 
-  const groupedValues = useMemo(() => groupItemsByValue(data), [data]);
-  const series = useMemo(
+  const chartData = useMemo(
     () =>
-      Array.from(groupedValues.keys()).map((key) => ({
-        name: translate(`panel.charts.series.${key.toLowerCase()}`, key),
-        data: groupedValues.get(key) || [],
-      })),
-    [groupedValues, translate]
+      cols.map((col, index) => {
+        const value = data[index];
+        return {
+          col,
+          EXPENSE: value < 0 ? value : null,
+          INCOME: value > 0 ? value : null,
+        };
+      }),
+    [cols, data]
   );
 
-  const barChartOptions = useMemo(
-    () =>
-      ({
-        title: { text: translate("panel.charts.averageItemCost", "Average Item Cost") },
-        chart: { id: "bar", background: "transparent", stacked: true, animations: { enabled: false } },
-        plotOptions: { bar: { borderRadius: 4 } },
-        dataLabels: { enabled: false },
-        colors: [EXPENSE_COLOR, INCOME_COLOR],
-        theme: { mode },
-        tooltip: { y: { formatter: currencyFormat } },
-        xaxis: { categories: cols },
-      }) as ApexOptions,
-    [cols, currencyFormat, mode, translate]
+  return (
+    <div className="h-[350px] w-full">
+      <p className="mb-2 text-sm font-semibold">{translate("panel.charts.averageItemCost", "Average Item Cost")}</p>
+      <ResponsiveContainer width="100%" height="90%">
+        <BarChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="col" />
+          <YAxis tickFormatter={(value: number) => currencyFormat(value)} width={90} />
+          <Tooltip formatter={(value: number) => currencyFormat(value)} />
+          <Legend />
+          <Bar dataKey="EXPENSE" name={translate("panel.charts.series.expense", "expense")} stackId="a" fill={EXPENSE_COLOR} />
+          <Bar dataKey="INCOME" name={translate("panel.charts.series.income", "income")} stackId="a" fill={INCOME_COLOR} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
-
-  return <Chart options={barChartOptions} series={series} type="bar" height={350} width="100%" />;
 };

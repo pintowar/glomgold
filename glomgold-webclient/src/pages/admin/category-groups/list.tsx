@@ -1,86 +1,94 @@
-import React, { useMemo } from "react";
-import { CrudFilters, HttpError, IResourceComponentsProps, useMany, useTranslate } from "@refinedev/core";
+import { useMemo } from "react";
+import { useList, useTranslate, type CrudFilter } from "@refinedev/core";
+import { useTable } from "@refinedev/react-table";
+import { useForm } from "react-hook-form";
+import type { ColumnDef } from "@tanstack/react-table";
 
-import { List, TextField, useTable } from "@refinedev/antd";
-import { Button, Col, Form, Input, Row, Select, Table } from "antd";
+import { DataTable } from "@/components/refine-ui/data-table/data-table";
+import { PageHeader } from "@/components/common/PageHeader";
+import { ResourceActions } from "@/components/common/ResourceActions";
+import { SelectInput, TextInput } from "@/components/common/form-fields";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useUserSelect } from "@/hooks/useUserSelect";
+import type { ICategoryGroup, IUser } from "@/interfaces";
 
-import { ICategoryGroup, IUser } from "../../../interfaces";
-import { ResourceActions } from "../../../components/common/ResourceActions";
-import { useUserSelect } from "../../../hooks/useUserSelect";
+const ALL = { pagination: { pageSize: 1000 } };
 
-export const CategoryGroupList: React.FC<IResourceComponentsProps> = () => {
+interface FilterValues {
+  name?: string;
+  userId?: number;
+}
+
+export const CategoryGroupList = () => {
   const translate = useTranslate();
-  const { tableProps, searchFormProps } = useTable<ICategoryGroup, HttpError, { name: string; userId: number }>({
-    syncWithLocation: true,
-    onSearch: (params: { name: string; userId: number }) => {
-      const crudFilters: CrudFilters = [];
-      crudFilters.push({ field: "name", operator: "eq", value: params.name?.trim() });
-      crudFilters.push({ field: "userId", operator: "eq", value: params.userId });
+  const { options: userOptions } = useUserSelect();
+  const { register, handleSubmit, setValue, watch } = useForm<FilterValues>({});
 
-      return crudFilters;
-    },
+  const { result: users } = useList<IUser>({ resource: "users", ...ALL });
+  const userNameById = useMemo(() => new Map((users?.data ?? []).map((user) => [user.id, user.name] as const)), [users]);
+
+  const columns = useMemo<ColumnDef<ICategoryGroup>[]>(
+    () => [
+      { id: "name", accessorKey: "name", header: translate("panel.category.field.name", "Name") },
+      { id: "position", accessorKey: "position", header: translate("panel.category.field.position", "Position") },
+      {
+        id: "userId",
+        accessorKey: "userId",
+        header: translate("panel.category.field.user", "User"),
+        cell: ({ row }) => userNameById.get(row.original.userId) ?? "Loading...",
+      },
+      {
+        id: "isSystem",
+        accessorKey: "isSystem",
+        header: translate("panel.category.field.system", "System"),
+        cell: ({ row }) =>
+          row.original.isSystem ? translate("panel.category.yes", "Yes") : translate("panel.category.no", "No"),
+      },
+      {
+        id: "actions",
+        header: translate("panel.items.column.action", "Action"),
+        cell: ({ row }) => <ResourceActions recordId={row.original.id} />,
+      },
+    ],
+    [translate, userNameById]
+  );
+
+  const table = useTable<ICategoryGroup>({
+    refineCoreProps: { resource: "category-groups", syncWithLocation: true },
+    columns,
   });
 
-  const userIds = useMemo(
-    () => [...new Set(tableProps?.dataSource?.map((group) => group.userId) ?? [])],
-    [tableProps?.dataSource]
-  );
-  const {
-    result: users,
-    query: { isLoading: isLoadingUsers },
-  } = useMany<IUser>({
-    resource: "users",
-    ids: userIds,
-    queryOptions: { enabled: userIds.length > 0 },
-  });
-  const userNameById = useMemo(
-    () => new Map((users?.data ?? []).map((user) => [user.id, user.name] as const)),
-    [users]
-  );
-  const { selectProps: userSelectProps } = useUserSelect();
+  const onSearch = (values: FilterValues) =>
+    table.refineCore.setFilters(
+      [
+        { field: "name", operator: "eq", value: values.name?.trim() },
+        { field: "userId", operator: "eq", value: values.userId },
+      ].filter((filter) => filter.value !== undefined && filter.value !== "") as CrudFilter[],
+      "replace"
+    );
 
   return (
-    <Row gutter={[16, 16]}>
-      <Col xs={24} lg={6}>
-        <Form {...searchFormProps} layout="vertical">
-          <Form.Item label={translate("panel.category.field.name", "Name")} name="name">
-            <Input allowClear />
-          </Form.Item>
-          <Form.Item label={translate("panel.category.field.user", "User")} name="userId">
-            <Select {...userSelectProps} allowClear />
-          </Form.Item>
-          <Form.Item>
-            <Button htmlType="submit" type="primary">
-              {translate("panel.items.filter.filter", "Filter")}
-            </Button>
-          </Form.Item>
-        </Form>
-      </Col>
-      <Col xs={24} lg={18}>
-        <List>
-          <Table {...tableProps} rowKey="id">
-            <Table.Column dataIndex="name" title={translate("panel.category.field.name", "Name")} />
-            <Table.Column dataIndex="position" title={translate("panel.category.field.position", "Position")} />
-            <Table.Column
-              dataIndex="userId"
-              title={translate("panel.category.field.user", "User")}
-              render={(value) => <TextField value={isLoadingUsers ? "Loading..." : userNameById.get(value)} />}
-            />
-            <Table.Column
-              dataIndex="isSystem"
-              title={translate("panel.category.field.system", "System")}
-              render={(value: boolean) =>
-                value ? translate("panel.category.yes", "Yes") : translate("panel.category.no", "No")
-              }
-            />
-            <Table.Column<ICategoryGroup>
-              title={translate("panel.items.column.action", "Action")}
-              dataIndex="actions"
-              render={(_, record) => <ResourceActions recordId={record.id} />}
-            />
-          </Table>
-        </List>
-      </Col>
-    </Row>
+    <div className="flex flex-col gap-4">
+      <PageHeader title={translate("category-groups.category-groups", "Category Groups")} />
+      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+        <Card>
+          <CardContent>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSearch)}>
+              <TextInput label={translate("panel.category.field.name", "Name")} {...register("name")} />
+              <SelectInput
+                label={translate("panel.category.field.user", "User")}
+                options={userOptions}
+                value={watch("userId")}
+                onChange={(value) => setValue("userId", value as number | undefined)}
+                allowClear
+              />
+              <Button type="submit">{translate("panel.items.filter.filter", "Filter")}</Button>
+            </form>
+          </CardContent>
+        </Card>
+        <DataTable table={table} />
+      </div>
+    </div>
   );
 };

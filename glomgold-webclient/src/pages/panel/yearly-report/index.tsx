@@ -1,181 +1,141 @@
-import React, { useMemo } from "react";
-
-import { Row, Col, Card, Space, DatePicker, Tabs, Skeleton, Select, Switch } from "antd";
-import { CalculatorOutlined, LineChartOutlined, TableOutlined } from "@ant-design/icons";
-import dayjs from "dayjs";
-
-import { ItemChart, PeriodChart, SummaryTable } from "../../../components/panel/report";
-import { IPanelAnnualReport } from "../../../interfaces";
+import { useMemo } from "react";
 import { useCustom, useTranslate } from "@refinedev/core";
-import { REPORT_TYPES, type ReportType } from "../../../constants";
-import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
-import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
-import { usePanelSearchParams } from "../../../hooks/usePanelSearchParams";
-import { usePanelAccounts } from "../../../hooks/usePanelAccounts";
+import dayjs from "dayjs";
+import { Calculator, LineChart as LineChartIcon, Table as TableIcon } from "lucide-react";
 
-export const ReportPanel: React.FC = () => {
+import { ItemChart } from "@/components/panel/report/ItemChart";
+import { PeriodChart } from "@/components/panel/report/PeriodChart";
+import { SummaryTable } from "@/components/panel/report/SummaryTable";
+import { ItemTypeIcon } from "@/components/common/ItemTypeIcon";
+import { PageHeader } from "@/components/common/PageHeader";
+import { SelectInput } from "@/components/common/form-fields";
+import { YearPicker } from "@/components/common/period-pickers";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { REPORT_TYPES, type ReportType } from "@/constants";
+import { useIdentityDefaults } from "@/hooks/useIdentityDefaults";
+import { usePanelAccounts } from "@/hooks/usePanelAccounts";
+import { usePanelSearchParams } from "@/hooks/usePanelSearchParams";
+import type { IPanelAnnualReport } from "@/interfaces";
+
+const PERIOD_FORMAT = "YYYY";
+
+export const ReportPanel = () => {
   const { locale, currency } = useIdentityDefaults();
   const translate = useTranslate();
-  const periodFormat = "YYYY";
-  const periodParam = "period";
-  const typeParam = "type";
-  const accountParam = "account";
-  const byCategoryParam = "byCategory";
   const { accounts } = usePanelAccounts();
   const { searchParams, updateSearchParams } = usePanelSearchParams();
-  const period = searchParams.get(periodParam) ?? dayjs().format(periodFormat);
-  const type = (searchParams.get(typeParam) ?? "BALANCE") as ReportType;
-  const accountValue = searchParams.get(accountParam);
+
+  const period = searchParams.get("period") ?? dayjs().format(PERIOD_FORMAT);
+  const type = (searchParams.get("type") ?? "BALANCE") as ReportType;
+  const accountValue = searchParams.get("account");
   const accountId = accountValue ? Number(accountValue) : undefined;
-  const byCategory = searchParams.get(byCategoryParam) === "true";
-  const currentPeriod = useMemo(() => dayjs(period, periodFormat), [period, periodFormat]);
+  const byCategory = searchParams.get("byCategory") === "true";
+  const year = dayjs(period, PERIOD_FORMAT).year();
 
   const {
     query: { isLoading },
-
-    result: dataTable,
+    result,
   } = useCustom<IPanelAnnualReport>({
-    url: `/api/panel/yearly-report`,
+    url: "/api/panel/yearly-report",
     method: "get",
-    config: { query: { year: currentPeriod.year(), type, accountId, byCategory: byCategory } },
+    config: { query: { year, type, accountId, byCategory } },
   });
 
-  const onChangePeriod = (date: dayjs.Dayjs | null) => {
-    if (date) {
-      updateSearchParams({ [periodParam]: date.format(periodFormat) });
-    }
-  };
-
-  const onTypeChange = (value: string) => {
-    if (value) {
-      updateSearchParams({ [typeParam]: value });
-    }
-  };
-
-  const onAccountChange = (value?: number) => {
-    updateSearchParams({ account: value !== undefined ? `${value}` : undefined });
-  };
-
-  const onGroupByCategoryChange = (checked: boolean) => {
-    updateSearchParams({ [byCategoryParam]: checked ? "true" : undefined });
-  };
-  const tabsItems = useMemo(
-    () => [
-      {
-        key: "1",
-        label: (
-          <span>
-            <TableOutlined />
-            {translate("panel.report.table", "Table")}
-          </span>
-        ),
-        children: (
-          <SummaryTable
-            year={currentPeriod.format(periodFormat)}
-            locale={locale}
-            currency={currency}
-            columns={dataTable?.data.columns ?? []}
-            rowIndex={dataTable?.data.rowIndex ?? []}
-            data={dataTable?.data.data ?? []}
-            rowSummary={dataTable?.data.rowSummary ?? []}
-            colSummary={dataTable?.data.colSummary ?? []}
-            total={dataTable?.data.total ?? 0}
-          />
-        ),
-      },
-      {
-        key: "2",
-        label: (
-          <span>
-            <LineChartOutlined />
-            {translate("panel.report.chart", "Chart")}
-          </span>
-        ),
-        children: (
-          <Space direction="vertical" size={12} style={{ width: "100%" }}>
-            <PeriodChart
-              cols={dataTable?.data.columns ?? []}
-              data={dataTable?.data.rowSummary ?? []}
-              trend={dataTable?.data.rowTrend ?? []}
-              locale={locale}
-              currency={currency}
-            />
-            <ItemChart
-              cols={dataTable?.data.rowIndex ?? []}
-              data={dataTable?.data.colAverage ?? []}
-              locale={locale}
-              currency={currency}
-            />
-          </Space>
-        ),
-      },
-    ],
-    [currentPeriod, locale, currency, dataTable, translate]
-  );
-
   const typeOptions = useMemo(
-    () =>
-      REPORT_TYPES.map((value) => ({
-        value,
-        label: (
-          <span>
-            {value === "BALANCE" ? <CalculatorOutlined /> : <ItemTypeIcon type={value} />} -{" "}
-            {translate(`panel.report.type.${value.toLowerCase()}`, value)}
-          </span>
-        ),
-      })),
-    [translate]
+    () => REPORT_TYPES.map((value) => ({ value, label: value })),
+    []
   );
 
   return (
-    <>
-      <div className="card-row">
-        <Row gutter={[24, 24]}>
-          <Col span={24}>
-            <Card title={translate("panel.report.navigation", "Report Navigation")} variant="borderless">
-              <Row gutter={[16, 16]}>
-                <Col>
-                  <DatePicker value={currentPeriod} picker="year" onChange={onChangePeriod} allowClear={false} />
-                </Col>
-                <Col>
-                  <Select value={type} onChange={onTypeChange} style={{ width: 160 }} options={typeOptions} />
-                </Col>
-                <Col>
-                  <Select
-                    data-testid="report-account"
-                    allowClear
-                    value={accountId}
-                    onChange={onAccountChange}
-                    style={{ minWidth: 160 }}
-                    placeholder={translate("panel.account.all", "All accounts")}
-                    options={accounts.map((account) => ({ value: account.id, label: account.name }))}
-                  />
-                </Col>
-                <Col>
-                  <Switch
-                    data-testid="report-group-by-category"
-                    checked={byCategory}
-                    onChange={onGroupByCategoryChange}
-                  />
-                  {translate("panel.report.groupByCategory", " by category")}{" "}
-                </Col>
-                <Col span={14} />
-              </Row>
-            </Card>
-          </Col>
-        </Row>
-      </div>
-      <div className="card-row">
-        <Row gutter={[24, 24]}>
-          <Col span={24}>
-            <Card variant="borderless">
-              <Space direction="vertical" size={12} style={{ width: "100%" }}>
-                {!isLoading ? <Tabs type="card" items={tabsItems} /> : <Skeleton active />}
-              </Space>
-            </Card>
-          </Col>
-        </Row>
-      </div>
-    </>
+    <div className="flex flex-col gap-6">
+      <PageHeader title={translate("panel.report.navigation", "Report Navigation")} />
+      <Card>
+        <CardContent className="flex flex-wrap items-end gap-4">
+          <YearPicker value={year} onChange={(next) => updateSearchParams({ period: `${next}` })} />
+          <SelectInput
+            label={translate("panel.report.type.label", "Type")}
+            options={typeOptions}
+            value={type}
+            onChange={(value) => value && updateSearchParams({ type: `${value}` })}
+          />
+          <SelectInput
+            label={translate("panel.account.label", "Account")}
+            options={accounts.map((account) => ({ value: `${account.id}`, label: account.name }))}
+            value={accountId}
+            onChange={(value) => updateSearchParams({ account: value === undefined ? undefined : `${value}` })}
+            allowClear
+            placeholder={translate("panel.account.all", "All accounts")}
+          />
+          <div className="flex items-center gap-2 pb-2">
+            <Switch
+              data-testid="report-group-by-category"
+              checked={byCategory}
+              onCheckedChange={(checked) => updateSearchParams({ byCategory: checked ? "true" : undefined })}
+            />
+            <Label>{translate("panel.report.groupByCategory", " by category")}</Label>
+          </div>
+          <div className="flex items-center gap-2 pb-2 text-sm text-muted-foreground">
+            {type === "BALANCE" ? <Calculator className="size-4" /> : <ItemTypeIcon type={type} />}
+            {translate(`panel.report.type.${type.toLowerCase()}`, type)}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{translate("panel.report.title", "Yearly Report")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <Skeleton className="h-80 w-full" />
+          ) : (
+            <Tabs defaultValue="table">
+              <TabsList>
+                <TabsTrigger value="table">
+                  <TableIcon className="size-4" />
+                  {translate("panel.report.table", "Table")}
+                </TabsTrigger>
+                <TabsTrigger value="chart">
+                  <LineChartIcon className="size-4" />
+                  {translate("panel.report.chart", "Chart")}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="table">
+                <SummaryTable
+                  year={`${year}`}
+                  locale={locale}
+                  currency={currency}
+                  columns={result?.data?.columns ?? []}
+                  rowIndex={result?.data?.rowIndex ?? []}
+                  data={result?.data?.data ?? []}
+                  rowSummary={result?.data?.rowSummary ?? []}
+                  colSummary={result?.data?.colSummary ?? []}
+                  total={result?.data?.total ?? 0}
+                />
+              </TabsContent>
+              <TabsContent value="chart" className="flex flex-col gap-6">
+                <PeriodChart
+                  cols={result?.data?.columns ?? []}
+                  data={result?.data?.rowSummary ?? []}
+                  trend={result?.data?.rowTrend ?? []}
+                  locale={locale}
+                  currency={currency}
+                />
+                <ItemChart
+                  cols={result?.data?.rowIndex ?? []}
+                  data={result?.data?.colAverage ?? []}
+                  locale={locale}
+                  currency={currency}
+                />
+              </TabsContent>
+            </Tabs>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };

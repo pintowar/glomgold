@@ -1,93 +1,73 @@
-import React from "react";
-import { Row, Col, Layout, Card, Typography, Form, Input, Button } from "antd";
 import { useLogin, useTranslate } from "@refinedev/core";
+import { useForm } from "react-hook-form";
+import { Loader2 } from "lucide-react";
 
-import { layoutStyles, containerStyles, titleStyles, imageContainer } from "./styles";
-import logo from "../../assets/images/glomgold-logo.png";
+import logo from "@/assets/images/glomgold-logo.png";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TextInput } from "@/components/common/form-fields";
 
-const { Title } = Typography;
 export interface ILoginForm {
   username: string;
   password: string;
-  remember: boolean;
 }
 
-/**
- * **refine** has a default login page form which is served on `/login` route when the `authProvider` configuration is provided.
- *
- * @see {@link https://refine.dev/docs/api-references/components/refine-config#loginpage} for more details.
- */
-export const Login: React.FC = () => {
-  const [form] = Form.useForm<ILoginForm>();
+export const Login = () => {
   const translate = useTranslate();
-
-  const { mutate: login, isPending: isLoading } = useLogin<ILoginForm>();
-
-  const CardTitle = (
-    <Title level={3} style={titleStyles}>
-      {translate("pages.login.title", "Sign in your account")}
-    </Title>
-  );
+  const { mutate: login, isPending } = useLogin<ILoginForm>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ILoginForm>({ defaultValues: { username: "", password: "" } });
 
   return (
-    <Layout style={layoutStyles}>
-      <Row
-        justify="center"
-        align="middle"
-        style={{
-          height: "100vh",
-        }}
-      >
-        <Col xs={22}>
-          <div style={containerStyles}>
-            <div style={imageContainer}>
-              <img src={logo} alt="Glomgold Logo" />
-            </div>
-            <Card title={CardTitle} styles={{ header: { borderBottom: 0 } }}>
-              <Form<ILoginForm>
-                layout="vertical"
-                form={form}
-                onFinish={(values) => {
-                  login(values);
-                }}
-                requiredMark={false}
-                initialValues={{
-                  remember: false,
-                }}
-              >
-                <Form.Item
-                  name="username"
-                  label={translate("pages.login.username", "Username")}
-                  rules={[
-                    {
-                      required: true,
-                      message: translate("pages.login.usernameRequired", "Please input your username!"),
-                    },
-                  ]}
-                >
-                  <Input size="large" placeholder={translate("pages.login.username", "Username")} />
-                </Form.Item>
-                <Form.Item
-                  name="password"
-                  label={translate("pages.login.password", "Password")}
-                  rules={[
-                    {
-                      required: true,
-                      message: translate("pages.login.passwordRequired", "Please input your password!"),
-                    },
-                  ]}
-                  style={{ marginBottom: "12px" }}
-                >
-                  <Input.Password placeholder={translate("pages.login.passwordPlaceholder", "●●●●●●●●")} size="large" />
-                </Form.Item>
-                <Button type="primary" size="large" htmlType="submit" loading={isLoading} block>
-                  {translate("pages.login.signin", "Sign in")}
-                </Button>
-              </Form>
-            </Card>
-          </div>
-        </Col>
-      </Row>
-    </Layout>
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-6 flex justify-center">
+          <img src={logo} alt="Glomgold Logo" className="h-24" />
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center text-xl">
+              {translate("pages.login.title", "Sign in your account")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={handleSubmit((values) => login(values))}
+              noValidate
+            >
+              <TextInput
+                id="username"
+                label={translate("pages.login.username", "Username")}
+                placeholder={translate("pages.login.username", "Username")}
+                autoComplete="username"
+                error={errors.username?.message}
+                {...register("username", {
+                  required: translate("pages.login.usernameRequired", "Please input your username!"),
+                })}
+              />
+              <TextInput
+                id="password"
+                type="password"
+                label={translate("pages.login.password", "Password")}
+                placeholder={translate("pages.login.passwordPlaceholder", "Password")}
+                autoComplete="current-password"
+                error={errors.password?.message}
+                {...register("password", {
+                  required: translate("pages.login.passwordRequired", "Please input your password!"),
+                })}
+              />
+              <Button type="submit" size="lg" disabled={isPending}>
+                {isPending && <Loader2 className="size-4 animate-spin" />}
+                {translate("pages.login.signin", "Sign in")}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };

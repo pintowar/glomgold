@@ -1,10 +1,9 @@
-import React from "react";
-import { Space } from "antd";
-import { DeleteButton, EditButton } from "@refinedev/antd";
+import { DeleteButton } from "../refine-ui/buttons/delete";
+import { EditButton } from "../refine-ui/buttons/edit";
 
-export const ResourceActions: React.FC<{ recordId: number | string }> = ({ recordId }) => (
-  <Space>
-    <EditButton hideText size="small" recordItemId={recordId} />
-    <DeleteButton hideText size="small" recordItemId={recordId} />
-  </Space>
+export const ResourceActions = ({ recordId }: { recordId: number | string }) => (
+  <div className="flex items-center gap-2">
+    <EditButton variant="outline" size="icon" recordItemId={recordId} />
+    <DeleteButton variant="destructive" size="icon" recordItemId={recordId} />
+  </div>
 );

@@ -1,68 +1,55 @@
-import React from "react";
-import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
+import { useForm } from "@refinedev/react-hook-form";
+import { useTranslate, type HttpError } from "@refinedev/core";
+import { Link } from "react-router";
 
-import { Create, useForm } from "@refinedev/antd";
-import { Form, Input, Select } from "antd";
+import { AccountFormFields } from "@/components/admin/AccountFormFields";
+import { PageHeader } from "@/components/common/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useUserSelect } from "@/hooks/useUserSelect";
+import type { IAccount } from "@/interfaces";
 
-import { IAccount } from "../../../interfaces";
-import { ACCOUNT_TYPES } from "../../../constants";
-import { useUserSelect } from "../../../hooks/useUserSelect";
-
-export const AccountCreate: React.FC<IResourceComponentsProps> = () => {
+export const AccountCreate = () => {
   const translate = useTranslate();
-  const { formProps, saveButtonProps } = useForm<IAccount>({
-    // warnWhenUnsavedChanges: true,
+  const { options: userOptions } = useUserSelect();
+  const {
+    register,
+    control,
+    formState: { errors },
+    saveButtonProps,
+  } = useForm<IAccount, HttpError, IAccount>({
+    refineCoreProps: { resource: "accounts" },
+    defaultValues: { type: "CHECKING", currency: "" },
+    warnWhenUnsavedChanges: true,
   });
-  const { selectProps: userSelectProps } = useUserSelect();
 
   return (
-    <Create saveButtonProps={saveButtonProps}>
-      <Form {...formProps} layout="vertical">
-        <Form.Item
-          label={translate("panel.account.field.name", "Name")}
-          name="name"
-          rules={[
-            {
-              required: true,
-              message: translate("panel.account.nameRequired", "Please input a name!"),
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label={translate("panel.account.field.type", "Type")}
-          name="type"
-          initialValue="CHECKING"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select
-            options={ACCOUNT_TYPES.map((value) => ({
-              value,
-              label: translate(`panel.account.type.${value}`, value),
-            }))}
-          />
-        </Form.Item>
-        <Form.Item label={translate("panel.account.field.currency", "Currency")} name="currency">
-          <Input maxLength={3} />
-        </Form.Item>
-        <Form.Item
-          label={translate("panel.account.field.user", "User")}
-          name="userId"
-          rules={[
-            {
-              required: true,
-              message: translate("panel.account.userRequired", "Please select an user!"),
-            },
-          ]}
-        >
-          <Select {...userSelectProps} />
-        </Form.Item>
-      </Form>
-    </Create>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title={translate("panel.account.new", "New Account")}
+        actions={
+          <Button variant="outline" asChild>
+            <Link to="/admin/accounts">Back</Link>
+          </Button>
+        }
+      />
+      <Card>
+        <CardContent>
+          <form className="flex max-w-xl flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+            <AccountFormFields
+              register={register}
+              control={control}
+              errors={errors}
+              userOptions={userOptions}
+            />
+            <div>
+              <Button onClick={saveButtonProps.onClick} disabled={saveButtonProps.disabled}>
+                {translate("buttons.save", "Save")}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

@@ -1,180 +1,153 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
+import { useList, useTranslate, type CrudFilter } from "@refinedev/core";
+import { useTable } from "@refinedev/react-table";
+import { useForm } from "react-hook-form";
+import type { ColumnDef } from "@tanstack/react-table";
 
-import { CrudFilters, IResourceComponentsProps, HttpError, useMany } from "@refinedev/core";
+import { DataTable } from "@/components/refine-ui/data-table/data-table";
+import { ImportCsvButton } from "@/components/admin/ImportCsvButton";
+import { PageHeader } from "@/components/common/PageHeader";
+import { CategoryBadge } from "@/components/common/CategoryBadge";
+import { ItemTypeIcon } from "@/components/common/ItemTypeIcon";
+import { ResourceActions } from "@/components/common/ResourceActions";
+import { SelectInput, TextInput } from "@/components/common/form-fields";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ITEM_ORIGINS } from "@/constants";
+import { useAccountSelect } from "@/hooks/useAccountSelect";
+import { useCategories } from "@/hooks/useCategories";
+import { useUserSelect } from "@/hooks/useUserSelect";
+import type { IAccount, IItem, IUser } from "@/interfaces";
 
-import { List, TextField, useImport, ImportButton, useTable } from "@refinedev/antd";
-import { Table, Select, Row, Col, Form, Input, Button, Tooltip } from "antd";
+interface FilterValues {
+  description?: string;
+  userId?: number;
+  accountId?: number;
+  origin?: string;
+}
 
-import { SearchOutlined } from "@ant-design/icons";
+const ALL = { pagination: { pageSize: 1000 } };
 
-import { IAccount, IItem, IUser } from "../../../interfaces";
-import { ITEM_ORIGINS } from "../../../constants";
-import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
-import { CategoryBadge } from "../../../components/common/CategoryBadge";
-import { ResourceActions } from "../../../components/common/ResourceActions";
-import { useUserSelect } from "../../../hooks/useUserSelect";
-import { useAccountSelect } from "../../../hooks/useAccountSelect";
-import { useCategories } from "../../../hooks/useCategories";
+export const ItemList = () => {
+  const translate = useTranslate();
+  const { register, handleSubmit, setValue, watch } = useForm<FilterValues>({});
+  const { options: userOptions } = useUserSelect();
+  const { options: accountOptions } = useAccountSelect(watch("userId"));
+  const { categoryById } = useCategories();
 
-export const ItemList: React.FC<IResourceComponentsProps> = () => {
-  const importProps = useImport<IItem>();
-  const { tableProps, searchFormProps } = useTable<
-    IItem,
-    HttpError,
-    { description: string; userId: number; accountId: number; origin: string }
-  >({
-    syncWithLocation: true,
-    onSearch: (params: { description: string; userId: number; accountId: number; origin: string }) => {
-      const crudFilters: CrudFilters = [];
-      const { description, userId, accountId, origin } = params;
-
-      crudFilters.push({
-        field: "description",
-        operator: "eq",
-        value: description,
-      });
-      crudFilters.push({
-        field: "userId",
-        operator: "eq",
-        value: userId,
-      });
-      crudFilters.push({
-        field: "accountId",
-        operator: "eq",
-        value: accountId,
-      });
-      crudFilters.push({
-        field: "origin",
-        operator: "eq",
-        value: origin,
-      });
-
-      return crudFilters;
-    },
-  });
-
-  const selectedUserId = Form.useWatch("userId", searchFormProps.form);
-  const { selectProps: accountSelectProps } = useAccountSelect(selectedUserId);
-
-  const userIds = useMemo(
-    () => [...new Set(tableProps?.dataSource?.map((item) => item.userId) ?? [])],
-    [tableProps?.dataSource]
-  );
-  const {
-    result: data,
-    query: { isLoading },
-  } = useMany<IUser>({
-    resource: "users",
-    ids: userIds,
-    queryOptions: {
-      enabled: userIds.length > 0,
-    },
-  });
-
-  const accountIds = useMemo(
-    () => [...new Set(tableProps?.dataSource?.map((item) => item.accountId) ?? [])],
-    [tableProps?.dataSource]
-  );
-  const {
-    result: accounts,
-    query: { isLoading: isLoadingAccounts },
-  } = useMany<IAccount>({
-    resource: "accounts",
-    ids: accountIds,
-    queryOptions: {
-      enabled: accountIds.length > 0,
-    },
-  });
-
-  const userNameById = useMemo(() => new Map((data?.data ?? []).map((user) => [user.id, user.name] as const)), [data]);
+  const { result: users } = useList<IUser>({ resource: "users", ...ALL });
+  const { result: accounts } = useList<IAccount>({ resource: "accounts", ...ALL });
+  const userNameById = useMemo(() => new Map((users?.data ?? []).map((user) => [user.id, user.name] as const)), [users]);
   const accountNameById = useMemo(
     () => new Map((accounts?.data ?? []).map((account) => [account.id, account.name] as const)),
     [accounts]
   );
 
-  const { selectProps: userSelectProps } = useUserSelect();
-  const { categoryById } = useCategories();
+  const columns = useMemo<ColumnDef<IItem>[]>(
+    () => [
+      { id: "id", accessorKey: "id", header: "ID" },
+      {
+        id: "itemType",
+        accessorKey: "itemType",
+        header: translate("panel.items.column.type", "Type"),
+        cell: ({ row }) => (
+          <span title={row.original.itemType}>
+            <ItemTypeIcon type={row.original.itemType} />
+          </span>
+        ),
+      },
+      { id: "description", accessorKey: "description", header: translate("panel.items.column.description", "Description") },
+      {
+        id: "categoryId",
+        accessorKey: "categoryId",
+        header: translate("panel.items.column.category", "Category"),
+        cell: ({ row }) => (
+          <CategoryBadge category={row.original.categoryId != null ? categoryById.get(row.original.categoryId) : null} />
+        ),
+      },
+      { id: "value", accessorKey: "value", header: translate("panel.items.column.value", "Value") },
+      { id: "year", accessorKey: "year", header: translate("items.field.year", "Year") },
+      { id: "month", accessorKey: "month", header: translate("items.field.month", "Month") },
+      { id: "origin", accessorKey: "origin", header: translate("panel.items.column.origin", "Origin") },
+      {
+        id: "userId",
+        accessorKey: "userId",
+        header: translate("panel.account.field.user", "User"),
+        cell: ({ row }) => userNameById.get(row.original.userId) ?? "Loading...",
+      },
+      {
+        id: "accountId",
+        accessorKey: "accountId",
+        header: translate("panel.account.label", "Account"),
+        cell: ({ row }) => accountNameById.get(row.original.accountId) ?? "Loading...",
+      },
+      {
+        id: "actions",
+        header: translate("panel.items.column.action", "Action"),
+        cell: ({ row }) => <ResourceActions recordId={row.original.id} />,
+      },
+    ],
+    [translate, categoryById, userNameById, accountNameById]
+  );
+
+  const table = useTable<IItem>({
+    refineCoreProps: { resource: "items", syncWithLocation: true },
+    columns,
+  });
+
+  const onSearch = (values: FilterValues) =>
+    table.refineCore.setFilters(
+      [
+        { field: "description", operator: "eq", value: values.description?.trim() },
+        { field: "userId", operator: "eq", value: values.userId },
+        { field: "accountId", operator: "eq", value: values.accountId },
+        { field: "origin", operator: "eq", value: values.origin },
+      ].filter((filter) => filter.value !== undefined && filter.value !== "") as CrudFilter[],
+      "replace"
+    );
 
   return (
-    <Row gutter={[16, 16]}>
-      <Col xs={24} lg={6}>
-        <Form {...searchFormProps} layout="vertical">
-          <Form.Item label="Description" name="description">
-            <Input placeholder="Description" prefix={<SearchOutlined />} />
-          </Form.Item>
-          <Form.Item label="User" name="userId">
-            <Select {...userSelectProps} allowClear />
-          </Form.Item>
-          <Form.Item label="Account" name="accountId">
-            <Select {...accountSelectProps} allowClear />
-          </Form.Item>
-          <Form.Item label="Origin" name="origin">
-            <Select options={ITEM_ORIGINS.map((value) => ({ value, label: value }))} allowClear />
-          </Form.Item>
-          <Form.Item>
-            <Button htmlType="submit" type="primary">
-              Filter
-            </Button>
-          </Form.Item>
-        </Form>
-      </Col>
-      <Col xs={24} lg={18}>
-        <List
-          headerProps={{
-            extra: <ImportButton {...importProps} />,
-          }}
-        >
-          <Table {...tableProps} rowKey="id">
-            <Table.Column dataIndex="id" title="ID" />
-            <Table.Column
-              dataIndex="itemType"
-              title="Type"
-              render={(value) => (
-                <Tooltip placement="left" title={value}>
-                  <ItemTypeIcon type={value} />
-                </Tooltip>
-              )}
-            />
-            <Table.Column dataIndex="description" title="Description" />
-            <Table.Column
-              dataIndex="categoryId"
-              title="Category"
-              render={(value) => <CategoryBadge category={value != null ? categoryById.get(value) : null} />}
-            />
-            <Table.Column dataIndex="value" title="Value" />
-            <Table.Column dataIndex="year" title="Year" />
-            <Table.Column dataIndex="month" title="Month" />
-            <Table.Column dataIndex="origin" title="Origin" />
-            <Table.Column
-              dataIndex="userId"
-              title="User"
-              render={(value) => {
-                if (isLoading) {
-                  return <TextField value="Loading..." />;
-                }
-
-                return <TextField value={userNameById.get(value)} />;
-              }}
-            />
-            <Table.Column
-              dataIndex="accountId"
-              title="Account"
-              render={(value) => {
-                if (isLoadingAccounts) {
-                  return <TextField value="Loading..." />;
-                }
-
-                return <TextField value={accountNameById.get(value)} />;
-              }}
-            />
-            <Table.Column<IItem>
-              title="Actions"
-              dataIndex="actions"
-              render={(_, record) => <ResourceActions recordId={record.id} />}
-            />
-          </Table>
-        </List>
-      </Col>
-    </Row>
+    <div className="flex flex-col gap-4">
+      <PageHeader title={translate("items.items", "Items")} actions={<ImportCsvButton />} />
+      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+        <Card>
+          <CardContent>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSearch)}>
+              <TextInput
+                label={translate("panel.items.column.description", "Description")}
+                placeholder={translate("panel.items.descriptionPlaceholder", "Description")}
+                {...register("description")}
+              />
+              <SelectInput
+                label={translate("panel.account.field.user", "User")}
+                options={userOptions}
+                value={watch("userId")}
+                onChange={(value) => {
+                  setValue("userId", value as number | undefined);
+                  setValue("accountId", undefined);
+                }}
+                allowClear
+              />
+              <SelectInput
+                label={translate("panel.account.label", "Account")}
+                options={accountOptions}
+                value={watch("accountId")}
+                onChange={(value) => setValue("accountId", value as number | undefined)}
+                allowClear
+              />
+              <SelectInput
+                label={translate("panel.items.column.origin", "Origin")}
+                options={ITEM_ORIGINS.map((value) => ({ value, label: value }))}
+                value={watch("origin")}
+                onChange={(value) => setValue("origin", value as string | undefined)}
+                allowClear
+              />
+              <Button type="submit">{translate("panel.items.filter.filter", "Filter")}</Button>
+            </form>
+          </CardContent>
+        </Card>
+        <DataTable table={table} />
+      </div>
+    </div>
   );
 };

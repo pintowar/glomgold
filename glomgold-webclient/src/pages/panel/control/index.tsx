@@ -1,22 +1,18 @@
-import React, { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useCustom } from "@refinedev/core";
-
-import { Row, Col, Spin } from "antd";
 import dayjs from "dayjs";
+import { Loader2 } from "lucide-react";
 
-import { IItem, ISummary } from "../../../interfaces";
-import { PANEL_QUERY_KEYS } from "../../../constants";
-
-import {
-  PeriodSummaryCard,
-  PeriodNavigationCard,
-  MonthItemsCard,
-  MonthStatsCard,
-} from "../../../components/panel/control";
-
-import { useIdentityDefaults } from "../../../hooks/useIdentityDefaults";
-import { usePanelSearchParams } from "../../../hooks/usePanelSearchParams";
-import { usePanelAccounts } from "../../../hooks/usePanelAccounts";
+import { MonthItemsCard } from "@/components/panel/control/MonthItemsCard";
+import { MonthStatsCard } from "@/components/panel/control/MonthStatsCard";
+import { PeriodNavigationCard } from "@/components/panel/control/PeriodNavigationCard";
+import { PeriodSummaryCard } from "@/components/panel/control/PeriodSummaryCard";
+import type { PanelItem } from "@/components/panel/control/types";
+import { PANEL_QUERY_KEYS, PERIOD_FORMAT } from "@/constants";
+import { useIdentityDefaults } from "@/hooks/useIdentityDefaults";
+import { usePanelAccounts } from "@/hooks/usePanelAccounts";
+import { usePanelSearchParams } from "@/hooks/usePanelSearchParams";
+import type { IItem, ISummary } from "@/interfaces";
 
 interface ControlPanelData {
   items: IItem[];
@@ -25,18 +21,17 @@ interface ControlPanelData {
   diff: ISummary;
 }
 
-const PERIOD_FORMAT = "YYYY-MM";
 const PERIOD_PARAM = "period";
 const DESC_PARAM = "desc";
 const ACCOUNT_PARAM = "account";
 
 const EMPTY_SUMMARY: ISummary = { expense: 0, income: 0, balance: 0 };
 
-export const ControlPanel: React.FC = () => {
+export const ControlPanel = () => {
   const { locale, currency, symbol } = useIdentityDefaults();
   const { accounts, isLoading: isLoadingAccounts } = usePanelAccounts();
-
   const { searchParams, updateSearchParams } = usePanelSearchParams();
+
   const period = searchParams.get(PERIOD_PARAM) ?? dayjs().format(PERIOD_FORMAT);
   const desc = searchParams.get(DESC_PARAM) ?? "";
   const accountParam = searchParams.get(ACCOUNT_PARAM);
@@ -47,35 +42,11 @@ export const ControlPanel: React.FC = () => {
     return accounts.length > 0 ? accounts[0].id : undefined;
   }, [accountParam, accounts]);
 
-  const onCurrentPeriodChange = useCallback(
-    (value: dayjs.Dayjs | null) => {
-      if (value) {
-        updateSearchParams({ [PERIOD_PARAM]: value.format(PERIOD_FORMAT) });
-      }
-    },
-    [updateSearchParams]
-  );
-
-  const onDescChange = useCallback(
-    (value: string) => {
-      updateSearchParams({ [DESC_PARAM]: value || undefined });
-    },
-    [updateSearchParams]
-  );
-
-  const onAccountChange = useCallback(
-    (value: number) => {
-      updateSearchParams({ [ACCOUNT_PARAM]: `${value}` });
-    },
-    [updateSearchParams]
-  );
-
-  const currentPeriod = useMemo(() => dayjs(period, PERIOD_FORMAT), [period]);
-  const formattedPeriod = currentPeriod.format(PERIOD_FORMAT);
+  const formattedPeriod = useMemo(() => dayjs(period, PERIOD_FORMAT).format(PERIOD_FORMAT), [period]);
 
   const {
     query: { isLoading },
-    result: panelData,
+    result,
   } = useCustom<ControlPanelData>({
     url: "/api/panel",
     method: "get",
@@ -86,9 +57,9 @@ export const ControlPanel: React.FC = () => {
     },
   });
 
-  const tableData = useMemo(
+  const tableData = useMemo<PanelItem[]>(
     () =>
-      (panelData?.data?.items ?? []).map(({ id, description, value, itemType, origin, categoryId }) => ({
+      (result?.data?.items ?? []).map(({ id, description, value, itemType, origin, categoryId }) => ({
         key: id,
         description,
         itemType,
@@ -96,52 +67,57 @@ export const ControlPanel: React.FC = () => {
         origin,
         categoryId,
       })),
-    [panelData?.data?.items]
+    [result?.data?.items]
+  );
+
+  const onCurrentPeriodChange = useCallback(
+    (next: string) => updateSearchParams({ [PERIOD_PARAM]: next }),
+    [updateSearchParams]
+  );
+  const onDescChange = useCallback(
+    (next: string) => updateSearchParams({ [DESC_PARAM]: next || undefined }),
+    [updateSearchParams]
+  );
+  const onAccountChange = useCallback(
+    (next: number) => updateSearchParams({ [ACCOUNT_PARAM]: `${next}` }),
+    [updateSearchParams]
   );
 
   return (
-    <Spin spinning={isLoading}>
-      <div className="card-row">
-        <Row gutter={[24, 24]}>
-          <Col span={12}>
-            <PeriodNavigationCard
-              value={currentPeriod}
-              onValueChange={onCurrentPeriodChange}
-              format={PERIOD_FORMAT}
-              accounts={accounts}
-              accountId={accountId}
-              onAccountChange={onAccountChange}
-            />
-          </Col>
-          <Col span={12}>
-            <PeriodSummaryCard
-              total={panelData?.data.total ?? EMPTY_SUMMARY}
-              difference={panelData?.data.diff ?? EMPTY_SUMMARY}
-              locale={locale}
-              symbol={symbol}
-            />
-          </Col>
-        </Row>
+    <div className="relative flex flex-col gap-6">
+      {isLoading && (
+        <div className="absolute inset-0 z-10 flex items-start justify-center bg-background/60 pt-24">
+          <Loader2 className="size-6 animate-spin" />
+        </div>
+      )}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <PeriodNavigationCard
+          value={formattedPeriod}
+          onValueChange={onCurrentPeriodChange}
+          locale={locale}
+          accounts={accounts}
+          accountId={accountId}
+          onAccountChange={onAccountChange}
+        />
+        <PeriodSummaryCard
+          total={result?.data?.total ?? EMPTY_SUMMARY}
+          difference={result?.data?.diff ?? EMPTY_SUMMARY}
+          locale={locale}
+          symbol={symbol}
+        />
       </div>
-      <div className="card-row">
-        <Row gutter={[24, 24]} align="stretch">
-          <Col span={12} style={{ display: "flex" }}>
-            <MonthItemsCard
-              formattedPeriod={formattedPeriod}
-              accountId={accountId}
-              initialSearch={desc}
-              onSearchChange={onDescChange}
-              tableData={tableData}
-              locale={locale}
-              currency={currency}
-              symbol={symbol}
-            />
-          </Col>
-          <Col span={12} style={{ display: "flex" }}>
-            <MonthStatsCard tableData={panelData?.data.stats ?? []} locale={locale} currency={currency} />
-          </Col>
-        </Row>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <MonthItemsCard
+          formattedPeriod={formattedPeriod}
+          accountId={accountId}
+          initialSearch={desc}
+          onSearchChange={onDescChange}
+          tableData={tableData}
+          locale={locale}
+          currency={currency}
+        />
+        <MonthStatsCard tableData={result?.data?.stats ?? []} locale={locale} currency={currency} />
       </div>
-    </Spin>
+    </div>
   );
 };

@@ -1,34 +1,39 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import {
-  AutoComplete,
-  Button,
-  Card,
-  Form,
-  InputNumber,
-  InputRef,
-  Popconfirm,
-  RefSelectProps,
-  Select,
-  Space,
-  Table,
-  Tooltip,
-  Typography,
-} from "antd";
-import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined, UploadOutlined } from "@ant-design/icons";
-
-import "./item-card.css";
+import { useEffect, useMemo, useState } from "react";
 import { useCustom, useTranslate } from "@refinedev/core";
-import { PANEL_URLS, type ItemType } from "../../../constants";
-import { ItemTypeIcon } from "../../common/ItemTypeIcon";
-import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
-import { useLocaleNumberFormat } from "../../../hooks/useLocaleNumberFormat";
-import { EditableCell, type EditableInputType, ITEM_TYPE_OPTIONS, useGreaterThanZeroRule } from "./EditableCell";
-import { useColumnSearch } from "./ColumnSearchFilter";
-import { useMonthItemsMutations } from "./useMonthItemsMutations";
-import { ImportItemsModal } from "./ImportItemsModal";
+import { Check, ChevronsUpDown, Pencil, Plus, Trash, Upload, X } from "lucide-react";
+
+import { Button } from "../../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Checkbox } from "../../ui/checkbox";
+import { Input } from "../../ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
 import { CategoryBadge } from "../../common/CategoryBadge";
+import { ConfirmDeleteButton } from "../../common/ConfirmDeleteButton";
+import { ItemTypeIcon } from "../../common/ItemTypeIcon";
+import { SelectInput } from "../../common/form-fields";
+import { ITEM_TYPES, PANEL_URLS, type ItemType } from "../../../constants";
+import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 import { usePanelCategories } from "../../../hooks/useCategories";
+import { ImportItemsModal } from "./ImportItemsModal";
 import type { PanelItem } from "./types";
+import { useMonthItemsMutations } from "./useMonthItemsMutations";
+
+interface Draft {
+  itemType: ItemType;
+  description: string;
+  value: string;
+  categoryId?: number | null;
+}
+
+const EMPTY_DRAFT: Draft = { itemType: "EXPENSE", description: "", value: "", categoryId: null };
+
+type SortKey = "description" | "itemType" | "value";
+
+const parseValue = (value: string) => {
+  const parsed = Number(value.replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
 interface MonthItemsCardProps {
   formattedPeriod: string;
@@ -36,382 +41,360 @@ interface MonthItemsCardProps {
   tableData: PanelItem[];
   locale: string;
   currency: string;
-  symbol: string;
   initialSearch: string;
   onSearchChange?: (value: string) => void;
 }
 
-const INITIAL_FORM_VALUES = { itemType: "EXPENSE", description: "", value: 0, categoryId: undefined };
-
-export const MonthItemsCard: React.FC<MonthItemsCardProps> = ({
+export const MonthItemsCard = ({
   formattedPeriod,
   accountId,
-  initialSearch,
-  onSearchChange,
   tableData,
   locale,
   currency,
-  symbol,
-}) => {
-  const [addForm] = Form.useForm();
-  const [editForm] = Form.useForm();
+  initialSearch,
+  onSearchChange,
+}: MonthItemsCardProps) => {
   const translate = useTranslate();
-  const greaterThanZeroRule = useGreaterThanZeroRule();
-  const { categoryById, options: categoryOptions } = usePanelCategories();
-  const descInputRef = useRef<RefSelectProps>(null);
-  const searchInput = useRef<InputRef>(null);
-
-  const { formatter: inputNumberFormatter, parser: inputNumberParser } = useLocaleNumberFormat(locale);
   const currencyFormat = useCurrencyFormat(locale, currency);
+  const { categoryById, options: categoryOptions } = usePanelCategories();
 
-  // start selected rows
-  const [selectedRows, setSelectedRows] = useState({
-    keys: [] as React.Key[],
-    rows: [] as PanelItem[],
-  });
-
-  const rowSelection = useMemo(
-    () => ({
-      selectedRowKeys: selectedRows.keys,
-      onChange: (selectedRowKeys: React.Key[], selected: PanelItem[]) => {
-        setSelectedRows({ keys: selectedRowKeys, rows: selected });
-      },
-    }),
-    [selectedRows.keys]
-  );
-
-  const [prevTableData, setPrevTableData] = useState(tableData);
-  if (prevTableData !== tableData) {
-    setPrevTableData(tableData);
-    setSelectedRows({ keys: [], rows: [] });
-  }
-  // end selected rows
-
-  // start of editable cells
-  const [editingKey, setEditingKey] = useState("");
-
-  const isEditing = (record: PanelItem) => `${record.key}` === editingKey;
-
-  const edit = useCallback(
-    (record: Partial<PanelItem> & { key: React.Key }) => {
-      editForm.setFieldsValue({
-        description: "",
-        value: "",
-        itemType: "EXPENSE",
-        categoryId: undefined,
-        ...record,
-      });
-      setEditingKey(`${record.key}`);
-    },
-    [editForm]
-  );
-
-  const cancel = useCallback(() => setEditingKey(""), []);
-
-  const cellProps = useCallback(
-    (dataIndex: string, title: string, inputType: EditableInputType, record: PanelItem) => ({
-      dataIndex,
-      title,
-      inputType,
-      locale,
-      categoryOptions,
-      editing: `${record.key}` === editingKey,
-    }),
-    [locale, categoryOptions, editingKey]
-  );
-  // end of editable cells
-
-  // start of filter components
-  const descFilter = initialSearch ?? "";
-  const [valueHighlight, setValueHighlight] = useState("");
-
-  const applyColumnFilter = useCallback(
-    (selectedKeys: React.Key[], confirmFilter: () => void, dataIndex: string) => {
-      confirmFilter();
-      const next = `${selectedKeys[0] ?? ""}`;
-      if (dataIndex === "description") {
-        onSearchChange?.(next);
-      } else {
-        setValueHighlight(next);
-      }
-    },
-    [onSearchChange]
-  );
-
-  const resetColumnFilter = useCallback(
-    (clearFilters: (() => void) | undefined, dataIndex: string) => {
-      clearFilters?.();
-      if (dataIndex === "description") {
-        onSearchChange?.("");
-      } else {
-        setValueHighlight("");
-      }
-    },
-    [onSearchChange]
-  );
-
-  const getColumnSearchProps = useColumnSearch({
-    searchInput,
-    currencyFormat,
-    descFilter,
-    valueHighlight,
-    applyColumnFilter,
-    resetColumnFilter,
-  });
-
-  // Backstop: keep ?desc= in sync when the description filter changes via the table itself.
-  const handleTableChange = (_: unknown, filters: Record<string, (React.Key | boolean | null)[] | null>) => {
-    const next = filters?.description?.[0] != null ? `${filters.description[0]}` : "";
-    if (next !== descFilter) {
-      onSearchChange?.(next);
-    }
-  };
-  // end of filter components
-
+  const [addDraft, setAddDraft] = useState<Draft>(EMPTY_DRAFT);
+  const [addError, setAddError] = useState<string>();
   const [autocompleteQuery, setAutocompleteQuery] = useState("");
+  const [editingKey, setEditingKey] = useState<number | null>(null);
+  const [editDraft, setEditDraft] = useState<Draft>(EMPTY_DRAFT);
+  const [selectedKeys, setSelectedKeys] = useState<number[]>([]);
+  const [valueFilter, setValueFilter] = useState("");
+  const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "description", dir: 1 });
   const [importOpen, setImportOpen] = useState(false);
+
+  useEffect(() => setSelectedKeys([]), [tableData]);
 
   const { result: itemSearchData } = useCustom<string[]>({
     url: PANEL_URLS.itemComplete,
     method: "get",
     config: { query: { description: autocompleteQuery } },
-    queryOptions: {
-      enabled: autocompleteQuery.length >= 3,
-    },
+    queryOptions: { enabled: autocompleteQuery.length >= 3 },
   });
-
-  const autoCompleteOptions = useMemo(() => {
-    const data = itemSearchData?.data;
-    return (Array.isArray(data) ? data : []).map((value) => ({ value }));
-  }, [itemSearchData]);
+  const autocompleteOptions = useMemo(
+    () => (Array.isArray(itemSearchData?.data) ? itemSearchData.data : []),
+    [itemSearchData]
+  );
 
   const { addItem, editItem, deleteItem, copyNextMonth, deleteSelected } = useMonthItemsMutations({
     formattedPeriod,
     accountId,
-    addForm,
-    editForm,
-    selectedRows,
-    setEditingKey,
-    focusDescription: () => descInputRef.current?.focus(),
+    selectedRows: tableData.filter((item) => selectedKeys.includes(item.key)),
+    onAddSuccess: () => {
+      setAddDraft((prev) => ({ ...EMPTY_DRAFT, itemType: prev.itemType }));
+      setAutocompleteQuery("");
+      setAddError(undefined);
+    },
+    onEditSettled: () => setEditingKey(null),
   });
 
-  const colDescription = translate("panel.items.column.description", "Description");
-  const colCategory = translate("panel.items.column.category", "Category");
-  const colType = translate("panel.items.column.type", "Type");
-  const colValue = translate("panel.items.column.value", "Value");
-  const originManual = translate("panel.items.origin.manual", "Manual");
-  const originCsv = translate("panel.items.origin.csv", "CSV");
-  const originOfx = translate("panel.items.origin.ofx", "OFX");
+  const rows = useMemo(() => {
+    const desc = initialSearch.trim().toLowerCase();
+    const value = valueFilter.trim();
+    return tableData
+      .filter((item) => item.description.toLowerCase().includes(desc) && (value === "" || `${item.value}`.includes(value)))
+      .sort((a, b) => {
+        const left = a[sort.key];
+        const right = b[sort.key];
+        if (typeof left === "number" && typeof right === "number") return (left - right) * sort.dir;
+        return `${left}`.localeCompare(`${right}`) * sort.dir;
+      });
+  }, [tableData, initialSearch, valueFilter, sort]);
 
-  const columns = useMemo(
-    () => [
-      {
-        key: "description",
-        title: colDescription,
-        dataIndex: "description",
-        width: "38%",
-        sorter: (a: PanelItem, b: PanelItem) => a.description.localeCompare(b.description),
-        onCell: (record: PanelItem) => cellProps("description", colDescription, "text", record),
-        ...getColumnSearchProps("description"),
-        filteredValue: descFilter ? [descFilter] : null,
-      },
-      {
-        key: "categoryId",
-        title: colCategory,
-        dataIndex: "categoryId",
-        width: "22%",
-        ellipsis: true,
-        onCell: (record: PanelItem) => cellProps("categoryId", colCategory, "category", record),
-        render: (value: number | null) => <CategoryBadge category={value != null ? categoryById.get(value) : null} />,
-      },
-      {
-        key: "itemType",
-        title: colType,
-        dataIndex: "itemType",
-        width: "8%",
-        onCell: (record: PanelItem) => cellProps("itemType", colType, "select", record),
-        sorter: (a: PanelItem, b: PanelItem) => a.itemType.localeCompare(b.itemType),
-        render: (record: string) => (
-          <Tooltip placement="left" title={record}>
-            <ItemTypeIcon type={record as ItemType} />
-          </Tooltip>
-        ),
-      },
-      {
-        key: "value",
-        title: colValue,
-        dataIndex: "value",
-        width: "17%",
-        onCell: (record: PanelItem) => cellProps("value", colValue, "number", record),
-        sorter: (a: PanelItem, b: PanelItem) => a.value - b.value,
-        ...getColumnSearchProps("value", true),
-      },
-      {
-        title: translate("panel.items.column.action", "Action"),
-        key: "operation",
-        render: (record: PanelItem) => {
-          const editable = isEditing(record);
-          return (
-            <Space direction="horizontal" size={12}>
-              {editable ? (
-                <>
-                  <Typography.Link onClick={() => editItem(record.key)} className="panel-confirm">
-                    <CheckOutlined />
-                  </Typography.Link>
-                  <Typography.Link onClick={cancel} className="panel-cancel">
-                    <CloseOutlined />
-                  </Typography.Link>
-                </>
-              ) : (
-                <>
-                  <Typography.Link disabled={editingKey !== ""} onClick={() => edit(record)} className="panel-edit">
-                    <EditOutlined />
-                  </Typography.Link>
-                  <Popconfirm
-                    title={translate("panel.items.confirmDelete", "Sure to delete?")}
-                    onConfirm={() => deleteItem(record)}
-                  >
-                    <Typography.Link className="panel-delete">
-                      <DeleteOutlined />
-                    </Typography.Link>
-                  </Popconfirm>
-                </>
-              )}
-            </Space>
-          );
-        },
-      },
-    ],
-    // All callbacks above are memoized (cellProps, useColumnSearch, edit/cancel,
-    // useMonthItemsMutations), so columns only rebuild when their inputs change.
-    [
-      cellProps,
-      getColumnSearchProps,
-      descFilter,
-      editingKey,
-      edit,
-      cancel,
-      editItem,
-      deleteItem,
-      colDescription,
-      colCategory,
-      categoryById,
-      colType,
-      colValue,
-      originManual,
-      originCsv,
-      originOfx,
-      translate,
-    ]
+  const toggleSort = (key: SortKey) =>
+    setSort((prev) => ({ key, dir: prev.key === key && prev.dir === 1 ? -1 : 1 }));
+
+  const allSelected = rows.length > 0 && rows.every((row) => selectedKeys.includes(row.key));
+
+  const validate = (draft: Draft) =>
+    draft.description.trim() === ""
+      ? translate("panel.items.inputRequired", { title: translate("panel.items.column.description", "Description") }, "Description is required.")
+      : parseValue(draft.value) <= 0
+        ? translate("panel.items.valuePositive", "Value must be greater than zero!")
+        : undefined;
+
+  const submitAdd = () => {
+    const error = validate(addDraft);
+    setAddError(error);
+    if (error) return;
+    addItem({
+      description: addDraft.description.trim(),
+      value: parseValue(addDraft.value),
+      itemType: addDraft.itemType,
+      categoryId: addDraft.categoryId,
+    });
+  };
+
+  const submitEdit = (key: number) => {
+    const error = validate(editDraft);
+    if (error) return;
+    editItem(key, {
+      description: editDraft.description.trim(),
+      value: parseValue(editDraft.value),
+      itemType: editDraft.itemType,
+      categoryId: editDraft.categoryId,
+    });
+  };
+
+  const startEdit = (item: PanelItem) => {
+    setEditingKey(item.key);
+    setEditDraft({
+      itemType: item.itemType,
+      description: item.description,
+      value: `${item.value}`,
+      categoryId: item.categoryId ?? null,
+    });
+  };
+
+  const draftFields = (draft: Draft, onChange: (next: Draft) => void, testId: string) => (
+    <>
+      <Select value={draft.itemType} onValueChange={(next) => onChange({ ...draft, itemType: next as ItemType })}>
+        <SelectTrigger className="w-full" data-testid={`${testId}-type`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {ITEM_TYPES.map((type) => (
+            <SelectItem key={type} value={type}>
+              {type}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Input
+        value={draft.description}
+        list="panel-item-descriptions"
+        placeholder={translate("panel.items.descriptionPlaceholder", "Description")}
+        data-testid={`${testId}-description`}
+        onChange={(event) => {
+          onChange({ ...draft, description: event.target.value });
+          setAutocompleteQuery(event.target.value);
+        }}
+      />
+      <Input
+        type="number"
+        step="any"
+        min={0}
+        value={draft.value}
+        placeholder={translate("panel.items.valuePlaceholder", "Value")}
+        data-testid={`${testId}-value`}
+        onChange={(event) => onChange({ ...draft, value: event.target.value })}
+      />
+      <SelectInput
+        groups={categoryOptions}
+        value={draft.categoryId ?? undefined}
+        onChange={(value) => onChange({ ...draft, categoryId: value == null ? null : Number(value) })}
+        allowClear
+      />
+    </>
   );
 
   return (
-    <Card
-      data-testid={"month-items-card"}
-      title={translate("panel.items.title", "Month Items")}
-      variant="borderless"
-      style={{ height: "100%", width: "100%" }}
-    >
-      <Space direction="vertical" size={12} wrap style={{ width: "100%" }}>
-        <Form form={addForm} layout="inline" initialValues={INITIAL_FORM_VALUES}>
-          <Form.Item data-testid={"itemType"} name="itemType">
-            <Select options={ITEM_TYPE_OPTIONS} />
-          </Form.Item>
-          <Form.Item name="description" rules={[{ required: true }]}>
-            <AutoComplete
-              data-testid={"description"}
-              ref={descInputRef}
-              value={autocompleteQuery}
-              onChange={setAutocompleteQuery}
-              options={autoCompleteOptions}
-              placeholder={translate("panel.items.descriptionPlaceholder", "Description")}
-              style={{ width: 250 }}
-            />
-          </Form.Item>
-          <Form.Item
-            name="value"
-            rules={[
-              {
-                required: true,
-                message: translate("panel.items.valueRequired", "Please input a value!"),
-              },
-              greaterThanZeroRule,
-            ]}
-          >
-            <InputNumber
-              data-testid={"value"}
-              min={0}
-              prefix={`${symbol} `}
-              formatter={inputNumberFormatter}
-              parser={inputNumberParser}
-              placeholder={translate("panel.items.valuePlaceholder", "Value")}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") void addItem();
-              }}
-            />
-          </Form.Item>
-          <Form.Item name="categoryId">
-            <Select
-              allowClear
-              data-testid={"category"}
-              options={categoryOptions}
-              placeholder={translate("panel.items.column.category", "Category")}
-              style={{ width: 160 }}
-            />
-          </Form.Item>
-        </Form>
-        <Space direction="horizontal" size={12} wrap style={{ width: "100%" }}>
-          <Button data-testid={"add-item"} type="primary" disabled={!accountId} onClick={() => addItem()}>
+    <Card className="h-full w-full" data-testid="month-items-card">
+      <CardHeader>
+        <CardTitle className="text-base">{translate("panel.items.title", "Month Items")}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <div className="grid gap-2 md:grid-cols-[110px_1fr_140px_180px_auto]">
+          {draftFields(addDraft, setAddDraft, "add-item")}
+          <Button data-testid="add-item" disabled={!accountId} onClick={submitAdd}>
+            <Plus className="size-4" />
             {translate("panel.items.add", "Add Item")}
           </Button>
-          <Button
-            data-testid={"import-items"}
-            icon={<UploadOutlined />}
-            disabled={!accountId}
-            onClick={() => setImportOpen(true)}
-          >
+        </div>
+        <datalist id="panel-item-descriptions">
+          {autocompleteOptions.map((option) => (
+            <option key={option} value={option} />
+          ))}
+        </datalist>
+        {addError && <p className="text-xs text-destructive">{addError}</p>}
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button data-testid="import-items" variant="outline" disabled={!accountId} onClick={() => setImportOpen(true)}>
+            <Upload className="size-4" />
             {translate("panel.items.import", "Import")}
           </Button>
           <Button
-            data-testid={"replicate-month"}
-            type="primary"
-            disabled={selectedRows.keys.length === 0}
+            data-testid="replicate-month"
+            disabled={selectedKeys.length === 0}
             onClick={() => copyNextMonth()}
           >
             {translate("panel.items.replicate", "Replicate Next Month")}
           </Button>
-          <Popconfirm
+          <ConfirmDeleteButton
             title={translate("panel.items.confirmDeleteSelected", "Sure to delete all selected?")}
             onConfirm={() => deleteSelected()}
           >
-            <Button data-testid={"delete-selected"} type="primary" danger disabled={selectedRows.keys.length === 0}>
+            <Button data-testid="delete-selected" variant="destructive" disabled={selectedKeys.length === 0}>
               {translate("panel.items.deleteSelected", "Delete Selected")}
             </Button>
-          </Popconfirm>
-        </Space>
-        <Form form={editForm} component={false}>
-          <Table
-            components={{
-              body: {
-                cell: EditableCell,
-              },
-            }}
-            rowSelection={rowSelection}
-            columns={columns}
-            dataSource={tableData}
-            size="small"
-            pagination={false}
-            tableLayout="fixed"
-            onChange={handleTableChange}
+          </ConfirmDeleteButton>
+          <Input
+            className="ml-auto w-[160px]"
+            placeholder={translate("panel.items.filter.searchPlaceholder", { dataIndex: "description" }, "Search description")}
+            value={initialSearch}
+            onChange={(event) => onSearchChange?.(event.target.value)}
           />
-        </Form>
+          <Input
+            className="w-[120px]"
+            placeholder={translate("panel.items.column.value", "Value")}
+            value={valueFilter}
+            onChange={(event) => setValueFilter(event.target.value)}
+          />
+        </div>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-10">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={(checked) => setSelectedKeys(checked === true ? rows.map((row) => row.key) : [])}
+                />
+              </TableHead>
+              <TableHead>
+                <button type="button" className="flex items-center gap-1" onClick={() => toggleSort("description")}>
+                  {translate("panel.items.column.description", "Description")}
+                  <ChevronsUpDown className="size-3" />
+                </button>
+              </TableHead>
+              <TableHead>{translate("panel.items.column.category", "Category")}</TableHead>
+              <TableHead>
+                <button type="button" className="flex items-center gap-1" onClick={() => toggleSort("itemType")}>
+                  {translate("panel.items.column.type", "Type")}
+                  <ChevronsUpDown className="size-3" />
+                </button>
+              </TableHead>
+              <TableHead>
+                <button type="button" className="flex items-center gap-1" onClick={() => toggleSort("value")}>
+                  {translate("panel.items.column.value", "Value")}
+                  <ChevronsUpDown className="size-3" />
+                </button>
+              </TableHead>
+              <TableHead>{translate("panel.items.column.action", "Action")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((item) => {
+              const editing = editingKey === item.key;
+              return (
+                <TableRow key={item.key} data-state={selectedKeys.includes(item.key) ? "selected" : undefined}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedKeys.includes(item.key)}
+                      onCheckedChange={(checked) =>
+                        setSelectedKeys((prev) =>
+                          checked === true ? [...prev, item.key] : prev.filter((key) => key !== item.key)
+                        )
+                      }
+                    />
+                  </TableCell>
+                  {editing ? (
+                    <>
+                      <TableCell className="min-w-[180px]">
+                        <Input
+                          value={editDraft.description}
+                          onChange={(event) => setEditDraft({ ...editDraft, description: event.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell className="min-w-[150px]">
+                        <SelectInput
+                          groups={categoryOptions}
+                          value={editDraft.categoryId ?? undefined}
+                          onChange={(value) =>
+                            setEditDraft({ ...editDraft, categoryId: value == null ? null : Number(value) })
+                          }
+                          allowClear
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={editDraft.itemType}
+                          onValueChange={(next) => setEditDraft({ ...editDraft, itemType: next as ItemType })}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {ITEM_TYPES.map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          step="any"
+                          min={0}
+                          value={editDraft.value}
+                          onChange={(event) => setEditDraft({ ...editDraft, value: event.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => submitEdit(item.key)}>
+                            <Check className="size-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => setEditingKey(null)}>
+                            <X className="size-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </>
+                  ) : (
+                    <>
+                      <TableCell>{item.description}</TableCell>
+                      <TableCell>
+                        <CategoryBadge category={item.categoryId != null ? categoryById.get(item.categoryId) : null} />
+                      </TableCell>
+                      <TableCell>
+                        <span title={item.itemType}>
+                          <ItemTypeIcon type={item.itemType} />
+                        </span>
+                      </TableCell>
+                      <TableCell>{currencyFormat(item.value)}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={editingKey !== null}
+                            onClick={() => startEdit(item)}
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <ConfirmDeleteButton
+                            title={translate("panel.items.confirmDelete", "Sure to delete?")}
+                            onConfirm={() => deleteItem(item)}
+                          >
+                            <Button variant="ghost" size="icon">
+                              <Trash className="size-4" />
+                            </Button>
+                          </ConfirmDeleteButton>
+                        </div>
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+
         <ImportItemsModal
           open={importOpen}
           formattedPeriod={formattedPeriod}
           accountId={accountId}
           onClose={() => setImportOpen(false)}
         />
-      </Space>
+      </CardContent>
     </Card>
   );
 };

@@ -1,17 +1,19 @@
-import React from "react";
-import { Row, Col } from "antd";
+import { useTranslate } from "@refinedev/core";
 
-import { ManagementInfoCard, ChangePasswordCard } from "../../../components";
+import { ChangePasswordCard } from "@/components/dashboard/ChangePasswordCard";
+import { ManagementInfoCard } from "@/components/dashboard/ManagementInfoCard";
+import { PageHeader } from "@/components/common/PageHeader";
 
-export const DashboardPage: React.FC = () => {
+export const DashboardPage = () => {
+  const translate = useTranslate();
+
   return (
-    <Row gutter={20}>
-      <Col span={6}>
+    <div className="flex flex-col gap-4">
+      <PageHeader title={translate("header.menu.dashboard", "Dashboard")} />
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <ManagementInfoCard />
-      </Col>
-      <Col span={6}>
         <ChangePasswordCard />
-      </Col>
-    </Row>
+      </div>
+    </div>
   );
 };

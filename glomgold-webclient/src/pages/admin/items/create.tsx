@@ -1,115 +1,55 @@
-import React, { useState } from "react";
-import { IResourceComponentsProps } from "@refinedev/core";
+import { useForm } from "@refinedev/react-hook-form";
+import { useTranslate, type HttpError } from "@refinedev/core";
+import { Link } from "react-router";
 
-import { Create, useForm } from "@refinedev/antd";
-import { Form, Input, Select } from "antd";
+import { ItemFormFields, type ItemFormValues } from "@/components/admin/ItemFormFields";
+import { PageHeader } from "@/components/common/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import type { IItem } from "@/interfaces";
 
-import { IItem } from "../../../interfaces";
-import { ITEM_TYPES } from "../../../constants";
-import { ItemTypeIcon } from "../../../components/common/ItemTypeIcon";
-import { useUserSelect } from "../../../hooks/useUserSelect";
-import { useAccountSelect } from "../../../hooks/useAccountSelect";
-import { useCategories } from "../../../hooks/useCategories";
-
-export const ItemCreate: React.FC<IResourceComponentsProps> = () => {
-  const { form, formProps, saveButtonProps } = useForm<IItem>({
+export const ItemCreate = () => {
+  const translate = useTranslate();
+  const {
+    register,
+    control,
+    setValue,
+    watch,
+    formState: { errors },
+    saveButtonProps,
+  } = useForm<IItem, HttpError, ItemFormValues>({
+    refineCoreProps: { resource: "items" },
     warnWhenUnsavedChanges: true,
   });
-  const [userId, setUserId] = useState<number | undefined>();
-  const { selectProps: userSelectProps } = useUserSelect();
-  const { selectProps: accountSelectProps } = useAccountSelect(userId);
-  const { options: categoryOptions } = useCategories(userId);
 
   return (
-    <Create saveButtonProps={saveButtonProps}>
-      <Form {...formProps} layout="vertical">
-        <Form.Item
-          label="Type"
-          name="itemType"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select options={ITEM_TYPES.map((value) => ({ value, label: <ItemTypeIcon type={value} /> }))} />
-        </Form.Item>
-        <Form.Item
-          label="Description"
-          name="description"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Value"
-          name="value"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Year"
-          name="year"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Month"
-          name="month"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="User"
-          name="userId"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select
-            {...userSelectProps}
-            onChange={(value) => {
-              setUserId(value as unknown as number);
-              form.setFieldValue("accountId", undefined);
-            }}
-          />
-        </Form.Item>
-        <Form.Item
-          label="Account"
-          name="accountId"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select {...accountSelectProps} disabled={!userId} />
-        </Form.Item>
-        <Form.Item label="Category" name="categoryId">
-          <Select allowClear options={categoryOptions} disabled={!userId} />
-        </Form.Item>
-      </Form>
-    </Create>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title={translate("items.new", "New Item")}
+        actions={
+          <Button variant="outline" asChild>
+            <Link to="/admin/items">Back</Link>
+          </Button>
+        }
+      />
+      <Card>
+        <CardContent>
+          <form className="flex max-w-xl flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+            <ItemFormFields
+              register={register}
+              control={control}
+              setValue={setValue}
+              watch={watch}
+              errors={errors}
+            />
+            <div>
+              <Button onClick={saveButtonProps.onClick} disabled={saveButtonProps.disabled}>
+                {translate("buttons.save", "Save")}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

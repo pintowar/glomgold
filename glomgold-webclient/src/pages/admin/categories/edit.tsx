@@ -1,56 +1,63 @@
-import React from "react";
-import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
+import { useForm } from "@refinedev/react-hook-form";
+import { useTranslate, type HttpError } from "@refinedev/core";
+import { Link } from "react-router";
 
-import { Edit, useForm } from "@refinedev/antd";
-import { Form, Input, Select } from "antd";
+import { CategoryFormFields } from "@/components/admin/CategoryFormFields";
+import { PageHeader } from "@/components/common/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useCategories } from "@/hooks/useCategories";
+import { useUserSelect } from "@/hooks/useUserSelect";
+import type { ICategory } from "@/interfaces";
 
-import { ICategory } from "../../../interfaces";
-import { useCategories } from "../../../hooks/useCategories";
-import { useUserSelect } from "../../../hooks/useUserSelect";
-
-export const CategoryEdit: React.FC<IResourceComponentsProps> = () => {
+export const CategoryEdit = () => {
   const translate = useTranslate();
-  const { formProps, saveButtonProps, query } = useForm<ICategory>({ warnWhenUnsavedChanges: true });
-  const postData = query?.data?.data;
-  const { selectProps: userSelectProps } = useUserSelect(postData?.userId);
   const { groups } = useCategories();
+  const {
+    register,
+    control,
+    formState: { errors },
+    saveButtonProps,
+    refineCore,
+  } = useForm<ICategory, HttpError, ICategory>({
+    refineCoreProps: { resource: "categories" },
+    warnWhenUnsavedChanges: true,
+  });
+  const userId = refineCore.query?.data?.data?.userId;
+  const { options: userOptions } = useUserSelect(userId);
 
   return (
-    <Edit saveButtonProps={saveButtonProps}>
-      <Form {...formProps} layout="vertical">
-        <Form.Item label="ID" name="id" hidden={true}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="Version" name="version" hidden={true}>
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label={translate("panel.category.field.name", "Name")}
-          name="name"
-          rules={[
-            {
-              required: true,
-              message: translate("panel.category.nameRequired", "Please input a name!"),
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item label={translate("panel.category.field.color", "Color")} name="color">
-          <Input type="color" />
-        </Form.Item>
-        <Form.Item label={translate("panel.category.field.group", "Group")} name="groupId">
-          <Select
-            allowClear
-            options={groups
-              .filter((group) => postData == null || group.userId === postData.userId)
-              .map((group) => ({ value: group.id, label: group.name }))}
-          />
-        </Form.Item>
-        <Form.Item label={translate("panel.category.field.user", "User")} name="userId">
-          <Select {...userSelectProps} disabled />
-        </Form.Item>
-      </Form>
-    </Edit>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title={translate("panel.category.edit", "Edit")}
+        actions={
+          <Button variant="outline" asChild>
+            <Link to="/admin/categories">Back</Link>
+          </Button>
+        }
+      />
+      <Card>
+        <CardContent>
+          <form className="flex max-w-xl flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+            <input type="hidden" {...register("id")} />
+            <input type="hidden" {...register("version")} />
+            <CategoryFormFields
+              register={register}
+              control={control}
+              errors={errors}
+              groups={groups}
+              userId={userId}
+              userOptions={userOptions}
+              userDisabled
+            />
+            <div>
+              <Button onClick={saveButtonProps.onClick} disabled={saveButtonProps.disabled}>
+                {translate("buttons.save", "Save")}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

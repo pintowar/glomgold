@@ -1,55 +1,43 @@
-import React, { useMemo } from "react";
-import { useCustom } from "@refinedev/core";
-import { Card, Space } from "antd";
+import { useCustom, useTranslate } from "@refinedev/core";
 
-export const ManagementInfoCard: React.FC = () => {
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Skeleton } from "../ui/skeleton";
+
+interface ManagementInfo {
+  git?: {
+    branch?: string;
+    build?: { version?: string };
+  };
+}
+
+export const ManagementInfoCard = () => {
+  const translate = useTranslate();
   const {
-    result: data,
+    result,
     query: { isLoading, isError },
-  } = useCustom({
-    url: `/api/management/info`,
+  } = useCustom<ManagementInfo>({
+    url: "/api/management/info",
     method: "get",
     queryOptions: { queryKey: ["management-info"], staleTime: 5 * 60 * 1000 },
   });
 
-  const appInfo = useMemo(() => {
-    const branch = data?.data?.git?.branch ?? "—";
-    const version = data?.data?.git?.build?.version ?? "—";
-    return { branch, version };
-  }, [data]);
-
-  if (isLoading)
-    return (
-      <Card
-        title="Management Info"
-        style={{ height: "300px", borderRadius: "15px" }}
-        styles={{ header: { textAlign: "center" } }}
-        loading
-      />
-    );
-  if (isError)
-    return (
-      <Card
-        title="Management Info"
-        style={{ height: "300px", borderRadius: "15px" }}
-        styles={{ header: { textAlign: "center" } }}
-      >
-        Unavailable
-      </Card>
-    );
-
   return (
-    <Card
-      title="Management Info"
-      style={{ height: "300px", borderRadius: "15px" }}
-      styles={{ header: { textAlign: "center" } }}
-    >
-      <Space align="center" direction="horizontal">
-        <ul>
-          <li>Branch: {appInfo.branch}</li>
-          <li>Version: {appInfo.version}</li>
-        </ul>
-      </Space>
+    <Card className="h-[300px]">
+      <CardHeader>
+        <CardTitle className="text-center">{translate("dashboard.managementInfo", "Management Info")}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-24 w-full" />
+        ) : isError ? (
+          <p className="text-sm text-muted-foreground">Unavailable</p>
+        ) : (
+          <ul className="list-inside list-disc text-sm">
+            <li>Branch: {result?.data?.git?.branch ?? "—"}</li>
+            <li>Version: {result?.data?.git?.build?.version ?? "—"}</li>
+          </ul>
+        )}
+      </CardContent>
     </Card>
   );
 };

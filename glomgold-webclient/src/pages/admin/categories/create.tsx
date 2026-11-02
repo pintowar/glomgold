@@ -1,50 +1,61 @@
-import React from "react";
-import { IResourceComponentsProps, useTranslate } from "@refinedev/core";
+import { useForm } from "@refinedev/react-hook-form";
+import { useTranslate, type HttpError } from "@refinedev/core";
+import { Link } from "react-router";
 
-import { Create, useForm } from "@refinedev/antd";
-import { Form, Input, Select } from "antd";
+import { CategoryFormFields } from "@/components/admin/CategoryFormFields";
+import { PageHeader } from "@/components/common/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useCategories } from "@/hooks/useCategories";
+import { useUserSelect } from "@/hooks/useUserSelect";
+import type { ICategory } from "@/interfaces";
 
-import { ICategory } from "../../../interfaces";
-import { useCategories } from "../../../hooks/useCategories";
-import { useUserSelect } from "../../../hooks/useUserSelect";
-
-export const CategoryCreate: React.FC<IResourceComponentsProps> = () => {
+export const CategoryCreate = () => {
   const translate = useTranslate();
-  const { form, formProps, saveButtonProps } = useForm<ICategory>();
-  const { selectProps: userSelectProps } = useUserSelect();
+  const { options: userOptions } = useUserSelect();
   const { groups } = useCategories();
-  const userId = Form.useWatch("userId", form);
+  const {
+    register,
+    control,
+    watch,
+    formState: { errors },
+    saveButtonProps,
+  } = useForm<ICategory, HttpError, ICategory>({
+    refineCoreProps: { resource: "categories" },
+    defaultValues: { color: "#6B7280" },
+    warnWhenUnsavedChanges: true,
+  });
+  const userId = watch("userId");
 
   return (
-    <Create saveButtonProps={saveButtonProps}>
-      <Form {...formProps} layout="vertical">
-        <Form.Item
-          label={translate("panel.category.field.name", "Name")}
-          name="name"
-          rules={[
-            {
-              required: true,
-              message: translate("panel.category.nameRequired", "Please input a name!"),
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item label={translate("panel.category.field.color", "Color")} name="color" initialValue="#6B7280">
-          <Input type="color" />
-        </Form.Item>
-        <Form.Item label={translate("panel.category.field.group", "Group")} name="groupId">
-          <Select
-            allowClear
-            options={groups
-              .filter((group) => userId == null || group.userId === userId)
-              .map((group) => ({ value: group.id, label: group.name }))}
-          />
-        </Form.Item>
-        <Form.Item label={translate("panel.category.field.user", "User")} name="userId">
-          <Select {...userSelectProps} allowClear />
-        </Form.Item>
-      </Form>
-    </Create>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title={translate("panel.category.new", "New Category")}
+        actions={
+          <Button variant="outline" asChild>
+            <Link to="/admin/categories">Back</Link>
+          </Button>
+        }
+      />
+      <Card>
+        <CardContent>
+          <form className="flex max-w-xl flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+            <CategoryFormFields
+              register={register}
+              control={control}
+              errors={errors}
+              groups={groups}
+              userId={userId}
+              userOptions={userOptions}
+            />
+            <div>
+              <Button onClick={saveButtonProps.onClick} disabled={saveButtonProps.disabled}>
+                {translate("buttons.save", "Save")}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

@@ -1,11 +1,9 @@
-import React, { useCallback, useContext, useMemo } from "react";
 import { useTranslate } from "@refinedev/core";
-import { ColorModeContext } from "../../../contexts/color-mode";
-import { ApexOptions } from "apexcharts";
-import Chart from "react-apexcharts";
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+
 import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
-import { IYearlySummary } from "../../../interfaces";
+import type { IYearlySummary } from "../../../interfaces";
 
 interface YearChartProps {
   years: IYearlySummary[];
@@ -13,39 +11,24 @@ interface YearChartProps {
   currency: string;
 }
 
-export const YearChart: React.FC<YearChartProps> = ({ years, locale, currency }) => {
-  const { mode } = useContext(ColorModeContext);
+export const YearChart = ({ years, locale, currency }: YearChartProps) => {
   const translate = useTranslate();
+  const currencyFormat = useCurrencyFormat(locale, currency);
 
-  const formatCurrency = useCurrencyFormat(locale, currency);
-  const currencyFormat = useCallback(
-    (value: number | null) => (value == null ? value : formatCurrency(value)),
-    [formatCurrency]
+  return (
+    <div className="h-[350px] w-full">
+      <p className="mb-2 text-sm font-semibold">{translate("panel.charts.yearlyEvolution", "Yearly Evolution")}</p>
+      <ResponsiveContainer width="100%" height="90%">
+        <BarChart data={years}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="year" />
+          <YAxis tickFormatter={(value: number) => currencyFormat(value)} width={90} />
+          <Tooltip formatter={(value: number) => currencyFormat(value)} />
+          <Legend />
+          <Bar dataKey="expense" name={translate("panel.charts.series.expense", "expense")} fill={EXPENSE_COLOR} />
+          <Bar dataKey="income" name={translate("panel.charts.series.income", "income")} fill={INCOME_COLOR} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
-
-  const barChartConfig = useMemo(
-    () => ({
-      options: {
-        title: { text: translate("panel.charts.yearlyEvolution", "Yearly Evolution") },
-        chart: { id: "yearly", background: "transparent", animations: { enabled: false } },
-        colors: [EXPENSE_COLOR, INCOME_COLOR],
-        theme: { mode },
-        tooltip: { y: { formatter: currencyFormat } },
-        xaxis: { categories: years.map((it) => String(it.year)) },
-      } as ApexOptions,
-      series: [
-        {
-          name: translate("panel.charts.series.expense", "expense"),
-          data: years.map((it) => it.expense),
-        },
-        {
-          name: translate("panel.charts.series.income", "income"),
-          data: years.map((it) => it.income),
-        },
-      ],
-    }),
-    [years, currencyFormat, mode, translate]
-  );
-
-  return <Chart options={barChartConfig.options} series={barChartConfig.series} type="bar" height={350} width="100%" />;
 };
