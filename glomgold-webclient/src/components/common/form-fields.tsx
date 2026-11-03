@@ -95,7 +95,7 @@ export const SelectInput = ({
   return (
     <FormRow label={label} error={error}>
       <Select
-        value={value == null ? undefined : String(value)}
+        value={value == null ? "" : String(value)}
         onValueChange={(next) => onChange(coerceValue(next))}
         disabled={disabled}
       >

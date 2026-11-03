@@ -19,8 +19,8 @@ const useCategoryData = (categoryResource: string, groupResource: string, userId
   const { result: categoryResult, query } = useList<ICategory>({ resource: categoryResource, ...ALL });
   const { result: groupResult } = useList<ICategoryGroup>({ resource: groupResource, ...ALL });
 
-  const categories = useMemo(() => categoryResult?.data ?? [], [categoryResult]);
-  const groups = useMemo(() => groupResult?.data ?? [], [groupResult]);
+  const categories = useMemo(() => categoryResult?.data ?? [], [categoryResult?.data]);
+  const groups = useMemo(() => groupResult?.data ?? [], [groupResult?.data]);
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c] as const)), [categories]);
 
   const options = useMemo<CategorySelectGroup[]>(() => {

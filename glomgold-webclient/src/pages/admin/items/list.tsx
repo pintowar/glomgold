@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useList, useTranslate, type CrudFilter } from "@refinedev/core";
+import { useMemo, useRef } from "react";
+import { useList, useTranslate } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { useForm } from "react-hook-form";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -37,11 +37,16 @@ export const ItemList = () => {
 
   const { result: users } = useList<IUser>({ resource: "users", ...ALL });
   const { result: accounts } = useList<IAccount>({ resource: "accounts", ...ALL });
-  const userNameById = useMemo(() => new Map((users?.data ?? []).map((user) => [user.id, user.name] as const)), [users]);
+  const usersData = users?.data;
+  const accountsData = accounts?.data;
+  const userNameById = useMemo(() => new Map((usersData ?? []).map((user) => [user.id, user.name] as const)), [usersData]);
   const accountNameById = useMemo(
-    () => new Map((accounts?.data ?? []).map((account) => [account.id, account.name] as const)),
-    [accounts]
+    () => new Map((accountsData ?? []).map((account) => [account.id, account.name] as const)),
+    [accountsData]
   );
+  // Lookup maps must not rebuild `columns`: @refinedev/react-table resets to page 1 whenever columns change while filters are active.
+  const lookupsRef = useRef({ categoryById, userNameById, accountNameById });
+  lookupsRef.current = { categoryById, userNameById, accountNameById };
 
   const columns = useMemo<ColumnDef<IItem>[]>(
     () => [
@@ -62,7 +67,7 @@ export const ItemList = () => {
         accessorKey: "categoryId",
         header: translate("panel.items.column.category", "Category"),
         cell: ({ row }) => (
-          <CategoryBadge category={row.original.categoryId != null ? categoryById.get(row.original.categoryId) : null} />
+          <CategoryBadge category={row.original.categoryId != null ? lookupsRef.current.categoryById.get(row.original.categoryId) : null} />
         ),
       },
       { id: "value", accessorKey: "value", header: translate("panel.items.column.value", "Value") },
@@ -72,14 +77,16 @@ export const ItemList = () => {
       {
         id: "userId",
         accessorKey: "userId",
+        filterFn: "equals",
         header: translate("panel.account.field.user", "User"),
-        cell: ({ row }) => userNameById.get(row.original.userId) ?? "Loading...",
+        cell: ({ row }) => lookupsRef.current.userNameById.get(row.original.userId) ?? "Loading...",
       },
       {
         id: "accountId",
         accessorKey: "accountId",
+        filterFn: "equals",
         header: translate("panel.account.label", "Account"),
-        cell: ({ row }) => accountNameById.get(row.original.accountId) ?? "Loading...",
+        cell: ({ row }) => lookupsRef.current.accountNameById.get(row.original.accountId) ?? "Loading...",
       },
       {
         id: "actions",
@@ -87,7 +94,7 @@ export const ItemList = () => {
         cell: ({ row }) => <ResourceActions recordId={row.original.id} />,
       },
     ],
-    [translate, categoryById, userNameById, accountNameById]
+    [translate]
   );
 
   const table = useTable<IItem>({
@@ -95,16 +102,13 @@ export const ItemList = () => {
     columns,
   });
 
-  const onSearch = (values: FilterValues) =>
-    table.refineCore.setFilters(
-      [
-        { field: "description", operator: "eq", value: values.description?.trim() },
-        { field: "userId", operator: "eq", value: values.userId },
-        { field: "accountId", operator: "eq", value: values.accountId },
-        { field: "origin", operator: "eq", value: values.origin },
-      ].filter((filter) => filter.value !== undefined && filter.value !== "") as CrudFilter[],
-      "replace"
-    );
+  const onSearch = ({ description, userId, accountId, origin }: FilterValues) =>
+    table.reactTable.setColumnFilters([
+      ...(description?.trim() ? [{ id: "description", value: description.trim() }] : []),
+      ...(userId !== undefined ? [{ id: "userId", value: userId }] : []),
+      ...(accountId !== undefined ? [{ id: "accountId", value: accountId }] : []),
+      ...(origin ? [{ id: "origin", value: origin }] : []),
+    ]);
 
   return (
     <div className="flex flex-col gap-4">

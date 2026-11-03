@@ -1,11 +1,12 @@
-import { useMemo } from "react";
-import { useList, useTranslate, type CrudFilter } from "@refinedev/core";
+import { useMemo, useRef } from "react";
+import { useList, useTranslate } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { useForm } from "react-hook-form";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { PageHeader } from "@/components/common/PageHeader";
+import { CreateButton } from "@/components/refine-ui/buttons/create";
 import { CategoryBadge } from "@/components/common/CategoryBadge";
 import { CategoryDeleteDialog } from "@/components/common/CategoryDeleteDialog";
 import { EditButton } from "@/components/refine-ui/buttons/edit";
@@ -31,8 +32,12 @@ export const CategoryList = () => {
   const { options: userOptions } = useUserSelect();
 
   const { result: users } = useList<IUser>({ resource: "users", ...ALL });
+  const usersData = users?.data;
   const groupNameById = useMemo(() => new Map(groups.map((group) => [group.id, group.name] as const)), [groups]);
-  const userNameById = useMemo(() => new Map((users?.data ?? []).map((user) => [user.id, user.name] as const)), [users]);
+  const userNameById = useMemo(() => new Map((usersData ?? []).map((user) => [user.id, user.name] as const)), [usersData]);
+  // Lookup maps must not rebuild `columns`: @refinedev/react-table resets to page 1 whenever columns change while filters are active.
+  const lookupsRef = useRef({ categories, groupNameById, userNameById });
+  lookupsRef.current = { categories, groupNameById, userNameById };
 
   const columns = useMemo<ColumnDef<ICategory>[]>(
     () => [
@@ -45,14 +50,16 @@ export const CategoryList = () => {
       {
         id: "groupId",
         accessorKey: "groupId",
+        filterFn: "equals",
         header: translate("panel.category.field.group", "Group"),
-        cell: ({ row }) => groupNameById.get(row.original.groupId ?? -1) ?? "-",
+        cell: ({ row }) => lookupsRef.current.groupNameById.get(row.original.groupId ?? -1) ?? "-",
       },
       {
         id: "userId",
         accessorKey: "userId",
+        filterFn: "equals",
         header: translate("panel.category.field.user", "User"),
-        cell: ({ row }) => userNameById.get(row.original.userId) ?? "Loading...",
+        cell: ({ row }) => lookupsRef.current.userNameById.get(row.original.userId) ?? "Loading...",
       },
       {
         id: "isSystem",
@@ -69,7 +76,7 @@ export const CategoryList = () => {
             <EditButton variant="outline" size="icon" recordItemId={row.original.id} />
             <CategoryDeleteDialog
               record={row.original}
-              candidates={categories.filter((category) => category.id !== row.original.id)}
+              candidates={lookupsRef.current.categories.filter((category) => category.id !== row.original.id)}
               resource="categories"
               usageUrl="/api/categories/usage"
               invalidates={["list", "many"]}
@@ -78,7 +85,7 @@ export const CategoryList = () => {
         ),
       },
     ],
-    [translate, categories, groupNameById, userNameById]
+    [translate]
   );
 
   const table = useTable<ICategory>({
@@ -86,19 +93,16 @@ export const CategoryList = () => {
     columns,
   });
 
-  const onSearch = (values: FilterValues) =>
-    table.refineCore.setFilters(
-      [
-        { field: "name", operator: "eq", value: values.name?.trim() },
-        { field: "groupId", operator: "eq", value: values.groupId },
-        { field: "userId", operator: "eq", value: values.userId },
-      ].filter((filter) => filter.value !== undefined && filter.value !== "") as CrudFilter[],
-      "replace"
-    );
+  const onSearch = ({ name, groupId, userId }: FilterValues) =>
+    table.reactTable.setColumnFilters([
+      ...(name?.trim() ? [{ id: "name", value: name.trim() }] : []),
+      ...(groupId !== undefined ? [{ id: "groupId", value: groupId }] : []),
+      ...(userId !== undefined ? [{ id: "userId", value: userId }] : []),
+    ]);
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title={translate("categories.categories", "Categories")} />
+      <PageHeader title={translate("categories.categories", "Categories")} actions={<CreateButton />} />
       <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
         <Card>
           <CardContent>

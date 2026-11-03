@@ -1,11 +1,12 @@
-import { useMemo } from "react";
-import { useList, useTranslate, type CrudFilter } from "@refinedev/core";
+import { useMemo, useRef } from "react";
+import { useList, useTranslate } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { useForm } from "react-hook-form";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { PageHeader } from "@/components/common/PageHeader";
+import { CreateButton } from "@/components/refine-ui/buttons/create";
 import { ResourceActions } from "@/components/common/ResourceActions";
 import { SelectInput, TextInput } from "@/components/common/form-fields";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,11 @@ export const AccountList = () => {
   const { register, handleSubmit, setValue, watch } = useForm<FilterValues>({});
 
   const { result: users } = useList<IUser>({ resource: "users", ...ALL });
-  const userNameById = useMemo(() => new Map((users?.data ?? []).map((user) => [user.id, user.name] as const)), [users]);
+  const usersData = users?.data;
+  const userNameById = useMemo(() => new Map((usersData ?? []).map((user) => [user.id, user.name] as const)), [usersData]);
+  // Lookup maps must not rebuild `columns`: @refinedev/react-table resets to page 1 whenever columns change while filters are active.
+  const userNameByIdRef = useRef(userNameById);
+  userNameByIdRef.current = userNameById;
 
   const columns = useMemo<ColumnDef<IAccount>[]>(
     () => [
@@ -44,8 +49,9 @@ export const AccountList = () => {
       {
         id: "userId",
         accessorKey: "userId",
+        filterFn: "equals",
         header: translate("panel.account.field.user", "User"),
-        cell: ({ row }) => userNameById.get(row.original.userId) ?? "Loading...",
+        cell: ({ row }) => userNameByIdRef.current.get(row.original.userId) ?? "Loading...",
       },
       {
         id: "actions",
@@ -53,7 +59,7 @@ export const AccountList = () => {
         cell: ({ row }) => <ResourceActions recordId={row.original.id} />,
       },
     ],
-    [translate, userNameById]
+    [translate]
   );
 
   const table = useTable<IAccount>({
@@ -61,19 +67,16 @@ export const AccountList = () => {
     columns,
   });
 
-  const onSearch = (values: FilterValues) =>
-    table.refineCore.setFilters(
-      [
-        { field: "userId", operator: "eq", value: values.userId },
-        { field: "type", operator: "eq", value: values.type },
-        { field: "currency", operator: "eq", value: values.currency?.trim().toUpperCase() },
-      ].filter((filter) => filter.value !== undefined && filter.value !== "") as CrudFilter[],
-      "replace"
-    );
+  const onSearch = ({ userId, type, currency }: FilterValues) =>
+    table.reactTable.setColumnFilters([
+      ...(userId !== undefined ? [{ id: "userId", value: userId }] : []),
+      ...(type ? [{ id: "type", value: type }] : []),
+      ...(currency?.trim() ? [{ id: "currency", value: currency.trim().toUpperCase() }] : []),
+    ]);
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title={translate("accounts.accounts", "Accounts")} />
+      <PageHeader title={translate("accounts.accounts", "Accounts")} actions={<CreateButton />} />
       <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
         <Card>
           <CardContent>

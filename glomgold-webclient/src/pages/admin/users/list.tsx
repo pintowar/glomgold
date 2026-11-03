@@ -6,6 +6,7 @@ import { useTranslate } from "@refinedev/core";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { BoolField } from "@/components/common/BoolField";
 import { PageHeader } from "@/components/common/PageHeader";
+import { CreateButton } from "@/components/refine-ui/buttons/create";
 import { ResourceActions } from "@/components/common/ResourceActions";
 import type { IUser } from "@/interfaces";
 
@@ -48,7 +49,7 @@ export const UserList = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader title={translate("users.users", "Users")} />
+      <PageHeader title={translate("users.users", "Users")} actions={<CreateButton />} />
       <DataTable table={table} />
     </div>
   );

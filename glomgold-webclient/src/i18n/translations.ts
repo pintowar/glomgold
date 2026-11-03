@@ -209,6 +209,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     // shared notifications
     "common.success": "Successful Operation",
     "common.error": "Operation Error",
+    "buttons.create": "Create",
   },
   pt: {
     "pages.login.title": "Acesse sua conta",
@@ -401,6 +402,7 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     "panel.charts.series.income": "receita",
     "common.success": "Operação Bem-sucedida",
     "common.error": "Erro na Operação",
+    "buttons.create": "Criar",
   },
 };
 
