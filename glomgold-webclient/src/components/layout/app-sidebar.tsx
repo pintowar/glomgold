@@ -25,8 +25,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
-  useSidebar,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import logo from "@/assets/images/glomgold-logo-collapsed.png";
 
@@ -36,7 +35,6 @@ type NavGroup = { label?: string; items: NavItem[] };
 export const AppSidebar = () => {
   const translate = useTranslate();
   const location = useLocation();
-  const { open } = useSidebar();
   const { mutate: logout } = useLogout();
   const { data: permissions } = usePermissions<string[]>({});
   const isAdmin = permissions?.includes("ROLE_ADMIN") ?? false;
@@ -88,12 +86,15 @@ export const AppSidebar = () => {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarRail />
-      <SidebarHeader className="h-16 justify-center border-b px-3">
-        <Link to="/panel" className="flex items-center gap-2 overflow-hidden">
+      <SidebarHeader className="h-16 flex-row items-center gap-2 border-b px-3">
+        <Link
+          to="/panel"
+          className="flex min-w-0 items-center gap-2 overflow-hidden group-data-[collapsible=icon]:hidden"
+        >
           <img src={logo} alt="Glomgold" className="h-6 w-6 shrink-0" />
-          {open && <span className="text-sm font-bold">Glomgold</span>}
+          <span className="text-sm font-bold">Glomgold</span>
         </Link>
+        <SidebarTrigger className="ml-auto group-data-[collapsible=icon]:mx-auto" />
       </SidebarHeader>
       <SidebarContent>
         {groups.map((group, index) => (

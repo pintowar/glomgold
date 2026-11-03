@@ -1,16 +1,22 @@
 import type React from "react";
+import { useState } from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { useTranslate } from "@refinedev/core";
+
+import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../ui/command";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { cn } from "../../lib/utils";
 
 export const CLEAR_VALUE = "__clear__";
 
@@ -86,37 +92,71 @@ export const SelectInput = ({
   "data-testid"?: string;
   "data-cy"?: string;
 }) => {
+  const translate = useTranslate();
+  const [open, setOpen] = useState(false);
+
+  const allOptions = groups ? groups.flatMap((group) => group.options) : (options ?? []);
+  const current = value == null ? undefined : allOptions.find((option) => option.value === String(value));
+
+  const select = (next?: string) => {
+    onChange(coerceValue(next ?? CLEAR_VALUE));
+    setOpen(false);
+  };
+
+  // antd-like filtering: case/diacritic-insensitive substring match on the label only.
+  const filterByLabel = (_value: string, search: string, keywords?: string[]) => {
+    const fold = (text: string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    return keywords?.some((keyword) => fold(keyword).includes(fold(search.trim()))) ? 1 : 0;
+  };
+
   const renderItem = (option: SelectOption) => (
-    <SelectItem key={option.value} value={option.value}>
-      {option.label}
-    </SelectItem>
+    <CommandItem key={option.value} value={option.value} keywords={[option.label]} onSelect={() => select(option.value)}>
+      <Check className={cn("size-4 shrink-0", current?.value === option.value ? "opacity-100" : "opacity-0")} />
+      <span className="truncate">{option.label}</span>
+    </CommandItem>
   );
 
   return (
     <FormRow label={label} error={error}>
-      <Select
-        value={value == null ? "" : String(value)}
-        onValueChange={(next) => onChange(coerceValue(next))}
-        disabled={disabled}
-      >
-        <SelectTrigger id={id} data-testid={testId} data-cy={dataCy} className="w-full">
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {allowClear && <SelectItem value={CLEAR_VALUE}>—</SelectItem>}
-          {options?.map(renderItem)}
-          {groups?.map((group, index) =>
-            group.label ? (
-              <SelectGroup key={group.label}>
-                <SelectLabel>{group.label}</SelectLabel>
-                {group.options.map(renderItem)}
-              </SelectGroup>
-            ) : (
-              <SelectGroup key={`group-${index}`}>{group.options.map(renderItem)}</SelectGroup>
-            )
-          )}
-        </SelectContent>
-      </Select>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            id={id}
+            type="button"
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            disabled={disabled}
+            data-testid={testId}
+            data-cy={dataCy}
+            className="w-full justify-between font-normal"
+          >
+            <span className="truncate">
+              {current ? current.label : <span className="text-muted-foreground">{placeholder}</span>}
+            </span>
+            <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0">
+          <Command filter={filterByLabel}>
+            <CommandInput placeholder={translate("common.search", "Search...")} />
+            <CommandList>
+              <CommandEmpty>{translate("common.noResults", "No results found.")}</CommandEmpty>
+              {allowClear && (
+                <CommandItem value={CLEAR_VALUE} onSelect={() => select()}>
+                  <span className="text-muted-foreground">—</span>
+                </CommandItem>
+              )}
+              {options?.map(renderItem)}
+              {groups?.map((group, index) => (
+                <CommandGroup key={group.label ?? `group-${index}`} heading={group.label}>
+                  {group.options.map(renderItem)}
+                </CommandGroup>
+              ))}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </FormRow>
   );
 };

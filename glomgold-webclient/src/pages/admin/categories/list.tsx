@@ -8,14 +8,13 @@ import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { PageHeader } from "@/components/common/PageHeader";
 import { CreateButton } from "@/components/refine-ui/buttons/create";
 import { CategoryBadge } from "@/components/common/CategoryBadge";
-import { CategoryDeleteDialog } from "@/components/common/CategoryDeleteDialog";
-import { EditButton } from "@/components/refine-ui/buttons/edit";
 import { SelectInput, TextInput } from "@/components/common/form-fields";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCategories } from "@/hooks/useCategories";
 import { useUserSelect } from "@/hooks/useUserSelect";
 import type { ICategory, IUser } from "@/interfaces";
+import {ResourceActions} from "@/components/common/ResourceActions.tsx";
 
 const ALL = { pagination: { pageSize: 1000 } };
 
@@ -71,18 +70,7 @@ export const CategoryList = () => {
       {
         id: "actions",
         header: translate("panel.items.column.action", "Action"),
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <EditButton variant="outline" size="icon" recordItemId={row.original.id} />
-            <CategoryDeleteDialog
-              record={row.original}
-              candidates={lookupsRef.current.categories.filter((category) => category.id !== row.original.id)}
-              resource="categories"
-              usageUrl="/api/categories/usage"
-              invalidates={["list", "many"]}
-            />
-          </div>
-        ),
+        cell: ({ row }) => <ResourceActions recordId={row.original.id} />,
       },
     ],
     [translate]
