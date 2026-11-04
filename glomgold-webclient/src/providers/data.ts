@@ -12,11 +12,23 @@ import type {
 import { createSimpleRestDataProvider } from "@refinedev/rest/simple-rest";
 
 import { API_URL, PANEL_URLS } from "../constants";
-import { jsonRequest, request } from "./http";
+import { ApiError, jsonRequest, request } from "./http";
+
+// The bundled simple-rest provider forces `throwHttpErrors: false` and maps error
+// bodies as data on GET, so an expired session came back as a "successful" list.
+// Fail 401s here so Refine's authProvider.onError can log out and redirect.
+const unauthorizedGuard = {
+  afterResponse: [
+    (_request: Request, _options: RequestInit, response: Response) => {
+      if (response.status === 401) throw new ApiError(401, response.statusText);
+      return response;
+    },
+  ],
+};
 
 const base: DataProvider = createSimpleRestDataProvider({
   apiURL: `${API_URL}/`,
-  kyOptions: { credentials: "include", throwHttpErrors: true },
+  kyOptions: { credentials: "include", throwHttpErrors: true, hooks: unauthorizedGuard },
 }).dataProvider;
 
 const isPanelItems = (resource: string) => resource === "panel-items";
