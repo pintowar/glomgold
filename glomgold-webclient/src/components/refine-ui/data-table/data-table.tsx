@@ -164,6 +164,7 @@ export function DataTable<TData extends BaseRecord>({
                 return (
                   <TableRow
                     key={row.original?.id ?? row.id}
+                    data-row-id={row.original?.id ?? row.id}
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => {

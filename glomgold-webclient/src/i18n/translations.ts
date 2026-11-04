@@ -210,6 +210,8 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     "common.search": "Search...",
     "common.noResults": "No results found.",
     "buttons.create": "Create",
+    "buttons.edit": "Edit",
+    "buttons.delete": "Delete",
   },
   pt: {
     "pages.login.title": "Acesse sua conta",
@@ -403,6 +405,8 @@ export const translations: Record<SupportedLang, Record<string, string>> = {
     "common.search": "Pesquisar...",
     "common.noResults": "Nenhum resultado encontrado.",
     "buttons.create": "Criar",
+    "buttons.edit": "Editar",
+    "buttons.delete": "Remover",
   },
 };
 

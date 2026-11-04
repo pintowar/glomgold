@@ -1,4 +1,5 @@
-{
+/** Management info payload served by GET /api/management/info. */
+export const adminInfo = {
   "git": {
     "dirty": "true",
     "total": {
@@ -42,4 +43,4 @@
       }
     }
   }
-}
+};

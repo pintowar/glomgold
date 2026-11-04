@@ -1,4 +1,5 @@
-[
+/** GET /api/panel/accounts. */
+export const panelAccounts = [
   {
     "id": 1,
     "version": 0,
@@ -15,4 +16,4 @@
     "type": "CREDIT_CARD",
     "userId": 3
   }
-]
+];

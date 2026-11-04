@@ -34,9 +34,13 @@ export const ProfileInfoCard = ({ localeOptions, timezonesOptions }: ProfileInfo
     formState: { errors },
   } = useForm<ProfileForm>();
 
+  // `useCustom().result` is a fresh object on every render, so depending on it
+  // would reset the form (and the typed values) on each keystroke.
+  const profileData = profile?.data;
+
   useEffect(() => {
-    if (profile?.data?.name) reset(profile.data);
-  }, [profile, reset]);
+    if (profileData?.name) reset(profileData);
+  }, [profileData, reset]);
 
   const onSubmit = (values: ProfileForm) =>
     updateProfile(

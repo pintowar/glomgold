@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useTranslate } from "@refinedev/core";
 
@@ -38,17 +38,19 @@ export const coerceValue = (value: string): string | number | undefined => {
 
 export const FormRow = ({
   label,
+  htmlFor,
   error,
   hint,
   children,
 }: {
   label?: string;
+  htmlFor?: string;
   error?: string;
   hint?: React.ReactNode;
   children: React.ReactNode;
 }) => (
   <div className="flex flex-col gap-2">
-    {label && <Label>{label}</Label>}
+    {label && <Label htmlFor={htmlFor}>{label}</Label>}
     {children}
     {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
     {error && <span className="text-xs text-destructive">{error}</span>}
@@ -58,12 +60,18 @@ export const FormRow = ({
 export const TextInput = ({
   label,
   error,
+  id,
   ...props
-}: React.ComponentProps<typeof Input> & { label?: string; error?: string }) => (
-  <FormRow label={label} error={error}>
-    <Input {...props} />
-  </FormRow>
-);
+}: React.ComponentProps<typeof Input> & { label?: string; error?: string }) => {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+
+  return (
+    <FormRow label={label} htmlFor={inputId} error={error}>
+      <Input id={inputId} {...props} />
+    </FormRow>
+  );
+};
 
 export const SelectInput = ({
   label,
@@ -94,6 +102,8 @@ export const SelectInput = ({
 }) => {
   const translate = useTranslate();
   const [open, setOpen] = useState(false);
+  const generatedId = useId();
+  const selectId = id ?? generatedId;
 
   const allOptions = groups ? groups.flatMap((group) => group.options) : (options ?? []);
   const current = value == null ? undefined : allOptions.find((option) => option.value === String(value));
@@ -117,11 +127,11 @@ export const SelectInput = ({
   );
 
   return (
-    <FormRow label={label} error={error}>
+    <FormRow label={label} htmlFor={selectId} error={error}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            id={id}
+            id={selectId}
             type="button"
             variant="outline"
             role="combobox"

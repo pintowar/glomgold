@@ -1,4 +1,5 @@
-[
+/** Admin resource list served by GET /api/users. */
+export const adminUsers = [
   {
     "id": 1,
     "version": 0,
@@ -32,4 +33,4 @@
     "locale": "pt_BR",
     "timezone": "America/Fortaleza"
   }
-]
+];

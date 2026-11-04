@@ -1,4 +1,5 @@
-{
+/** GET /api/panel for 2023-09 with items/stats/total/diff. */
+export const panelControl = {
   "period": "2023-09",
   "items": [
     {
@@ -184,4 +185,4 @@
     "income": -0.0833,
     "balance": -0.8778
   }
-}
+};

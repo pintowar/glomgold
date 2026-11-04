@@ -153,53 +153,63 @@ export const MonthItemsCard = ({
 
   const draftFields = (draft: Draft, onChange: (next: Draft) => void, testId: string) => (
     <>
-      <Select value={draft.itemType} onValueChange={(next) => onChange({ ...draft, itemType: next as ItemType })}>
-        <SelectTrigger className="w-full" data-testid={`${testId}-type`}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {ITEM_TYPES.map((type) => (
-            <SelectItem key={type} value={type}>
-              {type}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Input
-        value={draft.description}
-        list="panel-item-descriptions"
-        placeholder={translate("panel.items.descriptionPlaceholder", "Description")}
-        data-testid={`${testId}-description`}
-        onChange={(event) => {
-          onChange({ ...draft, description: event.target.value });
-          setAutocompleteQuery(event.target.value);
-        }}
-      />
-      <Input
-        type="number"
-        step="any"
-        min={0}
-        value={draft.value}
-        placeholder={translate("panel.items.valuePlaceholder", "Value")}
-        data-testid={`${testId}-value`}
-        onChange={(event) => onChange({ ...draft, value: event.target.value })}
-      />
-      <SelectInput
-        groups={categoryOptions}
-        value={draft.categoryId ?? undefined}
-        onChange={(value) => onChange({ ...draft, categoryId: value == null ? null : Number(value) })}
-        allowClear
-      />
+      <div className="w-[110px]">
+        <Select value={draft.itemType} onValueChange={(next) => onChange({ ...draft, itemType: next as ItemType })}>
+          <SelectTrigger className="w-full" data-testid={`${testId}-type`}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {ITEM_TYPES.map((type) => (
+              <SelectItem key={type} value={type}>
+                {type}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="min-w-[140px] flex-1">
+        <Input
+          value={draft.description}
+          list="panel-item-descriptions"
+          placeholder={translate("panel.items.descriptionPlaceholder", "Description")}
+          data-testid={`${testId}-description`}
+          onChange={(event) => {
+            onChange({ ...draft, description: event.target.value });
+            setAutocompleteQuery(event.target.value);
+          }}
+        />
+      </div>
+      <div className="w-[140px]">
+        <Input
+          type="number"
+          step="any"
+          min={0}
+          value={draft.value}
+          placeholder={translate("panel.items.valuePlaceholder", "Value")}
+          data-testid={`${testId}-value`}
+          onChange={(event) => onChange({ ...draft, value: event.target.value })}
+        />
+      </div>
+      <div className="w-[180px]">
+        <SelectInput
+          groups={categoryOptions}
+          value={draft.categoryId ?? undefined}
+          onChange={(value) => onChange({ ...draft, categoryId: value == null ? null : Number(value) })}
+          allowClear
+        />
+      </div>
     </>
   );
 
+  // min-w-0 lets the grid item shrink; otherwise the add-row's min-content width
+  // pushes the card over its neighbour at lg (1280px).
   return (
-    <Card className="h-full w-full" data-testid="month-items-card">
+    <Card className="h-full w-full min-w-0" data-testid="month-items-card">
       <CardHeader>
         <CardTitle className="text-base">{translate("panel.items.title", "Month Items")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <div className="grid gap-2 md:grid-cols-[110px_1fr_140px_180px_auto]">
+        <div className="flex flex-wrap items-center gap-2">
           {draftFields(addDraft, setAddDraft, "add-item")}
           <Button data-testid="add-item" disabled={!accountId} onClick={submitAdd}>
             <Plus className="size-4" />
@@ -282,7 +292,11 @@ export const MonthItemsCard = ({
             {rows.map((item) => {
               const editing = editingKey === item.key;
               return (
-                <TableRow key={item.key} data-state={selectedKeys.includes(item.key) ? "selected" : undefined}>
+                <TableRow
+                  key={item.key}
+                  data-item-key={item.key}
+                  data-state={selectedKeys.includes(item.key) ? "selected" : undefined}
+                >
                   <TableCell>
                     <Checkbox
                       checked={selectedKeys.includes(item.key)}
@@ -339,10 +353,20 @@ export const MonthItemsCard = ({
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => submitEdit(item.key)}>
+                          <Button
+                            data-testid="item-confirm"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => submitEdit(item.key)}
+                          >
                             <Check className="size-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => setEditingKey(null)}>
+                          <Button
+                            data-testid="item-cancel"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setEditingKey(null)}
+                          >
                             <X className="size-4" />
                           </Button>
                         </div>
@@ -363,6 +387,7 @@ export const MonthItemsCard = ({
                       <TableCell>
                         <div className="flex gap-1">
                           <Button
+                            data-testid="item-edit"
                             variant="ghost"
                             size="icon"
                             disabled={editingKey !== null}
@@ -374,7 +399,7 @@ export const MonthItemsCard = ({
                             title={translate("panel.items.confirmDelete", "Sure to delete?")}
                             onConfirm={() => deleteItem(item)}
                           >
-                            <Button variant="ghost" size="icon">
+                            <Button data-testid="item-delete" variant="ghost" size="icon">
                               <Trash className="size-4" />
                             </Button>
                           </ConfirmDeleteButton>

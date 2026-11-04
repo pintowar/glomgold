@@ -1,4 +1,5 @@
-{
+/** GET /api/panel for a period with no items. */
+export const panelControlEmpty = {
   "period": "2023-07",
   "items": [],
   "stats": [],
@@ -8,4 +9,4 @@
     "income": 0,
     "balance": 0
   }
-}
+};
