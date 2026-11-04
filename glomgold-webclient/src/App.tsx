@@ -28,8 +28,8 @@ import { AccountCreate, AccountEdit, AccountList } from "@/pages/admin/accounts"
 import { CategoryCreate, CategoryEdit, CategoryList } from "@/pages/admin/categories";
 import { CategoryGroupCreate, CategoryGroupEdit, CategoryGroupList } from "@/pages/admin/category-groups";
 import { DashboardPage } from "@/pages/admin/dashboard";
-import { ItemCreate, ItemEdit, ItemList, ItemShow } from "@/pages/admin/items";
-import { UserCreate, UserEdit, UserList, UserShow } from "@/pages/admin/users";
+import { ItemCreate, ItemEdit, ItemList } from "@/pages/admin/items";
+import { UserCreate, UserEdit, UserList } from "@/pages/admin/users";
 import { Login } from "@/pages/login";
 import { AccountsPanel } from "@/pages/panel/accounts";
 import { CategoriesPanel } from "@/pages/panel/categories";
@@ -64,7 +64,6 @@ const resources = [
     list: "/admin/users",
     create: "/admin/users/create",
     edit: "/admin/users/edit/:id",
-    show: "/admin/users/show/:id",
     meta: { canDelete: true },
   },
   {
@@ -72,7 +71,6 @@ const resources = [
     list: "/admin/items",
     create: "/admin/items/create",
     edit: "/admin/items/edit/:id",
-    show: "/admin/items/show/:id",
     meta: { canDelete: true },
   },
   {
@@ -152,13 +150,11 @@ const InnerApp = () => {
             <Route index element={<UserList />} />
             <Route path="create" element={<UserCreate />} />
             <Route path="edit/:id" element={<UserEdit />} />
-            <Route path="show/:id" element={<UserShow />} />
           </Route>
           <Route path="items">
             <Route index element={<ItemList />} />
             <Route path="create" element={<ItemCreate />} />
             <Route path="edit/:id" element={<ItemEdit />} />
-            <Route path="show/:id" element={<ItemShow />} />
           </Route>
           <Route path="accounts">
             <Route index element={<AccountList />} />
