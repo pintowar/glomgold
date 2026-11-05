@@ -21,7 +21,9 @@ export const MonthStatsCard = ({
 
   const data = useMemo(() => {
     const grouped = new Map<string, IItem[]>();
-    tableData.forEach((item) => grouped.set(item.description, [...(grouped.get(item.description) ?? []), item]));
+    tableData.forEach((item) => {
+      grouped.set(item.description, [...(grouped.get(item.description) ?? []), item]);
+    });
 
     return Array.from(grouped.entries()).map(([description, items]) => ({
       description,

@@ -56,7 +56,7 @@ export const panelDataProvider: DataProvider = {
     const data = await request<TData[]>(PANEL_URLS.accounts);
     return { data, total: data.length };
   },
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- mirrors @refinedev/core's own `TVariables = {}` signature
+  // biome-ignore lint/complexity/noBannedTypes: mirrors @refinedev/core's own `TVariables = {}` signature
   create: async <TData extends BaseRecord = BaseRecord, TVariables = {}>({
     resource,
     variables,
@@ -70,7 +70,7 @@ export const panelDataProvider: DataProvider = {
     const data = await request<TData>(PANEL_URLS.addItem, jsonRequest("POST", variables));
     return { data };
   },
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- mirrors @refinedev/core's own `TVariables = {}` signature
+  // biome-ignore lint/complexity/noBannedTypes: mirrors @refinedev/core's own `TVariables = {}` signature
   update: async <TData extends BaseRecord = BaseRecord, TVariables = {}>({
     resource,
     id,
@@ -89,7 +89,7 @@ export const panelDataProvider: DataProvider = {
     const data = await request<TData>(PANEL_URLS.editItem(id), jsonRequest("PATCH", variables));
     return { data };
   },
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- mirrors @refinedev/core's own `TVariables = {}` signature
+  // biome-ignore lint/complexity/noBannedTypes: mirrors @refinedev/core's own `TVariables = {}` signature
   deleteOne: async <TData extends BaseRecord = BaseRecord, TVariables = {}>({
     resource,
     id,
@@ -103,7 +103,7 @@ export const panelDataProvider: DataProvider = {
     const data = await request<TData>(PANEL_URLS.removeItem(id), { method: "DELETE" });
     return { data };
   },
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- mirrors @refinedev/core's own `TVariables = {}` signature
+  // biome-ignore lint/complexity/noBannedTypes: mirrors @refinedev/core's own `TVariables = {}` signature
   deleteMany: async <TData extends BaseRecord = BaseRecord, TVariables = {}>({
     resource,
     ids,

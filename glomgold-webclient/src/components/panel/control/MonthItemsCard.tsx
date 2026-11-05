@@ -68,6 +68,8 @@ export const MonthItemsCard = ({
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "description", dir: 1 });
   const [importOpen, setImportOpen] = useState(false);
 
+  // Selection is intentionally cleared whenever the period/account data changes.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset when the data changes
   useEffect(() => setSelectedKeys([]), [tableData]);
 
   const { result: itemSearchData } = useCustom<string[]>({

@@ -11,9 +11,9 @@ const RETURNABLE_PREFIXES = ["/panel", "/admin"];
 export const getErrorStatus = (error: unknown): number | undefined => {
   if (!error || typeof error !== "object") return undefined;
   const err = error as Record<string, unknown>;
-  const response = err["response"];
+  const response = err.response;
   if (response && typeof response === "object") {
-    const status = (response as Record<string, unknown>)["status"];
+    const status = (response as Record<string, unknown>).status;
     if (typeof status === "number") return status;
   }
   for (const key of ["statusCode", "status"] as const) {

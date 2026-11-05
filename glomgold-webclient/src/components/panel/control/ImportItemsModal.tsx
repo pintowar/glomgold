@@ -89,6 +89,8 @@ export const ImportItemsModal = ({ open, formattedPeriod, accountId, onClose, on
     return formData;
   }, [file, accountId, separator, dateFormat, hasHeader, mapping]);
 
+  // `buildFormData` already captures the mapping fields; Biome cannot see through it.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: buildFormData captures the mapping fields
   useEffect(() => {
     if (!open || !file) return;
     let cancelled = false;
@@ -117,7 +119,6 @@ export const ImportItemsModal = ({ open, formattedPeriod, accountId, onClose, on
       cancelled = true;
       clearTimeout(timer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, file, separator, dateFormat, hasHeader, mapping.description, mapping.value, mapping.itemType, mapping.date]);
 
   const mappingOptions = useMemo(() => {
@@ -258,8 +259,12 @@ export const ImportItemsModal = ({ open, formattedPeriod, accountId, onClose, on
                   <Input value={dateFormat} onChange={(event) => setDateFormat(event.target.value)} placeholder="yyyy-MM-dd" />
                 </div>
                 <div className="flex items-end">
-                  <label className="flex items-center gap-2 text-sm">
-                    <Checkbox checked={hasHeader} onCheckedChange={(checked) => setHasHeader(checked === true)} />
+                  <label htmlFor="import-has-header" className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      id="import-has-header"
+                      checked={hasHeader}
+                      onCheckedChange={(checked) => setHasHeader(checked === true)}
+                    />
                     {translate("panel.items.importHasHeader", "First row is header")}
                   </label>
                 </div>

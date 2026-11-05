@@ -29,7 +29,9 @@ const useCategoryData = (categoryResource: string, groupResource: string, userId
     if (groups.length === 0) return [{ options: visible.map(toOption) }];
 
     const byGroup = new Map<number | null, ICategory[]>();
-    visible.forEach((c) => byGroup.set(c.groupId ?? null, [...(byGroup.get(c.groupId ?? null) ?? []), c]));
+    visible.forEach((c) => {
+      byGroup.set(c.groupId ?? null, [...(byGroup.get(c.groupId ?? null) ?? []), c]);
+    });
     return [
       ...groups
         .filter((g) => byGroup.has(g.id))

@@ -115,7 +115,7 @@ export function DataTable<TData extends BaseRecord>({
           <TableBody className="relative">
             {isLoading ? (
               <>
-                {Array.from({ length: pageSize < 1 ? 1 : pageSize }).map(
+                {Array.from({ length: Math.max(1, pageSize) }).map(
                   (_, rowIndex) => (
                     <TableRow
                       key={`skeleton-row-${rowIndex}`}
