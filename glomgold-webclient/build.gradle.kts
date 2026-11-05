@@ -57,7 +57,7 @@ sonarqube {
     properties {
         val lcovReportPath = layout.projectDirectory.file("coverage/lcov.info").asFile.absolutePath
         property("sonar.sources", "src")
-        property("sonar.tests", "cypress")
+        property("sonar.tests", "e2e")
         property("sonar.javascript.lcov.reportPaths", lcovReportPath)
     }
 }
