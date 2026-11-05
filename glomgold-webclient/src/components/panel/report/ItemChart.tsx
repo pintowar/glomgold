@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useTranslate } from "@refinedev/core";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
+import { CHART_TOOLTIP_PROPS, EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 
 interface ItemChartProps {
@@ -37,7 +37,7 @@ export const ItemChart = ({ cols, data, locale, currency }: ItemChartProps) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="col" />
           <YAxis tickFormatter={(value: number) => currencyFormat(value)} width={90} />
-          <Tooltip formatter={(value: number) => currencyFormat(value)} />
+          <Tooltip {...CHART_TOOLTIP_PROPS} formatter={(value: number) => currencyFormat(value)} />
           <Legend />
           <Bar dataKey="EXPENSE" name={translate("panel.charts.series.expense", "expense")} stackId="a" fill={EXPENSE_COLOR} />
           <Bar dataKey="INCOME" name={translate("panel.charts.series.income", "income")} stackId="a" fill={INCOME_COLOR} />

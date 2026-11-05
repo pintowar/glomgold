@@ -46,8 +46,8 @@ export const ReportPanel = () => {
   });
 
   const typeOptions = useMemo(
-    () => REPORT_TYPES.map((value) => ({ value, label: value })),
-    []
+    () => REPORT_TYPES.map((value) => ({ value, label: translate(`panel.report.type.${value.toLowerCase()}`, value) })),
+    [translate]
   );
 
   return (

@@ -1,7 +1,7 @@
 import { useTranslate } from "@refinedev/core";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import { EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
+import { CHART_TOOLTIP_PROPS, EXPENSE_COLOR, INCOME_COLOR } from "../../../constants";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 import type { IYearlySummary } from "../../../interfaces";
 
@@ -23,7 +23,7 @@ export const YearChart = ({ years, locale, currency }: YearChartProps) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="year" />
           <YAxis tickFormatter={(value: number) => currencyFormat(value)} width={90} />
-          <Tooltip formatter={(value: number) => currencyFormat(value)} />
+          <Tooltip {...CHART_TOOLTIP_PROPS} formatter={(value: number) => currencyFormat(value)} />
           <Legend />
           <Bar dataKey="expense" name={translate("panel.charts.series.expense", "expense")} fill={EXPENSE_COLOR} />
           <Bar dataKey="income" name={translate("panel.charts.series.income", "income")} fill={INCOME_COLOR} />

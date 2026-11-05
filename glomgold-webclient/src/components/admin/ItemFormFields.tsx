@@ -37,7 +37,7 @@ export const ItemFormFields = ({ register, control, errors, setValue, watch }: I
         render={({ field }) => (
           <SelectInput
             label={translate("panel.items.column.type", "Type")}
-            options={ITEM_TYPES.map((value) => ({ value, label: value }))}
+            options={ITEM_TYPES.map((value) => ({ value, label: translate(`panel.items.type.${value}`, value) }))}
             value={field.value}
             onChange={field.onChange}
             error={errors.itemType?.message}

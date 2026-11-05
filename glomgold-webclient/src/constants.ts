@@ -8,6 +8,16 @@ export const INCOME_COLOR = "#1677FF";
 export const BALANCE_COLOR = "#722ED1";
 export const UP_COLOR = "#52C41A";
 export const DOWN_COLOR = "#FAAD14";
+/** Dark, high-contrast tooltip shared by every Recharts chart. */
+export const CHART_TOOLTIP_PROPS = {
+  contentStyle: {
+    backgroundColor: "#1F2937",
+    border: "1px solid #374151",
+    borderRadius: 8,
+    color: "#F9FAFB",
+  },
+  labelStyle: { color: "#F9FAFB", fontWeight: 600 },
+};
 export type ItemType = "EXPENSE" | "INCOME";
 export const ITEM_TYPES: ItemType[] = ["EXPENSE", "INCOME"];
 export type ItemOrigin = "MANUAL" | "CSV" | "OFX";

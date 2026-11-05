@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useTranslate } from "@refinedev/core";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import { BALANCE_COLOR, EXPENSE_COLOR } from "../../../constants";
+import { BALANCE_COLOR, CHART_TOOLTIP_PROPS, EXPENSE_COLOR } from "../../../constants";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 
 interface PeriodChartProps {
@@ -35,7 +35,7 @@ export const PeriodChart = ({ cols, data, trend, locale, currency }: PeriodChart
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="col" />
           <YAxis tickFormatter={(value: number) => currencyFormat(value)} width={90} />
-          <Tooltip formatter={(value: number) => currencyFormat(value)} />
+          <Tooltip {...CHART_TOOLTIP_PROPS} formatter={(value: number) => currencyFormat(value)} />
           <Legend />
           <Line
             type="monotone"

@@ -163,7 +163,7 @@ export const MonthItemsCard = ({
           <SelectContent>
             {ITEM_TYPES.map((type) => (
               <SelectItem key={type} value={type}>
-                {type}
+                {translate(`panel.items.type.${type}`, type)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -338,7 +338,7 @@ export const MonthItemsCard = ({
                           <SelectContent>
                             {ITEM_TYPES.map((type) => (
                               <SelectItem key={type} value={type}>
-                                {type}
+                                {translate(`panel.items.type.${type}`, type)}
                               </SelectItem>
                             ))}
                           </SelectContent>

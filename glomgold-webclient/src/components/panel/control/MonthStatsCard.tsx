@@ -3,7 +3,7 @@ import { useTranslate } from "@refinedev/core";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { EXPENSE_COLOR, INCOME_COLOR, ITEM_TYPES } from "../../../constants";
+import { CHART_TOOLTIP_PROPS, EXPENSE_COLOR, INCOME_COLOR, ITEM_TYPES } from "../../../constants";
 import { useCurrencyFormat } from "../../../hooks/useCurrencyFormat";
 import type { IItem } from "../../../interfaces";
 
@@ -47,7 +47,7 @@ export const MonthStatsCard = ({
             <BarChart data={data} layout="vertical" barSize={18}>
               <XAxis type="number" tickFormatter={(value: number) => currencyFormat(value)} />
               <YAxis type="category" dataKey="description" width={120} />
-              <Tooltip formatter={(value: number) => currencyFormat(value)} />
+              <Tooltip {...CHART_TOOLTIP_PROPS} formatter={(value: number) => currencyFormat(value)} />
               <Bar dataKey="EXPENSE" name={translate("panel.charts.series.expense", "Expense")} stackId="a" fill={EXPENSE_COLOR} />
               <Bar dataKey="INCOME" name={translate("panel.charts.series.income", "Income")} stackId="a" fill={INCOME_COLOR} />
             </BarChart>
