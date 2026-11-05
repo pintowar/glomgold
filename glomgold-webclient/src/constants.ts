@@ -28,7 +28,6 @@ export const PERIOD_FORMAT = "YYYY-MM";
 export const PANEL_QUERY_KEYS = {
   control: "control-panel-key",
   profile: "panel-profile",
-  accounts: "panel-accounts",
 } as const;
 export const PANEL_URLS = {
   panel: "/api/panel",

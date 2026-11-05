@@ -18,7 +18,7 @@ import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "../../lib/utils";
 
-export const CLEAR_VALUE = "__clear__";
+const CLEAR_VALUE = "__clear__";
 
 export interface SelectOption {
   label: string;
@@ -31,12 +31,12 @@ export interface SelectOptionGroup {
 }
 
 /** Radix Select only deals in strings; numeric ids are converted back at the boundary. */
-export const coerceValue = (value: string): string | number | undefined => {
+const coerceValue = (value: string): string | number | undefined => {
   if (value === CLEAR_VALUE) return undefined;
   return /^-?\d+$/.test(value) ? Number(value) : value;
 };
 
-export const FormRow = ({
+const FormRow = ({
   label,
   htmlFor,
   error,

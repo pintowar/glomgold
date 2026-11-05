@@ -6,7 +6,7 @@ export type UserKind = "admin" | "common";
 
 export const sessionFor = (user: UserKind) => (user === "admin" ? adminSession : commonSession);
 
-export type MockReply =
+type MockReply =
   | { status?: number; body?: unknown }
   | ((route: Route, request: Request) => Promise<void> | void);
 

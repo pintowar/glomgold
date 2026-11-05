@@ -1,6 +1,6 @@
 import type { SupportedLang } from "./translations";
 
-export const LOCALE_STORAGE_KEY = "glomgold-locale";
+const LOCALE_STORAGE_KEY = "glomgold-locale";
 
 export const normalizeLang = (tag: string | undefined | null): SupportedLang => {
   const t = (tag ?? "").toLowerCase().replace("_", "-");

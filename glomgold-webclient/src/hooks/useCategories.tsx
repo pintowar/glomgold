@@ -4,12 +4,12 @@ import type { ICategory, ICategoryGroup } from "../interfaces";
 
 const ALL = { pagination: { pageSize: 500 } };
 
-export interface CategorySelectOption {
+interface CategorySelectOption {
   value: string;
   label: string;
 }
 
-export interface CategorySelectGroup {
+interface CategorySelectGroup {
   label?: string;
   options: CategorySelectOption[];
 }

@@ -25,7 +25,7 @@ export interface CsvColumnMapping {
   date?: string;
 }
 
-export interface ImportPreviewRow {
+interface ImportPreviewRow {
   raw?: Record<string, string>;
   description?: string | null;
   value?: number | null;

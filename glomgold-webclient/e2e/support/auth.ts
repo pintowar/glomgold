@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 
 import { mockApi, sessionFor, type ApiRoute, type UserKind } from "./api";
 
-export const SESSION_KEY = "glomgold-session";
+const SESSION_KEY = "glomgold-session";
 
 /** Signs in by seeding the metadata the client keeps in localStorage; `/api/auth/me` is stubbed too. */
 export const signedIn = async (page: Page, user: UserKind = "admin", overrides: ApiRoute[] = []) => {

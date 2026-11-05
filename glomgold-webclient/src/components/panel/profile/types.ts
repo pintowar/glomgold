@@ -3,7 +3,7 @@ export interface ProfilePasswordForm {
   newPassword: string;
 }
 
-export interface ProfileInfo {
+interface ProfileInfo {
   name: string;
   email: string;
   locale: string;

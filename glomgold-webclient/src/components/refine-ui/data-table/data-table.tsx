@@ -259,7 +259,7 @@ function DataTableNoData({
   );
 }
 
-export function getCommonStyles<TData>({
+function getCommonStyles<TData>({
   column,
   isOverflowing,
 }: {

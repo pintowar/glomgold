@@ -8,7 +8,7 @@ import { MonthStatsCard } from "@/components/panel/control/MonthStatsCard";
 import { PeriodNavigationCard } from "@/components/panel/control/PeriodNavigationCard";
 import { PeriodSummaryCard } from "@/components/panel/control/PeriodSummaryCard";
 import type { PanelItem } from "@/components/panel/control/types";
-import { PANEL_QUERY_KEYS, PERIOD_FORMAT } from "@/constants";
+import { PANEL_QUERY_KEYS, PANEL_URLS, PERIOD_FORMAT } from "@/constants";
 import { useIdentityDefaults } from "@/hooks/useIdentityDefaults";
 import { usePanelAccounts } from "@/hooks/usePanelAccounts";
 import { usePanelSearchParams } from "@/hooks/usePanelSearchParams";
@@ -48,7 +48,7 @@ export const ControlPanel = () => {
     query: { isLoading },
     result,
   } = useCustom<ControlPanelData>({
-    url: "/api/panel",
+    url: PANEL_URLS.panel,
     method: "get",
     config: { query: { period: formattedPeriod, accountId } },
     queryOptions: {
