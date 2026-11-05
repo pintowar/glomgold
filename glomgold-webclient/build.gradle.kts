@@ -42,8 +42,11 @@ tasks {
         delete("${project.projectDir}/.nyc_output")
     }
 
-    register("coverageReport") {
-        dependsOn("test")
+    register<NpmTask>("coverageReport") {
+        dependsOn(npmInstall)
+        group = "test"
+        description = "e2e coverage report"
+        args.set(listOf("run", "e2e:coverage"))
         doLast {
             logger.quiet("Finishing Coverage Report!!")
         }

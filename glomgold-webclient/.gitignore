@@ -28,3 +28,5 @@ dist-ssr
 test-results
 playwright-report
 blob-report
+.nyc_output
+coverage

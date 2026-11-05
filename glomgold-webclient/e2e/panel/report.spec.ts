@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "playwright-test-coverage";
 
 import { panelAccounts, panelReport } from "../fixtures";
 import { json } from "../support/api";

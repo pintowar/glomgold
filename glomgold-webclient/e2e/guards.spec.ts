@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "playwright-test-coverage";
 
 import { mockApi } from "./support/api";
 import { gotoHash, loginViaUi } from "./support/auth";

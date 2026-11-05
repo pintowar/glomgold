@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "playwright-test-coverage";
 
 import { panelAccounts, panelControl, panelControlEmpty, panelItemComplete } from "../fixtures";
 import { json, type ApiRoute } from "../support/api";
