@@ -133,14 +133,12 @@ open class PanelCategoryController(
             HttpResponse.ok(group.toCommand())
         } ?: HttpResponse.notFound()
 
-    // Explicit unlink keeps the behaviour correct where the FK is not applied (schema-generate).
     @Delete("/category-groups/{id}")
     @Transactional
     open suspend fun deleteCategoryGroup(
         @PathVariable id: Long
     ): HttpResponse<Unit> =
         categoryGroupRepository.findByIdAndUserId(id, securityService.currentUserId())?.let { group ->
-            categoryRepository.clearGroup(id)
             categoryGroupRepository.delete(group)
             HttpResponse.ok()
         } ?: HttpResponse.notFound()

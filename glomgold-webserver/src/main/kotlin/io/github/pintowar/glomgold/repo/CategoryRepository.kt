@@ -30,7 +30,4 @@ interface CategoryRepository : EntityRepository<Category, Long> {
         sourceId: Long,
         targetId: Long
     ): Long
-
-    @Query("UPDATE categories SET group_id = NULL WHERE group_id = :groupId")
-    suspend fun clearGroup(groupId: Long): Long
 }
