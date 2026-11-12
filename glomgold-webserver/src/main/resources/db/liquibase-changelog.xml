@@ -11,4 +11,5 @@
     <include file="changelog/20261017000000-create-accounts.sql" relativeToChangelogFile="true"/>
     <include file="changelog/20261023000000-create-categories.sql" relativeToChangelogFile="true"/>
     <include file="changelog/20261111000000-add-user-delete-cascades.sql" relativeToChangelogFile="true"/>
+    <include file="changelog/20261112000000-cascade-delete-categories-on-group-delete.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>
