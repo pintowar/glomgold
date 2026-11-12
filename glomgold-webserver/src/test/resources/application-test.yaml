@@ -2,16 +2,18 @@ micronaut:
   server:
     port: -1
 
+# The database is the Postgres container started by PostgresTestContainer; both the R2DBC
+# datasource and the JDBC datasource Liquibase uses point at it, so tests run the real migrations.
 r2dbc:
   datasources:
     default:
-      schema-generate: CREATE_DROP
       dialect: POSTGRES
       url: r2dbc:tc:postgresql:///glomgold?TC_IMAGE_TAG=12
       driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
 
-liquibase:
-  enabled: false
+datasources:
+  liquibase:
+    driverClassName: org.postgresql.Driver
 
 logger:
   levels:

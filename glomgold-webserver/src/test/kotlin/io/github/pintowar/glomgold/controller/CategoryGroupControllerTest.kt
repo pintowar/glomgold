@@ -2,10 +2,16 @@ package io.github.pintowar.glomgold.controller
 
 import io.github.pintowar.glomgold.dto.CategoryGroupCommand
 import io.github.pintowar.glomgold.dto.RefinePaginateQuery
+import io.github.pintowar.glomgold.model.Account
+import io.github.pintowar.glomgold.model.AccountType
 import io.github.pintowar.glomgold.model.Category
 import io.github.pintowar.glomgold.model.CategoryGroup
+import io.github.pintowar.glomgold.model.Item
+import io.github.pintowar.glomgold.model.ItemType
+import io.github.pintowar.glomgold.repo.AccountRepository
 import io.github.pintowar.glomgold.repo.CategoryGroupRepository
 import io.github.pintowar.glomgold.repo.CategoryRepository
+import io.github.pintowar.glomgold.repo.ItemRepository
 import io.github.pintowar.glomgold.repo.UserRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
@@ -18,10 +24,14 @@ import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.extensions.kotest5.annotation.MicronautTest
+import java.math.BigDecimal
+import java.time.YearMonth
 
 @MicronautTest(transactional = false)
 class CategoryGroupControllerTest(
     private val userRepo: UserRepository,
+    private val accountRepo: AccountRepository,
+    private val itemRepo: ItemRepository,
     private val categoryRepo: CategoryRepository,
     private val groupRepo: CategoryGroupRepository,
     private val authClient: AuthClient,
@@ -32,6 +42,7 @@ class CategoryGroupControllerTest(
         var donaldId = 0L
 
         beforeSpec {
+            itemRepo.deleteAll()
             categoryRepo.deleteAll()
             groupRepo.deleteAll()
             adminId = (userRepo.findByUsername("admin") ?: userRepo.save(fakeUsers().getValue("admin"))).id!!
@@ -39,6 +50,7 @@ class CategoryGroupControllerTest(
         }
 
         beforeEach {
+            itemRepo.deleteAll()
             categoryRepo.deleteAll()
             groupRepo.deleteAll()
         }
@@ -106,15 +118,29 @@ class CategoryGroupControllerTest(
         }
 
         describe("deletion") {
-            it("unlinks its categories on delete") {
+            it("deletes its categories on delete and keeps their items") {
                 val adminToken = authCookie(authClient, "admin")
                 val group = groupClient.create(adminToken, CategoryGroupCommand(name = "Housing")).body.get()
                 val category = categoryRepo.save(Category("Rent", userId = adminId, groupId = group.id))
+                val account = accountRepo.save(Account("Checking", "USD", AccountType.CHECKING, adminId))
+                val item =
+                    itemRepo.save(
+                        Item(
+                            description = "Rent",
+                            value = BigDecimal.TEN,
+                            itemType = ItemType.EXPENSE,
+                            period = YearMonth.now(),
+                            userId = adminId,
+                            accountId = account.id!!,
+                            categoryId = category.id
+                        )
+                    )
 
                 groupClient.delete(adminToken, group.id!!).status shouldBe HttpStatus.OK
 
-                categoryRepo.findById(category.id!!)!!.groupId.shouldBeNull()
-                groupRepo.findById(group.id!!).shouldBeNull()
+                groupRepo.findById(group.id).shouldBeNull()
+                categoryRepo.findById(category.id!!) shouldBe null
+                itemRepo.findById(item.id!!)!!.categoryId.shouldBeNull()
             }
         }
 

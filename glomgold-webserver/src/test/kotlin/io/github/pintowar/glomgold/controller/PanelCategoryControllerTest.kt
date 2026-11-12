@@ -296,15 +296,17 @@ class PanelCategoryControllerTest(
                 updated.position shouldBe 2
             }
 
-            it("deletes a group and ungroups its categories") {
+            it("deletes a group and its categories, keeping their items") {
                 val donaldToken = authCookie(authClient, "donald")
                 val group = groupOf("donald", "Home")
                 val category = categoryOf("donald", "Rent", group.id)
+                val item = itemOf("donald", category.id!!)
 
                 panelClient.deleteGroup(donaldToken, group.id!!).status shouldBe HttpStatus.OK
 
                 groupRepo.findById(group.id!!).shouldBeNull()
-                categoryRepo.findById(category.id!!)!!.groupId shouldBe null
+                categoryRepo.findById(category.id!!) shouldBe null
+                itemRepo.findById(item.id!!)!!.categoryId.shouldBeNull()
             }
 
             it("hides another user's groups") {
